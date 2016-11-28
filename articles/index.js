@@ -21,8 +21,3 @@ Articles.prototype.fetchOne = function () {
 };
 
 module.exports = Articles;
-
-// a = new Articles();
-// a.fetchOne().then(function (article) {
-//     console.log(article);
-// }, throwError);

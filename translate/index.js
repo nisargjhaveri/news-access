@@ -20,7 +20,6 @@ exports.translateArticle = function (article, targetLang) {
                                 });
 
     return Promise.all([titleTranslateP, summaryTranslateP]).then(function (values) {
-        // console.log(targetArticle);
         return targetArticle;
     });
 };
