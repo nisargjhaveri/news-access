@@ -62,4 +62,4 @@ ArticleList.prototype.getArticle = function () {
     });
 };
 
-exports.ArticleList = ArticleList;
+module.exports = ArticleList;

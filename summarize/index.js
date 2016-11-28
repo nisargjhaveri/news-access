@@ -1,5 +1,7 @@
 function summarizeArticle(article) {
-    return article.summary;
+    return new Promise(function(resolve, reject) {
+        resolve(article);
+    });
 }
 
 exports.summarizeArticle = summarizeArticle;

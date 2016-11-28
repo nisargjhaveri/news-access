@@ -1,4 +1,4 @@
-var ArticleList = require("./listArticles.js").ArticleList;
+var ArticleList = require("./listArticles.js");
 var fullArticle = require("./fullArticle.js");
 
 function throwError (error) {

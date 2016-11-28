@@ -1,5 +1,5 @@
 {
-  "name": "translate",
+  "name": "pipeline",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,9 +9,5 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "google-translate-token": "^1.0.0",
-    "querystring": "^0.2.0",
-    "request": "^2.79.0",
-    "safe-eval": "^0.3.0"
   }
 }
