@@ -44,7 +44,7 @@ function showAccessibleArticles(articles) {
         $article.find('.accessible-article-list').append(makeAccessibleArticle(articles[i]));
     }
 
-    $('.article-container').append($article);
+    $('.article-container').removeClass('loading').append($article);
 }
 
 $(function () {

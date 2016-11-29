@@ -12,7 +12,7 @@ function addNewArticle (article) {
     $article.find('.link-article').attr('href', getArticleUrl(article.id));
     $article.find('.link-original-article').attr('href', article.url);
 
-    $('.article-list').append($article);
+    $('.article-list').removeClass('loading').append($article);
 }
 
 $(function () {
