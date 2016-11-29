@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>News Access</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <link rel="stylesheet" href="/static/css/common.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.0/moment.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var articleId = "{{articleId}}";
+            var langs = ['hi', 'gu'];
+        </script>
+        <script src="/static/js/article.js"></script>
+    </head>
+    <body>
+        <div class="article-container"></div>
+        <div class="hidden">
+            <article id="sample-original-article">
+                <div class="large-img-wrapper">
+                    <img src="" alt="Image" class="show-image large-img">
+                </div>
+                <div class="article-small">
+                    <div class="news-heading">
+                        <h2 class="show-title"></h2>
+                        <a href="#" class="link-original-article show-source"></a>
+                        <span class="show-published-time"></span>
+                    </div>
+                    <p class="show-summary"></p>
+                </div>
+
+                <div class="accessible-article-list"></div>
+
+                <div class="show-full-article"></div>
+            </article>
+
+            <section id="sample-accessible-article" class="article-small">
+                <div class="news-heading">
+                    <h2 class="show-title"></h2>
+                    <a href="#" class="link-original-article show-source"></a>
+                    <span class="show-published-time"></span>
+                </div>
+                <p class="show-summary"></p>
+            </section>
+        </div>
+    </body>
+</html>

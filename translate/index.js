@@ -6,16 +6,16 @@ exports.translateArticle = function (article, targetLang) {
     targetArticle.orignialArticle = article;
     targetArticle.lang = targetLang;
 
-    console.log("Translating title and summary");
+    console.log(article.id, "Translating title and summary to " + targetLang);
 
     var titleTranslateP = translateText(article.title, article.lang, targetLang)
                             .then(function (targetTitle) {
-                                console.log("Title translated");
+                                console.log(article.id, "Title translated to " + targetLang);
                                 targetArticle.title = targetTitle;
                             });
     var summaryTranslateP = translateText(article.summary, article.lang, targetLang)
                                 .then(function (targetSummary) {
-                                    console.log("Summary translated");
+                                    console.log(article.id, "Summary translated to " + targetLang);
                                     targetArticle.summary = targetSummary;
                                 });
 

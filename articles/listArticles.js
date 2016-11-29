@@ -10,25 +10,54 @@ function parseArticles (body) {
 
     $('.feed-item').each(function (i, elem) {
         $elem = $(elem);
-        articleList.push({
-            title: $elem.find('.feed-item-title .title-url').text(),
-            summary: $elem.find('.feed-item-text .summary-content').text(),
-            picture: $elem.find('img.feed-item-news-photo').attr('src'),
-            url: $elem.data('webUrl'),
-            lang: $elem.data('language'),
-            source: $elem.find('.news-source-info .news-source').text().trim(),
-            published: Date.parse($elem.find('.news-source-info .timeago').attr('datetime')),
-        });
+        articleList.push(makeArticle($elem));
     });
 
     return articleList;
 }
 
-function ArticleList() {
+function parseArticle (body, id) {
+    var $ = cheerio.load(body);
+
+    return makeArticle($(".feed-item[data-link-id='" + id + "']"));
+}
+
+function makeArticle ($elem) {
+    return {
+        id: $elem.data('linkId'),
+        title: $elem.find('.feed-item-title .title-url').text(),
+        summary: $elem.find('.feed-item-text .summary-content').text(),
+        picture: $elem.find('img.feed-item-news-photo').attr('src'),
+        url: $elem.data('webUrl'),
+        lang: $elem.data('language'),
+        source: $elem.find('.news-source-info .news-source').text().trim(),
+        published: Date.parse($elem.find('.news-source-info .timeago').attr('datetime')),
+    };
+}
+
+function ArticleList(id) {
+    this.id = id || "noid";
     this.page = 1;
 
     this.articleList = [];
 }
+
+ArticleList.prototype.getSpecificArticle = function (id) {
+    var url = 'http://www.veooz.com/news/' + id + '.html';
+
+    var that = this;
+
+    return new Promise(function (resolve, reject) {
+        console.log(that.id, "Fetching specific article");
+        request(url, function (err, res, body) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(parseArticle(body, id));
+            }
+        });
+    });
+};
 
 ArticleList.prototype.getArticle = function () {
     var page = this.page || 1;
@@ -44,7 +73,7 @@ ArticleList.prototype.getArticle = function () {
             //
             // resolve(that.articleList.shift());
 
-            console.log("Fetching list of articles");
+            console.log(that.id, "Fetching list of articles");
             request(url, function (err, res, body) {
                 if (err) {
                     reject(err);

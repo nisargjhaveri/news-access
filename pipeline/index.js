@@ -10,11 +10,31 @@ var translate = require("../translate");
 
 var articles = new Articles();
 
-articles.fetchOne()
-    .then(summarize.summarizeArticle)
-    .then(function (article) {
-        return translate.translateArticle(article, 'gu');
-    })
-    .then(function (article) {
-        console.log(article);
-    });
+// articles.fetchOne()
+//     .then(summarize.summarizeArticle)
+//     .then(function (article) {
+//         return translate.translateArticle(article, 'gu');
+//     })
+//     .then(function (article) {
+//         console.log(article);
+//     });
+
+exports.accessArticle = function (article, langs) {
+    var summaryPromise = summarize.summarizeArticle(article);
+
+    var langArticlePromises = [];
+
+    function getSummaryPromiseResolver (lang) {
+        return function (article) {
+            return translate.translateArticle(article, lang);
+        };
+    }
+
+    for (var i = 0; i < langs.length; i++) {
+        langArticlePromises.push(
+            summaryPromise.then(getSummaryPromiseResolver(langs[i]))
+        );
+    }
+
+    return Promise.all(langArticlePromises);
+};

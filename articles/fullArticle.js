@@ -9,9 +9,9 @@ function parseArticle (body) {
     return $("[itemprop='articleBody'] arttextxml").text().trim();
 }
 
-exports.addBodyText = function (article) {
+exports.addBodyText = function (id, article) {
     return new Promise(function (resolve, reject) {
-        console.log("Fetching article");
+        console.log(id, "Fetching article");
         request(article.url, function (err, res, body) {
             if (err) {
                 reject(err);

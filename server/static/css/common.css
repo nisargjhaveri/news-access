@@ -1,0 +1,86 @@
+body {
+    font-family: "Lohit Gujarati", "Lohit Devanagri", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    font-weight: 400;
+}
+
+a {
+    text-decoration: none;
+}
+
+.hidden {
+    display: none;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.float-left {
+    float: left;
+}
+
+.clear-fix {
+
+}
+
+.clear-fix:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.img-wrapper {
+    width: 12em;
+    height: 9em;
+    text-align: center;
+    margin-right: 1em;
+}
+
+.large-img-wrapper {
+    text-align: center;
+}
+
+.article-list {
+    max-width: 720px;
+    margin: auto;
+    padding: 1em;
+}
+
+.article-container {
+    max-width: 480px;
+    margin: auto;
+    text-align: justify;
+    padding: 1em;
+}
+
+.news-heading h2 {
+    margin-bottom: 0;
+}
+
+.news-heading h2 .link-article {
+    color: #444;
+}
+
+.news-heading h2 .link-article:hover {
+    color: #f17575;
+}
+
+.news-heading .show-source + .show-published-time:before {
+    content: " ⋅ ";
+    margin: 0 5px 0 5px;
+    /*background-color: red;*/
+}
+
+.article-small {
+    border-bottom: 1px solid;
+}

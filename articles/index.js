@@ -1,22 +1,34 @@
 var ArticleList = require("./listArticles.js");
 var fullArticle = require("./fullArticle.js");
 
-function throwError (error) {
-    console.error(error);
-    throw error;
+function getErrorFunc (id) {
+    return function (err) {
+        console.error(id, err);
+    };
 }
 
-function Articles() {
-    this.articleList = new ArticleList();
+function Articles(id) {
+    this.id = id || 'noid';
+    this.articleList = new ArticleList(this.id);
 }
 
-Articles.prototype.fetchOne = function () {
+Articles.prototype.fetchOne = function (id) {
+    id = id || false;
     var that = this;
 
     return new Promise(function (resolve, reject) {
-        that.articleList.getArticle()
-            .then(fullArticle.addBodyText, throwError)
-            .then(resolve, throwError);
+        var articlePromise;
+        if (id) {
+            articlePromise = that.articleList.getSpecificArticle(id);
+        } else {
+            articlePromise = that.articleList.getArticle();
+        }
+
+        articlePromise
+            .then(function (article) {
+                return fullArticle.addBodyText(that.id, article);
+            }, getErrorFunc(that.id))
+            .then(resolve, getErrorFunc(that.id));
     });
 };
 
