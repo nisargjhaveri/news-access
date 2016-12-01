@@ -1,4 +1,5 @@
 {
     "port": 3000,
-    "baseUrl": "/news-access/"
+    "baseUrl": "/news-access/",
+    "proxy": "http://proxy.iiit.ac.in:8080/"
 }

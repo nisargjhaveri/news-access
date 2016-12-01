@@ -11,6 +11,8 @@ var handleSocket = require('./handleSocket.js');
 
 var config = require('./config.json');
 
+process.env.http_proxy = config.proxy;
+
 app.engine('handlebars', handlebars);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'handlebars');
