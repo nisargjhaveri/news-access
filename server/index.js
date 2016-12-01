@@ -9,18 +9,23 @@ var handlebars = require('express-handlebars')();
 
 var handleSocket = require('./handleSocket.js');
 
+var config = require('./config.json');
+
 app.engine('handlebars', handlebars);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'handlebars');
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
 app.get('/', function(req, res){
-    res.render('index');
+    res.render('index', {
+        baseUrl: config.baseUrl,
+    });
 });
 
 app.get('/article/:articleId', function(req, res){
     res.render('article', {
-        articleId: req.params.articleId
+        articleId: req.params.articleId,
+        baseUrl: config.baseUrl,
     });
 });
 
@@ -30,6 +35,6 @@ io.on('connection', function(socket){
   handleSocket(socket);
 });
 
-http.listen(3000, function(){
-  console.log('listening on *:3000');
+http.listen(config.port, function(){
+  console.log('listening on *:' + config.port);
 });

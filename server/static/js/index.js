@@ -1,5 +1,5 @@
 function getArticleUrl (id) {
-    return "/article/" + id;
+    return "article/" + id;
 }
 
 function addNewArticle (article) {
@@ -16,7 +16,7 @@ function addNewArticle (article) {
 }
 
 $(function () {
-    var socket = io();
+    var socket = io({path: baseUrl + 'socket.io'});
     socket.on('new article', function (article) {
         addNewArticle(article);
         console.log(article);

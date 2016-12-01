@@ -92,7 +92,7 @@ img {
 .loading {
     height: 100%;
     width: 100%;
-    background-image: url("/static/img/loading.gif");
+    background-image: url("../img/loading.gif");
     background-position: center;
     background-repeat: no-repeat;
     box-sizing: border-box;

@@ -3,16 +3,18 @@
     <head>
         <meta charset="utf-8">
         <title>News Access</title>
+        <base href="{{baseUrl}}">
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-        <link rel="stylesheet" href="/static/css/common.css">
+        <link rel="stylesheet" href="static/css/common.css">
         <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.0/moment.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-        <script src="/socket.io/socket.io.js"></script>
+        <script src="socket.io/socket.io.js"></script>
         <script>
+            var baseUrl = "{{baseUrl}}";
             var articleId = "{{articleId}}";
             var langs = ['hi', 'gu'];
         </script>
-        <script src="/static/js/article.js"></script>
+        <script src="static/js/article.js"></script>
     </head>
     <body>
         <div class="loading article-container"></div>

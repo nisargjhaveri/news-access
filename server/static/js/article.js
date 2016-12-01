@@ -48,7 +48,7 @@ function showAccessibleArticles(articles) {
 }
 
 $(function () {
-    var socket = io();
+    var socket = io({path: baseUrl + 'socket.io'});
     socket.on('accessible articles', function (articles) {
         showAccessibleArticles(articles);
         console.log(articles);
