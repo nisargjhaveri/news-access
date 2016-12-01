@@ -1,4 +1,4 @@
-var token = require('google-translate-token');
+var token = require('./googleTranslateToken.js');
 var request = require('request').defaults({
     'proxy': process.env.http_proxy || process.env.HTTP_PROXY
 });
