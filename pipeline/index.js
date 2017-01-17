@@ -19,14 +19,15 @@ var articles = new Articles();
 //         console.log(article);
 //     });
 
-exports.accessArticle = function (article, langs) {
-    var summaryPromise = summarize.summarizeArticle(article);
+exports.accessArticle = function (article, langs, options) {
+    options = options || {};
+    var summaryPromise = summarize.summarizeArticle(article, options.summarizer);
 
     var langArticlePromises = [];
 
     function getSummaryPromiseResolver (lang) {
         return function (article) {
-            return translate.translateArticle(article, lang);
+            return translate.translateArticle(article, lang, options.translator);
         };
     }
 

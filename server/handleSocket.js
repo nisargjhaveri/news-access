@@ -16,10 +16,10 @@ module.exports = function (socket) {
         }
     });
 
-    socket.on('access article', function (articleId, langs) {
+    socket.on('access article', function (articleId, langs, options) {
         socket.articleFactory.fetchOne(articleId)
             .then(function (article) {
-                return pipeline.accessArticle(article, langs);
+                return pipeline.accessArticle(article, langs, options);
             })
             .then(function (articles) {
                 socket.emit('accessible articles', articles);

@@ -5,7 +5,13 @@ var request = require('request').defaults({
 var querystring = require('querystring');
 var safeEval = require('safe-eval');
 
+var supported_langs = ['en', 'hi', 'gu'];
+
 function translate (text, from, to) {
+    if (supported_langs.indexOf(from) < 0 || supported_langs.indexOf(to) < 0) {
+        return Promise.reject("LANG_NOT_SUPPORTED");
+    }
+
     return token.get(text).then(function (token) {
         var url = 'https://translate.google.com/translate_a/single';
         var data = {

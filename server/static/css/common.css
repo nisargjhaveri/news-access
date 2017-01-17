@@ -8,12 +8,25 @@ body {
     padding: 0;
 }
 
+h1 {
+    color: #555;
+    margin: 0.3em 0 0.5em 0;
+}
+
 h2 {
     font-weight: 400;
 }
 
 a {
     text-decoration: none;
+}
+
+.link-home {
+    color: #555;
+}
+
+.link-home:hover {
+    color: #f17575;
 }
 
 .hidden {
@@ -89,6 +102,11 @@ img {
     border-bottom: 1px solid;
 }
 
+.access-error {
+    padding: 1em;
+    color: #888;
+}
+
 .loading {
     height: 100%;
     width: 100%;
@@ -96,4 +114,22 @@ img {
     background-position: center;
     background-repeat: no-repeat;
     box-sizing: border-box;
+}
+
+.header {
+    display: inline-block;
+    text-align: left;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #eee;
+}
+
+.header-container {
+    text-align: center;
+}
+
+select.inline {
+    border: 1px solid #ccc;
+    background-color: transparent;
+    outline: none;
+    font-size: 1em;
 }

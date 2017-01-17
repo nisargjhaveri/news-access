@@ -17,6 +17,27 @@
         <script src="static/js/article.js"></script>
     </head>
     <body>
+        <div class="header-container">
+            <div class="header">
+                <h1><a href="{{baseUrl}}" class="link-home">News Access</a></h1>
+                <div class="access-options">
+                    <label>
+                        Summarize using
+                        <select class="select-summarizer inline">
+                            <option value="veooz">Veooz</option>
+                        </select>
+                    </label>
+                    ,
+                    <label>
+                        Translate using
+                        <select class="select-translator inline">
+                            <option value="google-translate">Google Translate</option>
+                            <option value="microsoft-translate">Microsoft Cognitive Services</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+        </div>
         <div class="loading article-container"></div>
         <div class="hidden">
             <article id="sample-original-article">

@@ -1,3 +1,9 @@
+function getErrorText(article) {
+    if (article.error == "LANG_NOT_SUPPORTED") {
+        return "The language is not supported with the selected translation method: " + article.lang;
+    }
+}
+
 function appendParagraphs($elem, text) {
     var paragraphs = text.split("\n").map(function (para) {
         return para.trim();
@@ -12,11 +18,16 @@ function makeAccessibleArticle(article) {
     var $article = $('#sample-accessible-article').clone();
     $article.removeAttr('id');
 
-    $article.find('.show-title').text(article.title);
-    $article.find('.show-summary').text(article.summary);
-    $article.find('.show-source').text(article.source);
-    $article.find('.show-published-time').text(moment(article.published).fromNow());
-    $article.find('.link-original-article').attr('href', article.url);
+    if (article.error) {
+        $article.empty();
+        $article.append($('<div>').addClass('access-error').text(getErrorText(article)));
+    } else {
+        $article.find('.show-title').text(article.title);
+        $article.find('.show-summary').text(article.summary);
+        $article.find('.show-source').text(article.source);
+        $article.find('.show-published-time').text(moment(article.published).fromNow());
+        $article.find('.link-original-article').attr('href', article.url);
+    }
 
     return $article;
 }
@@ -47,13 +58,54 @@ function showAccessibleArticles(articles) {
     $('.article-container').removeClass('loading').append($article);
 }
 
+function setupOptions() {
+    var selectedSummarizer = localStorage.getItem('news-access-summarizer');
+    var selectedTranslator = localStorage.getItem('news-access-translator');
+
+    if (selectedSummarizer) {
+        $('.select-summarizer option').removeAttr('selected');
+        $('.select-summarizer option[value="' + selectedSummarizer + '"]').attr('selected', 'selected');
+    }
+    if (selectedTranslator) {
+        $('.select-translator option').removeAttr('selected');
+        $('.select-translator option[value="' + selectedTranslator + '"]').attr('selected', 'selected');
+    }
+
+    $('.select-summarizer').on('change', refreshArticle);
+    $('.select-translator').on('change', refreshArticle);
+}
+
+function refreshArticle() {
+    $('.article-container').empty().addClass('loading');
+
+    $('.select-summarizer').attr('disabled', 'true');
+    $('.select-translator').attr('disabled', 'true');
+
+    var selectedSummarizer = $('.select-summarizer').val();
+    var selectedTranslator = $('.select-translator').val();
+
+    localStorage.setItem('news-access-summarizer', selectedSummarizer);
+    localStorage.setItem('news-access-translator', selectedTranslator);
+
+    console.log("Requesting article");
+    socket.emit('access article', articleId, langs, {
+        'summarizer': selectedSummarizer,
+        'translator': selectedTranslator
+    });
+}
+
+var socket;
+
 $(function () {
-    var socket = io({path: baseUrl + 'socket.io'});
+    socket = io({path: baseUrl + 'socket.io'});
     socket.on('accessible articles', function (articles) {
         showAccessibleArticles(articles);
+
+        $('.select-summarizer').removeAttr('disabled');
+        $('.select-translator').removeAttr('disabled');
         console.log(articles);
     });
 
-    console.log("Requesting article");
-    socket.emit('access article', articleId, langs);
+    setupOptions();
+    refreshArticle();
 });
