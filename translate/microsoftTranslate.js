@@ -4,6 +4,8 @@ var request = require('request').defaults({
 var querystring = require('querystring');
 var xml2js = require('xml2js');
 
+var config = require('./config.json');
+
 var supported_langs = ['en', 'hi'];
 
 function getAccessToken() {
@@ -11,7 +13,7 @@ function getAccessToken() {
         var options = {
             url: 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken',
             headers: {
-                'Ocp-Apim-Subscription-Key': '36a5c542248e4e64ba341415998686de'
+                'Ocp-Apim-Subscription-Key': config.microsoftTranslateSubscriptionKey
             },
         };
         request.post(options, function (error, response, body) {
