@@ -1,9 +1,20 @@
-function summarizeArticle(article, method) {
-    // method is ignored for now
+var gFlowSummarize = require('./gFlowSummarize.js');
+var veoozSummzrize = require('./veoozSummarize.js');
 
-    return new Promise(function(resolve, reject) {
-        resolve(article);
-    });
+function summarizeArticle(article, method) {
+    method = method || 'veooz';
+    var summarize;
+
+    switch (method) {
+        case 'g-flow':
+            summarize = gFlowSummarize;
+            break;
+        case 'veooz': // jshint ignore:line
+        default:
+            summarize = veoozSummzrize;
+    }
+
+    return summarize(article);
 }
 
 exports.summarizeArticle = summarizeArticle;

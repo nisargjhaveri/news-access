@@ -9,5 +9,6 @@
   "author": "",
   "license": "UNLICENCED",
   "dependencies": {
+    "tmp": "0.0.31"
   }
 }

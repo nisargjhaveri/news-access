@@ -45,8 +45,9 @@ function translate (text, from, to) {
                     xml2js.parseString(body, function (err, result) {
                         if (err) {
                             reject(err);
+                        } else {
+                            resolve(result.string._);
                         }
-                        resolve(result.string._);
                     });
                 }
             });
