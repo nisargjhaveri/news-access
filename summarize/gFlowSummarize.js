@@ -51,6 +51,7 @@ function summarize(article) {
                 article.summary = summary.trim();
                 resolve(article);
             }
+            tmpDir.removeCallback();
         });
     });
 }
