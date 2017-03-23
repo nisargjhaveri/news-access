@@ -6,7 +6,7 @@ var xml2js = require('xml2js');
 
 var config = require('./config.json');
 
-var supported_langs = ['en', 'hi'];
+var supported_langs = ['en', 'hi', 'ur'];
 
 function getAccessToken() {
     return new Promise(function (resolve, reject) {

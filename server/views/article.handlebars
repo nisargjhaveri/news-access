@@ -12,7 +12,6 @@
         <script>
             var baseUrl = "{{baseUrl}}";
             var articleId = "{{articleId}}";
-            var langs = ['hi', 'gu'];
         </script>
         <script src="static/js/article.js"></script>
     </head>
@@ -21,6 +20,23 @@
             <div class="header">
                 <h1><a href="{{baseUrl}}" class="link-home">News Access</a></h1>
                 <div class="access-options">
+                    <label>
+                        Access article in
+                        <select class="select-language inline">
+                            <option value="hi">Hindi</option>
+                            <option value="gu">Gujarati</option>
+                            <option value="bn">Bengali</option>
+                            <option value="kn">Kannada</option>
+                            <option value="ml">Malayalam</option>
+                            <option value="mr">Marathi</option>
+                            <option value="ne">Nepali</option>
+                            <option value="pa">Punjabi</option>
+                            <option value="sd">Sindhi</option>
+                            <option value="ta">Tamil</option>
+                            <option value="te">Telugu</option>
+                        </select>
+                    </label>
+                    ,
                     <label>
                         Summarize using
                         <select class="select-summarizer inline">
@@ -45,6 +61,9 @@
                 <div class="large-img-wrapper">
                     <img src="" alt="Image" class="show-image large-img">
                 </div>
+
+                <div class="accessible-article-list"></div>
+
                 <div class="article-small">
                     <div class="news-heading">
                         <h2 class="show-title"></h2>
@@ -53,8 +72,6 @@
                     </div>
                     <p class="show-summary"></p>
                 </div>
-
-                <div class="accessible-article-list"></div>
 
                 <div class="show-full-article"></div>
             </article>

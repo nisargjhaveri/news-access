@@ -5,7 +5,7 @@ var request = require('request').defaults({
 var querystring = require('querystring');
 var safeEval = require('safe-eval');
 
-var supported_langs = ['en', 'hi', 'gu'];
+var supported_langs = ['en', 'hi', 'gu', 'bn', 'kn', 'ml', 'mr', 'ne', 'pa', 'sd', 'ta', 'te', 'ur'];
 
 function translate (text, from, to) {
     if (supported_langs.indexOf(from) < 0 || supported_langs.indexOf(to) < 0) {
