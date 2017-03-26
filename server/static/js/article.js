@@ -26,6 +26,7 @@ function makeAccessibleArticle(article) {
         $article.empty();
         $article.append($('<div>').addClass('access-error').text(getErrorText(article)));
     } else {
+        $article.attr('lang', article.lang);
         $article.find('.show-title').text(article.title);
         $article.find('.show-summary').text(article.summary);
         $article.find('.show-source').text(article.source);
