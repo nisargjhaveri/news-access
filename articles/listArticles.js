@@ -39,8 +39,34 @@ function ArticleList(id) {
     this.id = id || "noid";
     this.page = 1;
 
+    this.articlePromise = Promise.resolve();
     this.articleList = [];
 }
+
+ArticleList.prototype.ensureArticleList = function () {
+    var page = this.page || 1;
+    var url = 'http://www.veooz.com/ajax/source?langEdition=en&geo=IN&sourceId=timesofindia.indiatimes.com&feedType=fpopular&page=' + page;
+
+    var that = this;
+
+    return new Promise(function (resolve, reject) {
+        if (that.articleList.length === 0) {
+            console.log(that.id, "Fetching list of articles");
+            request(url, function (err, res, body) {
+                if (err) {
+                    reject(err);
+                } else {
+                    that.articleList = parseArticles(body);
+                    resolve();
+                }
+            });
+
+            that.page += 1;
+        } else {
+            resolve();
+        }
+    });
+};
 
 ArticleList.prototype.getSpecificArticle = function (id) {
     var url = 'http://www.veooz.com/news/' + id + '.html';
@@ -60,29 +86,15 @@ ArticleList.prototype.getSpecificArticle = function (id) {
 };
 
 ArticleList.prototype.getArticle = function () {
-    var page = this.page || 1;
-    var url = 'http://www.veooz.com/ajax/source?langEdition=en&geo=IN&sourceId=timesofindia.indiatimes.com&feedType=fpopular&page=' + page;
-
     var that = this;
+    this.articlePromise = this.articlePromise
+                            .then(function() {
+                                return that.ensureArticleList();
+                            }).then(function() {
+                                return that.articleList.shift();
+                            });
 
-    return new Promise(function (resolve, reject) {
-        if (that.articleList.length === 0) {
-            console.log(that.id, "Fetching list of articles");
-            request(url, function (err, res, body) {
-                if (err) {
-                    reject(err);
-                } else {
-                    that.articleList = parseArticles(body);
-                    resolve(that.articleList.shift());
-                }
-            });
-
-            that.page += 1;
-        } else {
-            resolve(that.articleList.shift());
-        }
-
-    });
+    return this.articlePromise;
 };
 
 module.exports = ArticleList;

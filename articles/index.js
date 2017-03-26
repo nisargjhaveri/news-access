@@ -26,7 +26,11 @@ Articles.prototype.fetchOne = function (id) {
 
         articlePromise
             .then(function (article) {
-                return fullArticle.addBodyText(that.id, article);
+                if (id) {
+                    return fullArticle.addBodyText(that.id, article);
+                } else {
+                    return article;
+                }
             }, getErrorFunc(that.id))
             .then(resolve, getErrorFunc(that.id));
     });
