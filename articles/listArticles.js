@@ -57,7 +57,11 @@ ArticleList.prototype.ensureArticleList = function () {
                     reject(err);
                 } else {
                     that.articleList = parseArticles(body);
-                    resolve();
+                    if (that.articleList.length === 0) {
+                        reject();
+                    } else {
+                        resolve();
+                    }
                 }
             });
 
@@ -90,9 +94,13 @@ ArticleList.prototype.getArticle = function () {
     this.articlePromise = this.articlePromise
                             .then(function() {
                                 return that.ensureArticleList();
-                            }).then(function() {
-                                return that.articleList.shift();
-                            });
+                            }).then(
+                                function() {
+                                    return that.articleList.shift();
+                                }, function(err) {
+                                    return Promise.reject(err);
+                                }
+                            );
 
     return this.articlePromise;
 };

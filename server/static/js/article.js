@@ -107,6 +107,11 @@ function refreshArticle() {
     });
 }
 
+function panic() {
+    $('.article-container').removeClass('loading');
+    $('.error-container').removeClass('hidden');
+}
+
 var socket;
 
 $(function () {
@@ -118,6 +123,11 @@ $(function () {
         $('.select-summarizer').removeAttr('disabled');
         $('.select-translator').removeAttr('disabled');
         console.log(articles);
+    });
+
+    socket.on('new error', function (err) {
+        panic();
+        console.log("Error", err);
     });
 
     setupOptions();

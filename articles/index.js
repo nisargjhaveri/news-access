@@ -4,6 +4,7 @@ var fullArticle = require("./fullArticle.js");
 function getErrorFunc (id) {
     return function (err) {
         console.error(id, err);
+        return Promise.reject(err);
     };
 }
 
@@ -32,7 +33,7 @@ Articles.prototype.fetchOne = function (id) {
                     return article;
                 }
             }, getErrorFunc(that.id))
-            .then(resolve, getErrorFunc(that.id));
+            .then(resolve, reject);
     });
 };
 

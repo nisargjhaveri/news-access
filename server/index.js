@@ -1,6 +1,9 @@
 var path = require('path');
 var express = require('express');
 
+var config = require('./config.json');
+process.env.http_proxy = config.proxy;
+
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -8,10 +11,6 @@ var io = require('socket.io')(http);
 var handlebars = require('express-handlebars')();
 
 var handleSocket = require('./handleSocket.js');
-
-var config = require('./config.json');
-
-process.env.http_proxy = config.proxy;
 
 app.engine('handlebars', handlebars);
 app.set('views', path.join(__dirname, 'views'));

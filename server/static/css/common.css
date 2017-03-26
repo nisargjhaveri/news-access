@@ -42,7 +42,6 @@ a {
 }
 
 .clear-fix {
-
 }
 
 .clear-fix:after {
@@ -132,4 +131,18 @@ select.inline {
     background-color: transparent;
     outline: none;
     font-size: 1em;
+}
+
+.block {
+    display: block;
+}
+
+.error-container {
+    text-align: center;
+    color: #444;
+    margin-top: 2em;
+}
+
+.error-suggestion {
+    margin-top: 4em;
 }
