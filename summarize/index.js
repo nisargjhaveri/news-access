@@ -1,4 +1,5 @@
 var gFlowSummarize = require('./gFlowSummarize.js');
+var linBilmesSummarize = require('./linBilmesSummarize.js');
 var veoozSummzrize = require('./veoozSummarize.js');
 
 function summarizeArticle(article, method) {
@@ -8,6 +9,9 @@ function summarizeArticle(article, method) {
     switch (method) {
         case 'g-flow':
             summarize = gFlowSummarize;
+            break;
+        case 'linBilmes':
+            summarize = linBilmesSummarize;
             break;
         case 'veooz': // jshint ignore:line
         default:

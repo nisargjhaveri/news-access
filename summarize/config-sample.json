@@ -1,3 +1,6 @@
 {
-    "gFlowPath": "/home/nisarg/Projects/gflow-2014-9-17"
+    "gFlowPath": "/home/nisarg/Libraries/gflow-2014-9-17",
+
+    "linBilmesPath": "/home/nisarg/Libraries/summarizer/",
+    "clutoBinPath": "/home/nisarg/Libraries/cluto-2.1.2/Linux-x86_64/"
 }

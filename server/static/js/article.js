@@ -128,6 +128,10 @@ function refreshArticle() {
 }
 
 function panic() {
+    $('.select-language').removeAttr('disabled');
+    $('.select-summarizer').removeAttr('disabled');
+    $('.select-translator').removeAttr('disabled');
+
     $('.article-container').removeClass('loading');
     $('.error-container').removeClass('hidden');
 }
