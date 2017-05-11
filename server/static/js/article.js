@@ -81,14 +81,12 @@ function setupOptions() {
         $('.select-translator option[value="' + selectedTranslator + '"]').attr('selected', 'selected');
     }
 
-    $('.select-language').on('change', refreshArticle);
-    $('.select-summarizer').on('change', refreshArticle);
-    $('.select-translator').on('change', refreshArticle);
+    $('.select-language').on('change', manageOptionsAndRefresh);
+    $('.select-summarizer').on('change', manageOptionsAndRefresh);
+    $('.select-translator').on('change', manageOptionsAndRefresh);
 }
 
-function refreshArticle() {
-    $('.article-container').empty().addClass('loading');
-
+function manageOptionsAndRefresh() {
     $('.select-language').attr('disabled', 'true');
     $('.select-summarizer').attr('disabled', 'true');
     $('.select-translator').attr('disabled', 'true');
@@ -97,9 +95,30 @@ function refreshArticle() {
     var selectedSummarizer = $('.select-summarizer').val();
     var selectedTranslator = $('.select-translator').val();
 
+    if (['en', 'hi', 'ur'].indexOf(selectedLanguage) == -1) {
+        $('.select-translator option[value="microsoft-translate"]').attr('disabled', 'true');
+
+        if (selectedTranslator == 'microsoft-translate') {
+            selectedTranslator = 'google-translate';
+            $('.select-translator').val(selectedTranslator);
+        }
+    } else {
+        $('.select-translator option[value="microsoft-translate"]').removeAttr('disabled');
+    }
+
     localStorage.setItem('news-access-language', selectedLanguage);
     localStorage.setItem('news-access-summarizer', selectedSummarizer);
     localStorage.setItem('news-access-translator', selectedTranslator);
+
+    refreshArticle();
+}
+
+function refreshArticle() {
+    $('.article-container').empty().addClass('loading');
+
+    var selectedLanguage = $('.select-language').val();
+    var selectedSummarizer = $('.select-summarizer').val();
+    var selectedTranslator = $('.select-translator').val();
 
     console.log("Requesting article");
     socket.emit('access article', articleId, [selectedLanguage], {
@@ -132,5 +151,5 @@ $(function () {
     });
 
     setupOptions();
-    refreshArticle();
+    manageOptionsAndRefresh();
 });
