@@ -3,10 +3,19 @@ var request = require("request").defaults({
 });
 var cheerio = require("cheerio");
 
-function parseArticle (body) {
+function parseArticle (source, body) {
     var $ = cheerio.load(body);
 
-    return $("[itemprop='articleBody'] arttextxml").text().trim();
+    if (source == "The Indian Express") {
+        return $("[itemprop='articleBody'] p:not(.appstext)")
+            .map(function(i, p) {
+                return $(p).text();
+            }).get().join("\n");
+    } else if (source == "The Time of India") {
+        return $("[itemprop='articleBody'] arttextxml").text().trim();
+    }
+
+    return false;
 }
 
 exports.addBodyText = function (id, article) {
@@ -16,8 +25,12 @@ exports.addBodyText = function (id, article) {
             if (err) {
                 reject(err);
             } else {
-                article.body = parseArticle(body);
-                resolve(article);
+                article.body = parseArticle(article.source, body);
+                if (article.body === false) {
+                    reject("ARTICLE_PARSE_ERROR");
+                } else {
+                    resolve(article);
+                }
             }
         });
     });
