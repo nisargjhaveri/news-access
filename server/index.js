@@ -17,6 +17,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'handlebars');
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
+
 app.get('/', function(req, res){
     res.render('index', {
         baseUrl: config.baseUrl,
@@ -26,6 +27,12 @@ app.get('/', function(req, res){
 app.get('/article/:articleId', function(req, res){
     res.render('article', {
         articleId: req.params.articleId,
+        baseUrl: config.baseUrl,
+    });
+});
+
+app.get('/workbench', function(req, res){
+    res.render('workbench', {
         baseUrl: config.baseUrl,
     });
 });
