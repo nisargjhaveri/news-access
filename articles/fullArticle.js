@@ -11,8 +11,12 @@ function parseArticle (source, body) {
             .map(function(i, p) {
                 return $(p).text();
             }).get().join("\n");
-    } else if (source == "The Time of India") {
+    } else if (source == "The Times of India") {
         return $("[itemprop='articleBody'] arttextxml").text().trim();
+    } else if (source == "The Hindu") {
+        return $("[id^='content-body-'] p").map(function(i, p) {
+            return $(p).text();
+        }).get().join("\n");
     }
 
     return false;
