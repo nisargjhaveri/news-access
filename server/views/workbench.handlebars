@@ -13,25 +13,84 @@
         <script>
             var baseUrl = "{{baseUrl}}";
         </script>
+        <script>
+            sentences = [
+                {
+                    'source': "An expert in river conservation and a member of the Parliamentary forum on global warming, environment was a subject close to the heart of Anil Madhav Dave who was appointed Environment Minister only last year.",
+                    'target': "નદી સંરક્ષણ અને ગ્લોબલ વોર્મિંગના સંસદીય ફોરમના સભ્યમાં એક નિષ્ણાત, પર્યાવરણ અનિલ માધવ દવેના હૃદયની નજીકનો વિષય હતો, જેને ગયા વર્ષે પર્યાવરણ પ્રધાન તરીકે નિમણૂક કરાયો હતો.",
+                }, {
+                    'source': "Dave was involved in social work right from his early days and founded NGO \“Narmada Samagra\” for conservation of the river.",
+                    'target': "દવે તેના પ્રારંભિક દિવસોથી જ સામાજિક કાર્યમાં સંકળાયેલા હતા અને નદીના સંરક્ષણ માટે એનજીઓ \"નર્મદા સમાગ્રા\" ની સ્થાપના કરી હતી.",
+                }, {
+                    'source': "A two-time Rajya Sabha MP from Madhya Pradesh, Dave was known in the BJP circles as a man gifted with immaculate organisational skills.",
+                    'target': "મધ્યપ્રદેશમાંથી બે વખતની રાજ્ય સભાના સાંસદ, દવે ભાજપના વર્તુળોમાં જાણીતા હતા જેમને શુદ્ધ સંગઠનાત્મક કૌશલ્યોથી ભેટિત કરવામાં આવે છે.",
+                }, {
+                    'source': "He had a long time association with the Rashtriya Swayam Sewak Sangh and shot into prominence in 2003 when he crafted the strategy leading to the defeat of Chief Minister Digvijay Singh.",
+                    'target': "2003 માં રાષ્ટ્રીય સ્વયં સેવક સંઘ સાથે લાંબા સમય સુધી સંડોવણી હતી અને મુખ્ય પ્રધાન દિગ્વિજયસિંહની હારની આગેવાનીવાળી વ્યૂહરચનાની રચના કરવામાં આવી હતી.",
+                }, {
+                    'source': "Following this, Uma Bharti who became the Chief Minister, made him Advisor to the CM.",
+                    'target': "આ પછી, મુખ્યમંત્રી બન્યા તે ઉમા ભારતીએ તેમને મુખ્યમંત્રીના સલાહકાર બનાવ્યા.",
+                }, {
+                    'source': "As an NCC Air Wing Cadet he took his early flying lessons and found a lifetime passion. He was a holder of a private pilot licence and had once flown a Cessna aircraft around the banks of Narmada for 18 hours.",
+                    'target': "એન.સી.સી. એર વિંગ કેડેટ તરીકે તેમણે પ્રારંભિક ઉડ્ડયન પાઠ લીધો અને આજીવન જુસ્સો શોધી. તેઓ ખાનગી પાઇલોટ લાઇસન્સના ધારક હતા અને એક વખત 18 કલાક માટે નર્મદાના કાંઠાની આસપાસ સેસ્ના એરક્રાફ્ટ ઉડાન ભરી હતી.",
+                }, {
+                    'source': "As Rajya Sabha MP, he has served as Member of Parliamentary Forum on Global Warming and Climate Change.",
+                    'target': "રાજ્ય સભાના સાંસદ તરીકે, તેમણે ગ્લોબલ વૉર્મિંગ અને ક્લાયમેટ ચેન્જ પર સંસદીય ફોરમના સભ્ય તરીકે સેવા આપી છે.",
+                }, {
+                    'source': "A post-graduate in Commerce from Gujarati College in Indore, Dave had keen interest in literature and had penned a number of books.",
+                    'target': "ઇન્દોરમાં ગુજરાતી કોલેજમાંથી પોસ્ટ ગ્રેજ્યુએટ, ડેવ સાહિત્યમાં ગહન રસ ધરાવે છે અને તેણે અનેક પુસ્તકો લખી છે.",
+                }, {
+                    'source': "Dave was born to Pushpa and Madhav Dave at Barnagar, district Ujjain in Madhya Pradesh on July 6, 1956.",
+                    'target': "દવેનો જન્મ 6 જુલાઇ, 1956 ના રોજ મધ્યપ્રદેશના બરનગર જિલ્લાના ઉઝજેન ખાતે પુષ્પા અને માધવ દવેમાં થયો હતો.",
+                }, {
+                    'source': "He inherited the legacy of the Rashtriya Swayamsewak Sangh from his grandfather Dadasaheb Dave and volunteered to be a Pracharak fter completing higher studies.",
+                    'target': "તેમણે તેમના દાદા દાદાસાહેબ દવે તરફથી રાષ્ટ્રીય સ્વયંસેવક સંઘની વારસામાં વારસાગત અને ઉચ્ચ અભ્યાસ પૂર્ણ કરવા માટે પ્રચારક બનવા માટે સ્વૈચ્છિક બન્યા.",
+                }, {
+                    'source': "He rose in the Sangh echelons over the years and was deputed to the BJP, right before the Madhya Pradesh Assembly Elections in 2003.",
+                    'target': "તેઓ વર્ષોથી સંઘના નેતાઓમાં વધારો પામ્યા હતા અને 2003 માં મધ્યપ્રદેશ વિધાનસભાની ચૂંટણી પહેલાં જ ભાજપને સોંપવામાં આવ્યા હતા.",
+                }, {
+                    'source': "The leader from Madhya Pradesh was key party strategist and served as chief of its election management committee for the three times during the state Assembly elections in 2003, 2008 and 2013 and Lok Sabha elections in 2004, 2009 and 2014.",
+                    'target': "મધ્યપ્રદેશના નેતા મુખ્ય પક્ષના વ્યૂહરચનાકાર હતા અને 2003, 2008 અને 2013 ની વિધાનસભાની ચૂંટણીમાં 2004 અને 2009, 2004 અને 2004 ની લોકસભા ચૂંટણી દરમિયાન ત્રણ વખત ચૂંટણી પ્રચાર સમિતિના વડા બન્યા હતા.",
+                }, {
+                    'source': "He was known for his booth-level management and planning.",
+                    'target': "તેઓ તેમના બૂથ-સ્તરની વ્યવસ્થાપન અને આયોજન માટે જાણીતા હતા.",
+                }, {
+                    'source': "Dave was elected to Rajya Sabha in 2009 and has been on various committees including Chairman, Select Committee on Prevention of Corruption (Amendment) Bill 2013.",
+                    'target': "ડેવ 2009 માં રાજ્યસભામાં ચૂંટાયા હતા અને ભ્રષ્ટાચાર નિવારણ (સુધારો) બિલ 2013 ના ચેરમેન, પસંદગી સમિતિ સહિત વિવિધ સમિતિઓમાં રહ્યા હતા.",
+                }, {
+                    'source': "Dave had also organised the World Hindi Conference in Bhopal and an international conference on the occasion of Simhastha (Kumbh) Mela in Ujjain",
+                    'target': "દવેએ ભોપાલમાં વર્લ્ડ હિન્દી કોન્ફરન્સ અને ઉજજૈનમાં સિંઘસ્થા (કુંભ) મેળાના પ્રસંગે આંતરરાષ્ટ્રીય પરિષદનું આયોજન કર્યું હતું."
+                }
+            ];
+        </script>
         <script src="static/js/workbench.js"></script>
     </head>
-    <body>
-        <div class="bench-container">
-            <div class="flex-item column1">
-                <p>South Korea will temporarily shut down 10 coal-fired power plants that are over 30 years old in June to mitigate air pollution, the office of President Moon Jae-in said in a statement on Monday. The measure comes as coal-fired power plants are being criticised for contributing to deteriorating air quality in South Korea, Asia’s fourth-largest economy. Amid these concerns, new President Moon vowed during his election campaign to close the old coal power plants and review a plan to add coal power generation. Instead he advocated increasing the share of renewables to produce more clean energy. Following through on the promise to reduce coal-fired generation, the presidential office, formally called the Blue House, said that it will temporarily suspend operations of the older coal power plants next month for one month.
-                <p>The Blue House also said it will shut the older coal plants again in 2018 from March to June and, furthermore, wants to close all of the old coal plants within Moon’s presidency which ends in May 2022. In July last year, South Korea’s energy ministry announced a plan to close the 10 old coal-fired power plants by 2025 in order to lower its coal power reliance and reduce greenhouse gas emissions.
-                <p>Coal supplies about 40 percent of South Korea’s total power generation because it is cheaper compared to other energy sources such as liquefied natural gas. At present, South Korea runs a total of 59 coal-fired power plants. Out of the total, the 10 old power plants make up 10.6 percent of South Korea’s total installed coal power capacity, or 3.3 gigawatts, the statement said.
-            </div>
-            <div class="flex-item column2">
-                <div class="flex-item">
-                    South Korea will temporarily shut down 10 coal-fired power plants that are over 30 years old in June to mitigate air pollution, the office of President Moon Jae-in said in a statement on Monday. In July last year, South Korea's energy ministry announced a plan to close the 10 old coal-fired power plants by 2025 in order to lower its coal power reliance and reduce greenhouse gas emissions.
+    <body class="flex-column">
+        <h1>Workbench - News Access</h1>
+        <div class="bench-container flex-row flex-item">
+            <div class="flex-item flex-2">
+                <div class='article-title flex-row'>
+                    <h2 class="flex-item">Dave -- A man passionate about river conservation</h2>
+                    <h2 class="flex-item">ડેવ - નદી સંરક્ષણ વિશે પ્રખર માણસ</h2>
+                </div>
+                <div class="article-body flex-item">
                 </div>
             </div>
-            <div class="flex-item column3">
-                <div class="flex-item"></div>
+            <div class="flex-item flex-column">
+                <div class="flex-item">
+                    <p class="paragraph">
+                        <span class="sentence">An expert in river conservation and a member of the Parliamentary forum on global warming, environment was a subject close to the heart of Anil Madhav Dave who was appointed Environment Minister only last year.</span>
+                        <span class="sentence">A two-time Rajya Sabha MP from Madhya Pradesh, Dave was known in the BJP circles as a man gifted with immaculate organisational skills.</span>
+                    </p>
+                </div>
                 <div class="flex-item final-edit">
-                    <textarea class="flex-item">દક્ષિણ કોરિયાએ હંગામી ધોરણે 10 કોલસા આધારિત વીજ પ્લાન્ટ બંધ કરી દીધા હતા, જે જૂન મહિનામાં હવાના પ્રદૂષણને ઘટાડવા માટે 30 વર્ષથી વધુ ઉંમરના છે. રાષ્ટ્રપતિ ચંદ્ર જૈ-ઇનની ઑફિસે સોમવારે એક નિવેદનમાં જણાવ્યું હતું. ગત વર્ષે જુલાઈમાં, દક્ષિણ કોરિયાના ઊર્જા મંત્રાલયે 2025 દ્વારા કોલસા આધારિત પાવર પ્લાન્ટ્સને બંધ કરવાની યોજના જાહેર કરી હતી જેથી ગ્રીનહાઉસ ગેસ ઉત્સર્જનમાં ઘટાડો થઈ શકે.</textarea>
-                    <input type="submit" value="Submit">
+                    <div class="flex-item">
+                        <p class="paragraph">
+                            <span class="sentence">નદી સંરક્ષણ અને ગ્લોબલ વોર્મિંગના સંસદીય ફોરમના સભ્યમાં એક નિષ્ણાત, પર્યાવરણ અનિલ માધવ દવેના હૃદયની નજીકનો વિષય હતો, જેને ગયા વર્ષે પર્યાવરણ પ્રધાન તરીકે નિમણૂક કરાયો હતો.</span>
+                            <span class="sentence">મધ્યપ્રદેશમાંથી બે વખતની રાજ્ય સભાના સાંસદ, દવે ભાજપના વર્તુળોમાં જાણીતા હતા જેમને શુદ્ધ સંગઠનાત્મક કૌશલ્યોથી ભેટિત કરવામાં આવે છે.</span>
+                        </p>
+                    </div>
+                    <input type="submit" value="Publish" class="publish-btn">
                 </div>
             </div>
         </div>
