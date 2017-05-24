@@ -34,7 +34,7 @@ select.inline {
 }
 
 .hidden {
-    display: none;
+    display: none  !important;
 }
 
 .inline-block {

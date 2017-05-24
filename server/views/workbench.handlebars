@@ -7,8 +7,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
         <link rel="stylesheet" href="static/css/common.css">
         <link rel="stylesheet" href="static/css/workbench.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
         <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.0/moment.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/Sortable/1.5.1/Sortable.min.js"></script>
         <script src="socket.io/socket.io.js"></script>
         <script>
             var baseUrl = "{{baseUrl}}";
@@ -77,13 +79,15 @@
                 </div>
             </div>
             <div class="flex-item flex-column">
-                <div class="flex-item">
-                    <p class="paragraph">
-                        <span class="sentence">An expert in river conservation and a member of the Parliamentary forum on global warming, environment was a subject close to the heart of Anil Madhav Dave who was appointed Environment Minister only last year.</span>
-                        <span class="sentence">A two-time Rajya Sabha MP from Madhya Pradesh, Dave was known in the BJP circles as a man gifted with immaculate organisational skills.</span>
-                    </p>
+                <div class="flex-item flex-column summary-source-container">
+                    <p class="paragraph paragraph-draggable summary-source flex-item"></p>
+                    <div class="summary-bin-container flex-row hidden">
+                        <div class="flex-item"></div>
+                        <div class="summary-bin fa fa-trash-o"></div>
+                        <div class="flex-item"></div>
+                    </div>
                 </div>
-                <div class="flex-item final-edit">
+                <div class="flex-item flex-column">
                     <div class="flex-item">
                         <p class="paragraph">
                             <span class="sentence">નદી સંરક્ષણ અને ગ્લોબલ વોર્મિંગના સંસદીય ફોરમના સભ્યમાં એક નિષ્ણાત, પર્યાવરણ અનિલ માધવ દવેના હૃદયની નજીકનો વિષય હતો, જેને ગયા વર્ષે પર્યાવરણ પ્રધાન તરીકે નિમણૂક કરાયો હતો.</span>
