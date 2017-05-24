@@ -35,11 +35,7 @@ function prepareArticle() {
                     pull: "clone",
                     put: false
                 },
-                sort: false,
-                setData: function (dataTransfer, elem) {
-                    dataTransfer.effectAllowed = "move";
-
-                }
+                sort: false
             });
         });
 
@@ -58,7 +54,6 @@ function prepareArticle() {
                 $('.summary-bin').removeClass('summary-bin-highlight');
             },
             onMove: function (e) {
-                console.log(e.to);
                 if ($(e.to).is(".summary-bin")) {
                     $('.summary-bin').addClass('summary-bin-highlight');
                 } else {
