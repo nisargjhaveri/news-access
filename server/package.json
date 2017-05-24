@@ -21,5 +21,8 @@
   },
   "browserslist": [
     "last 2 version"
-  ]
+  ],
+  "scripts": {
+    "gulp": "gulp"
+  }
 }
