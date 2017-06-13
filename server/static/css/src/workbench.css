@@ -48,7 +48,12 @@
 
 .paragraph-draggable .sentence:hover {
     white-space: pre-wrap;
-    background-color: #00ffff;
+    background-color: #94ffff;
+}
+
+.paragraph-draggable .sentence[contenteditable="true"] {
+    cursor: auto;
+    background-color: #bfffd9;
 }
 
 .sortable-ghost {
