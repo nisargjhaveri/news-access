@@ -42,13 +42,13 @@
     content: " ";
 }
 
-.sentence:hover {
-    white-space: pre-wrap;
-    background-color: #00ffff;
-}
-
 .paragraph-draggable .sentence {
     cursor: grab;
+}
+
+.paragraph-draggable .sentence:hover {
+    white-space: pre-wrap;
+    background-color: #00ffff;
 }
 
 .sortable-ghost {
