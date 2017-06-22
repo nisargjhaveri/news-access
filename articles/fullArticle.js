@@ -2,21 +2,36 @@ var request = require("request").defaults({
     'proxy': process.env.http_proxy || process.env.HTTP_PROXY
 });
 var cheerio = require("cheerio");
+var htmlToText = require('html-to-text');
 
 function parseArticle (source, body) {
     var $ = cheerio.load(body);
+    var article;
 
     if (source == "The Indian Express") {
+        // FIXME: use htmlToText
         return $("[itemprop='articleBody'] p:not(.appstext)")
             .map(function(i, p) {
                 return $(p).text();
             }).get().join("\n");
     } else if (source == "The Times of India") {
-        return $("[itemprop='articleBody'] arttextxml").text().trim();
+        article = $("[itemprop='articleBody'] arttextxml");
     } else if (source == "The Hindu") {
-        return $("[id^='content-body-'] p").map(function(i, p) {
-            return $(p).text();
-        }).get().join("\n");
+        article = $("[id^='content-body-']");
+        $(".also-view-container").remove();
+        $(".img-container").remove();
+    }
+
+    if (article) {
+        return htmlToText.fromString(
+            article.html(),
+            {
+                wordwrap: false,
+                uppercaseHeadings: false,
+                ignoreImages: true,
+                ignoreHref: true
+            }
+        );
     }
 
     return false;
