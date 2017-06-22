@@ -46,8 +46,8 @@ function translate (text, from, to) {
                         if (sentence[0]) {
                             translation += sentence[0];
                             sentences.push({
-                                source: sentence[1],
-                                target: sentence[0]
+                                source: sentence[1].trim(),
+                                target: sentence[0].trim()
                             });
                         }
                     });

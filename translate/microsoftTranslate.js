@@ -62,8 +62,8 @@ function translate (text, from, to) {
                             } else {
                                 for (var i = 0; i < sourceSentences.length; i++) {
                                     sentences.push({
-                                        source: sourceSentences[i],
-                                        target: targetSentences[i]
+                                        source: sourceSentences[i].trim(),
+                                        target: targetSentences[i].trim()
                                     });
                                 }
                             }

@@ -1,29 +1,40 @@
-function prepareArticle() {
-    function showArticle(sentences) {
+function prepareArticle(article) {
+    function showArticle(paragraphs) {
         articleBody = $('.article-body');
         // sourceArticleParent = $('<div class="flex-item">').appendTo(articleBody);
         // translatedArticleParent = $('<div class="flex-item">').appendTo(articleBody);
 
-        for (var i = 0; i < sentences.length; i++) {
-            para = $('<div class="flex-row">');
+        articleBody.append(
+            paragraphs.map(function (paragraph) {
+                var paraContainer = $('<div class="flex-row">');
 
-            $('<p class="paragraph paragraph-draggable paragraph-source flex-item">')
-                .append($('<span class="sentence">').text(sentences[i].source))
-                .appendTo(para);
-            $('<p class="paragraph flex-item">')
-                .append($('<span class="sentence">').text(sentences[i].target))
-                .appendTo(para);
+                var sentences =  paragraph.map(function (sentence) {
+                    return $('<span class="sentence">').text(sentence.source);
+                });
 
-            para.appendTo(articleBody);
-        }
+                $('<p class="paragraph paragraph-draggable paragraph-source flex-item">')
+                    .append(sentences)
+                    .appendTo(paraContainer);
 
-        $('.summary-source')
-            .append($('<span class="sentence">').text(
-                "An expert in river conservation and a member of the Parliamentary forum on global warming, environment was a subject close to the heart of Anil Madhav Dave who was appointed Environment Minister only last year."
-            ))
-            .append($('<span class="sentence">').text(
-                "A two-time Rajya Sabha MP from Madhya Pradesh, Dave was known in the BJP circles as a man gifted with immaculate organisational skills."
-            ));
+                return paraContainer;
+            })
+        );
+
+        $('.article-title-source').text(article.orignialArticle.title);
+        $('.article-title-target').text(article.title);
+
+
+        $('.summary-source').append(
+            article.summarySentences.map(function (sentence) {
+                return $('<span class="sentence">').text(sentence.source);
+            })
+        );
+
+        $('.summary-target').append(
+            article.summarySentences.map(function (sentence) {
+                return $('<span class="sentence">').text(sentence.target);
+            })
+        );
 
         $('.summary-source')
             .on('click', '.sentence', function(e) {
@@ -119,8 +130,10 @@ function prepareArticle() {
         });
     }
 
-    showArticle(sentences);
+    showArticle(article.bodySentences);
     enableDragDrop();
+
+    $('.bench-container').removeClass('loading');
 }
 
 var sentenceToolbar = (function() {
@@ -130,6 +143,30 @@ var sentenceToolbar = (function() {
     };
 })();
 
+function panic() {
+    alert("Error!");
+}
+
 $(function () {
-    prepareArticle();
+    socket = io({path: baseUrl + 'socket.io'});
+    socket.on('workbench article', function (article) {
+        console.log(article);
+        prepareArticle(article);
+    });
+
+    socket.on('new error', function (err) {
+        panic();
+        console.log("Error", err);
+    });
+
+    var articleId = '2MwKe8d';
+
+    var selectedLanguage = localStorage.getItem('news-access-language');
+    var selectedSummarizer = localStorage.getItem('news-access-summarizer');
+    var selectedTranslator = localStorage.getItem('news-access-translator');
+
+    socket.emit('workbench get article', articleId, selectedLanguage, {
+        'summarizer': selectedSummarizer,
+        'translator': selectedTranslator
+    });
 });
