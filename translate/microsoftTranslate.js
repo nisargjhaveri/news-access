@@ -48,7 +48,27 @@ function translate (text, from, to) {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result.string._);
+                            var targetText = result.string._;
+                            var sourceSentences = text.split("\n");
+                            var targetSentences = targetText.split("\n");
+                            var sentences = [];
+
+                            if (sourceSentences.length != targetSentences.length) {
+                                // FIXME: find a better way to handle this
+                                sentences.push({
+                                    source: text,
+                                    target: targetText
+                                });
+                            } else {
+                                for (var i = 0; i < sourceSentences.length; i++) {
+                                    sentences.push({
+                                        source: sourceSentences[i],
+                                        target: targetSentences[i]
+                                    });
+                                }
+                            }
+
+                            resolve(targetText, sentences);
                         }
                     });
                 }

@@ -40,14 +40,19 @@ function translate (text, from, to) {
                 } else {
                     body = safeEval(body);
                     var translation = "";
+                    var sentences = [];
 
                     body[0].forEach(function (sentence) {
                         if (sentence[0]) {
                             translation += sentence[0];
+                            sentences.push({
+                                source: sentence[1],
+                                target: sentence[0]
+                            });
                         }
                     });
 
-                    resolve(translation);
+                    resolve(translation, sentences);
                 }
             });
         });
