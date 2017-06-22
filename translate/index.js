@@ -1,19 +1,28 @@
 var googleTranslate = require('./googleTranslate.js');
 var microsoftTranslate = require('./microsoftTranslate.js');
 
-exports.translateArticle = function (article, targetLang, method) {
+function getTranslator(method) {
     method = method || 'google-translate';
-    var translateText;
+    var translator;
 
     switch (method) {
         case 'microsoft-translate':
-            translateText = microsoftTranslate;
+            translator = microsoftTranslate;
             break;
         case 'google-translate': // jshint ignore:line
         default:
-            translateText = googleTranslate;
+            translator = googleTranslate;
     }
 
+    return translator;
+}
+
+exports.translateText = function(text, sourceLang, targetLang, method) {
+    return getTranslator(method)(text, sourceLang, targetLang);
+};
+
+exports.translateArticle = function (article, targetLang, method) {
+    var translateText = getTranslator(method);
     var targetArticle = JSON.parse(JSON.stringify(article));
 
     targetArticle.orignialArticle = article;
