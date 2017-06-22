@@ -52,7 +52,10 @@ function translate (text, from, to) {
                         }
                     });
 
-                    resolve(translation, sentences);
+                    resolve({
+                        'text': translation,
+                        'sentences': sentences
+                    });
                 }
             });
         });

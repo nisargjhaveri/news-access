@@ -31,18 +31,19 @@ exports.translateArticle = function (article, targetLang, method) {
     console.log(article.id, "Translating title and summary to " + targetLang);
 
     var titleTranslateP = translateText(article.title, article.lang, targetLang)
-                            .then(function (targetTitle) {
+                            .then(function (translation) {
                                 console.log(article.id, "Title translated to " + targetLang);
-                                targetArticle.title = targetTitle;
+                                targetArticle.title = translation.text;
                             }, function (err) {
                                 console.log(article.id, "Failed to translate title to " + targetLang + ": ", err);
                                 targetArticle.error = err;
                             });
 
     var summaryTranslateP = translateText(article.summary, article.lang, targetLang)
-                                .then(function (targetSummary) {
+                                .then(function (translation) {
                                     console.log(article.id, "Summary translated to " + targetLang);
-                                    targetArticle.summary = targetSummary;
+                                    targetArticle.summary = translation.text;
+                                    targetArticle.summarySentences = translation.sentences;
                                 }, function (err) {
                                     console.log(article.id, "Failed to translate title to " + targetLang + ": ", err);
                                     targetArticle.error = err;

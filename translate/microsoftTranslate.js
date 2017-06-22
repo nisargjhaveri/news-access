@@ -68,7 +68,10 @@ function translate (text, from, to) {
                                 }
                             }
 
-                            resolve(targetText, sentences);
+                            resolve({
+                                'text': targetText,
+                                'sentences': sentences
+                            });
                         }
                     });
                 }
