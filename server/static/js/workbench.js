@@ -9,7 +9,9 @@ function prepareArticle(article) {
                 var paraContainer = $('<div class="flex-row">');
 
                 var sentences =  paragraph.map(function (sentence) {
-                    return $('<span class="sentence">').text(sentence.source);
+                    return $('<span class="sentence">')
+                        .text(sentence.source)
+                        .attr('data-sentence-id', sentence.id);
                 });
 
                 $('<p class="paragraph paragraph-draggable paragraph-source flex-item">')
@@ -26,13 +28,17 @@ function prepareArticle(article) {
 
         $('.summary-source').append(
             article.summarySentences.map(function (sentence) {
-                return $('<span class="sentence">').text(sentence.source);
+                return $('<span class="sentence">')
+                    .text(sentence.source)
+                    .attr('data-sentence-id', sentence.id);
             })
         );
 
         $('.summary-target').append(
             article.summarySentences.map(function (sentence) {
-                return $('<span class="sentence">').text(sentence.target);
+                return $('<span class="sentence">')
+                    .text(sentence.target)
+                    .attr('data-sentence-id', sentence.id);
             })
         );
 
