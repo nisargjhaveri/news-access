@@ -4,6 +4,8 @@ var translate = require("../translate");
 var pipeline = require("../pipeline");
 var nltk = require('../nltk-binding');
 
+var leven = require('leven');
+
 module.exports = function (socket) {
     socket.articleFactory = new Articles(socket.id);
 
@@ -34,6 +36,7 @@ module.exports = function (socket) {
     });
 
     socket.on('workbench get article', function (articleId, lang, options) {
+        // FIXME: too much logic here. Move it somewhere else
         socket.articleFactory.fetchOne(articleId)
             .then(function (article) {
                 return pipeline.accessArticle(article, [lang], options);
@@ -42,6 +45,7 @@ module.exports = function (socket) {
                 return articles[0];
             }, handleError)
             .then(function (article) {
+                // Split sentences in body
                 paragraphs = [];
                 article.body.split("\n").map(function (para) {
                     paragraphs.push(nltk.splitSentences(para.trim()));
@@ -71,9 +75,31 @@ module.exports = function (socket) {
                         return Promise.reject(err);
                     });
             }, handleError)
-            // .then(function (sentences) {
-            //
-            // })
+            .then(function (article) {
+                // Map sentences in body and summary
+                sentences = [].concat.apply([], article.bodySentences);
+                summarySentences = article.summarySentences;
+
+                summarySentences.map(function (summarySentence) {
+                    var similarities = sentences.map(function (sentence) {
+                        return {
+                            id: sentence.id,
+                            distance: leven(sentence.source, summarySentence.source) / sentence.source.length
+                        };
+                    });
+
+                    similarities.sort(function (a, b) {
+                        return a.distance - b.distance;
+                    });
+
+                    // If similarity is more than 90%, match sentence
+                    if (similarities[0].distance < 0.1) {
+                        summarySentence.id = similarities[0].id;
+                    }
+                });
+
+                return article;
+            }, handleError)
             .then(function (article) {
                 socket.emit('workbench article', article);
             }, handleError);

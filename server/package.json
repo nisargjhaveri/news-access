@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "gulp": "gulp"
   },
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
     "express": "^4.14.0",
     "express-handlebars": "^3.0.0",
+    "leven": "^2.1.0",
     "socket.io": "^1.7.1"
   },
   "devDependencies": {
@@ -21,8 +22,5 @@
   },
   "browserslist": [
     "last 2 version"
-  ],
-  "scripts": {
-    "gulp": "gulp"
-  }
+  ]
 }
