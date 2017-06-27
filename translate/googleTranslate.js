@@ -7,7 +7,7 @@ var safeEval = require('safe-eval');
 
 var supported_langs = ['en', 'hi', 'gu', 'bn', 'kn', 'ml', 'mr', 'ne', 'pa', 'sd', 'ta', 'te', 'ur'];
 
-function translate (text, from, to) {
+function translateSentence (text, from, to) {
     if (supported_langs.indexOf(from) < 0 || supported_langs.indexOf(to) < 0) {
         return Promise.reject("LANG_NOT_SUPPORTED");
     }
@@ -60,6 +60,38 @@ function translate (text, from, to) {
             });
         });
     });
+}
+
+function translate (text, from, to) {
+    var sourceSentences = text.split("\n").filter(function (sentence) {
+        return sentence;
+    });
+    var translatePromises = [];
+    sourceSentences.forEach(function (sentence) {
+        translatePromises.push(translateSentence(sentence, from, to));
+    });
+
+    return Promise.all(translatePromises)
+        .then(function (translations) {
+            var translation = "";
+            var sentences = [];
+
+            translations.forEach(function (translation, i) {
+                sentences.push({
+                    source: sourceSentences[i],
+                    target: translation.text
+                });
+            });
+
+            return Promise.resolve({
+                'text': sentences.map(function (sentence) {
+                    return sentence.target;
+                }).join("\n"),
+                'sentences': sentences
+            });
+        }, function (err) {
+            return Promise.reject(err);
+        });
 }
 
 module.exports = translate;
