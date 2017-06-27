@@ -51,7 +51,7 @@
     background-color: #94ffff;
 }
 
-.paragraph-draggable .sentence[contenteditable="true"] {
+.paragraph .sentence:focus {
     cursor: auto;
     background-color: #bfffd9;
 }

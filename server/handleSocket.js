@@ -104,4 +104,11 @@ module.exports = function (socket) {
                 socket.emit('workbench article', article);
             }, handleError);
     });
+
+    socket.on('translate text', function (text, from, to, method) {
+        translate.translateText(text, from, to, method)
+            .then(function (translation) {
+                socket.emit('translated text', text, translation);
+            }, handleError);
+    });
 };

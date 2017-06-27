@@ -1,4 +1,103 @@
+var summaryTranslator = (function () {
+    var translationStore = {};
+    var sentencesToTranslate;
+    var summaryCallback;
+    var fromLang, toLang;
+
+    function translateSentence(sentence) {
+        socket.emit('translate text', sentence.source, fromLang, toLang, getSelectedTranslator());
+    }
+
+    function checkSummaryResolved() {
+        if (!sentencesToTranslate) return;
+
+        var resolved = true;
+
+        sentencesToTranslate.forEach(function (sentence) {
+            if (sentence.target) return;
+
+            if (sentence.source in translationStore) {
+                sentence.target = translationStore[sentence.source];
+            } else {
+                resolved = false;
+            }
+        });
+
+        if (resolved) {
+            var callback = summaryCallback;
+            var summarySentences = sentencesToTranslate;
+
+            summaryCallback = false;
+            sentencesToTranslate = false;
+
+            callback(summarySentences);
+        }
+    }
+
+    return {
+        initialize: function (sourceLang, targetLang) {
+            fromLang = sourceLang;
+            toLang = targetLang;
+
+            socket.on('translated text', function (text, translation) {
+                translationStore[text] = translation.text;
+                checkSummaryResolved();
+            });
+        },
+        translate: function (summarySentences, callback) {
+            sentencesToTranslate = summarySentences;
+            summaryCallback = callback;
+
+            summarySentences.map(function (sentence) {
+                if (!(sentence.source in translationStore)) {
+                    translateSentence(sentence);
+                }
+            });
+
+            checkSummaryResolved();
+        },
+        cacheTranslations: function (sentences) {
+            sentences.forEach(function (sentence) {
+                translationStore[sentence.source] = sentence.target;
+            });
+        }
+    };
+})();
+
 function prepareArticle(article) {
+    summaryTranslator.initialize(article.orignialArticle.lang, article.lang);
+    summaryTranslator.cacheTranslations(article.summarySentences);
+
+    function updateSummaryDisplay(summarySentences) {
+        $('.summary-target').empty();
+        $('.summary-target').addClass('loading');
+        $('.summary-target').append(
+            summarySentences.map(function (sentence) {
+                return $('<span class="sentence" contenteditable="true">')
+                    .text(sentence.target)
+                    .attr('data-sentence-id', sentence.id);
+            })
+        );
+        $('.summary-target').removeClass('loading');
+    }
+
+    function updateTargetSummary() {
+        var sentences = [];
+        $('.summary-target').empty();
+        $('.summary-target').addClass('loading');
+
+        $('.summary-source .sentence').each(function () {
+            var $this = $(this);
+
+            sentences.push({
+                id: $this.attr('data-sentence-id'),
+                source: $this.text()
+            });
+        });
+
+        summaryTranslator.translate(sentences, updateSummaryDisplay);
+    }
+
     function showArticle(paragraphs) {
         articleBody = $('.article-body');
         // sourceArticleParent = $('<div class="flex-item">').appendTo(articleBody);
@@ -34,13 +133,7 @@ function prepareArticle(article) {
             })
         );
 
-        $('.summary-target').append(
-            article.summarySentences.map(function (sentence) {
-                return $('<span class="sentence">')
-                    .text(sentence.target)
-                    .attr('data-sentence-id', sentence.id);
-            })
-        );
+        updateSummaryDisplay(article.summarySentences);
 
         $('.summary-source')
             .on('click', '.sentence', function(e) {
@@ -75,6 +168,10 @@ function prepareArticle(article) {
             })
             .on("blur", '.sentence', function(e) {
                 $(this).removeAttr('contenteditable');
+                $('.summary-source').trigger('summaryUpdated');
+            })
+            .on("summaryUpdated", function(e) {
+                updateTargetSummary();
             });
     }
 
@@ -116,6 +213,9 @@ function prepareArticle(article) {
                     } else {
                         $('.summary-bin').removeClass('summary-bin-highlight');
                     }
+                },
+                onSort: function(e) {
+                    $('.summary-source').trigger('summaryUpdated');
                 }
             })
         );
@@ -129,9 +229,6 @@ function prepareArticle(article) {
             onAdd: function(e) {
                 var elem = e.item;
                 $(elem).remove();
-            },
-            onStart: function(e) {
-                console.log(e);
             }
         });
     }
@@ -142,16 +239,15 @@ function prepareArticle(article) {
     $('.bench-container').removeClass('loading');
 }
 
-var sentenceToolbar = (function() {
-    return {
-        show: "",
-        hide: "",
-    };
-})();
+function getSelectedTranslator() {
+    return localStorage.getItem('news-access-translator');
+}
 
 function panic() {
     alert("Error!");
 }
+
+var socket;
 
 $(function () {
     socket = io({path: baseUrl + 'socket.io'});
@@ -169,7 +265,7 @@ $(function () {
 
     var selectedLanguage = localStorage.getItem('news-access-language');
     var selectedSummarizer = localStorage.getItem('news-access-summarizer');
-    var selectedTranslator = localStorage.getItem('news-access-translator');
+    var selectedTranslator = getSelectedTranslator();
 
     socket.emit('workbench get article', articleId, selectedLanguage, {
         'summarizer': selectedSummarizer,
