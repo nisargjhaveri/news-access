@@ -188,8 +188,9 @@ function prepareArticle(article) {
                 put: ["summary-source"]
             },
             onAdd: function(e) {
-                var elem = e.item;
-                $(elem).remove();
+                var $elem = $(e.item);
+                $elem.trigger('removeSentence');
+                $elem.remove();
             }
         });
     }
@@ -254,6 +255,12 @@ function prepareArticle(article) {
                 getLinkedSentences(this).addClass('linked-focus');
             })
             .on('blur', '.sentence', function(e) {
+                getLinkedSentences(this).removeClass('linked-focus');
+            });
+
+        $('.summary-bin')
+            .on('removeSentence', '.sentence', function(e) {
+                getLinkedSentences(this).removeClass('linked-hover');
                 getLinkedSentences(this).removeClass('linked-focus');
             });
 
