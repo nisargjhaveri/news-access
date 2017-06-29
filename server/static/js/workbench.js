@@ -235,6 +235,7 @@ function prepareArticle(article) {
                 updateTargetSummary();
             });
 
+        // To highlight linked sentences on hover or focus
         function getLinkedSentences(elem) {
             var $elem = $(elem);
             var sentenceId = $elem.attr('data-sentence-id');
@@ -254,6 +255,30 @@ function prepareArticle(article) {
             })
             .on('blur', '.sentence', function(e) {
                 getLinkedSentences(this).removeClass('linked-focus');
+            });
+
+        // Make contenteditable safe
+        $('.paragraph')
+            .on('paste', '.sentence[contenteditable="true"]', function(e) {
+                if ((e.clipboardData || e.originalEvent.clipboardData) &&
+                        document.queryCommandSupported('insertText')
+                ) {
+                    var clipboardData = e.clipboardData || e.originalEvent.clipboardData;
+
+                    // Only allow plain text
+                    var text = clipboardData.getData('text/plain');
+
+                    // Replace new lines with space
+                    text = text.replace(/\n+/g, " ");
+
+                    document.execCommand("insertText", false, text);
+
+                    e.preventDefault();
+                }
+            })
+            .on('keypress', '.sentence[contenteditable="true"]', function(e) {
+                // Prevent new line
+                return e.which != 13;
             });
     }
 
