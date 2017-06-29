@@ -17,7 +17,11 @@ var summaryTranslator = (function () {
             if (sentence.target) return;
 
             if (sentence.source in translationStore) {
-                sentence.target = translationStore[sentence.source];
+                sentence.target = translationStore[sentence.source].original;
+
+                if (translationStore[sentence.source].edited) {
+                    sentence.editedTarget = translationStore[sentence.source].edited;
+                }
             } else {
                 resolved = false;
             }
@@ -40,7 +44,9 @@ var summaryTranslator = (function () {
             toLang = targetLang;
 
             socket.on('translated text', function (text, translation) {
-                translationStore[text] = translation.text;
+                translationStore[text] = {
+                    original: translation.text
+                };
                 checkSummaryResolved();
             });
         },
@@ -56,9 +62,30 @@ var summaryTranslator = (function () {
 
             checkSummaryResolved();
         },
+        getCached: function(sentence) {
+            if (sentence.source in translationStore) {
+                sentence.target = translationStore[sentence.source].original;
+
+                if (translationStore[sentence.source].edited) {
+                    sentence.editedTarget = translationStore[sentence.source].edited;
+                }
+
+                return sentence;
+            } else {
+                return false;
+            }
+        },
         cacheTranslations: function (sentences) {
             sentences.forEach(function (sentence) {
-                translationStore[sentence.source] = sentence.target;
+                translationStore[sentence.source] = {};
+                if (sentence.target) {
+                    translationStore[sentence.source].original = sentence.target;
+                }
+                if (sentence.editedTarget && sentence.editedTarget != sentence.target) {
+                    translationStore[sentence.source].edited = sentence.editedTarget;
+                } else {
+                    delete translationStore[sentence.source].edited;
+                }
             });
         }
     };
@@ -71,7 +98,8 @@ function prepareArticle(article) {
         $('.summary-target').append(
             summarySentences.map(function (sentence) {
                 return $('<span class="sentence" contenteditable="true">')
-                    .text(sentence.target)
+                    .text(sentence.editedTarget || sentence.target)
+                    .addClass(sentence.editedTarget ? 'translation-edited' : '')
                     .attr('data-sentence-id', sentence.id);
             })
         );
@@ -228,12 +256,46 @@ function prepareArticle(article) {
                 sel.removeAllRanges();
                 sel.addRange(range);
             })
+            .on("focus", '.sentence', function(e) {
+                $(this).data('on-focus-sentence', $(this).text());
+            })
             .on("blur", '.sentence', function(e) {
-                $(this).removeAttr('contenteditable');
+                var $this = $(this);
+                $this.removeAttr('contenteditable');
+
+                if ($this.data('on-focus-sentence') != $this.text()) {
+                    $this.trigger('change');
+                }
+
+                $this.removeData('on-focus-sentence');
+            })
+            .on("change", '.sentence', function(e) {
                 $('.summary-source').trigger('summaryUpdated');
             })
             .on("summaryUpdated", function(e) {
                 updateTargetSummary();
+            });
+
+        $('.summary-target')
+            .on("blur", '.sentence', function(e) {
+                var $this = $(this);
+
+                var sentence = {};
+                sentence.id = $this.attr('data-sentence-id');
+                sentence.source = $('.summary-source .sentence[data-sentence-id="' + sentence.id + '"]').text();
+
+                var currentText = $this.text();
+
+                sentence = summaryTranslator.getCached(sentence);
+
+                if (currentText == sentence.target) {
+                    $this.removeClass('translation-edited');
+                } else {
+                    $this.addClass('translation-edited');
+                }
+
+                sentence.editedTarget = currentText;
+                summaryTranslator.cacheTranslations([sentence]);
             });
 
         // To highlight linked sentences on hover or focus
