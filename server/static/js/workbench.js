@@ -65,9 +65,6 @@ var summaryTranslator = (function () {
 })();
 
 function prepareArticle(article) {
-    summaryTranslator.initialize(article.orignialArticle.lang, article.lang);
-    summaryTranslator.cacheTranslations(article.summarySentences);
-
     function updateSummaryDisplay(summarySentences) {
         $('.summary-target').empty();
         $('.summary-target').addClass('loading');
@@ -103,6 +100,7 @@ function prepareArticle(article) {
         // sourceArticleParent = $('<div class="flex-item">').appendTo(articleBody);
         // translatedArticleParent = $('<div class="flex-item">').appendTo(articleBody);
 
+        // Show original article in source and target languages
         articleBody.append(
             paragraphs.map(function (paragraph) {
                 var paraContainer = $('<div class="flex-row">');
@@ -121,10 +119,11 @@ function prepareArticle(article) {
             })
         );
 
+        // Show title in source and target languages
         $('.article-title-source').text(article.orignialArticle.title);
         $('.article-title-target').text(article.title);
 
-
+        // Show summary in source language
         $('.summary-source').append(
             article.summarySentences.map(function (sentence) {
                 return $('<span class="sentence">')
@@ -133,46 +132,8 @@ function prepareArticle(article) {
             })
         );
 
+        // Show summary in target language
         updateSummaryDisplay(article.summarySentences);
-
-        $('.summary-source')
-            .on('click', '.sentence', function(e) {
-                // Do nothing if already contenteditable
-                if ($(this).attr('contenteditable')) {
-                    return;
-                }
-
-                $(this).attr('contenteditable', true);
-
-                // Focus and set caret position
-                var range;
-                var textNode;
-                var offset;
-
-                if (document.caretPositionFromPoint) {
-                    range = document.caretPositionFromPoint(e.clientX, e.clientY);
-                    textNode = range.offsetNode;
-                    offset = range.offset;
-                } else if (document.caretRangeFromPoint) {
-                    range = document.caretRangeFromPoint(e.clientX, e.clientY);
-                    textNode = range.startContainer;
-                    offset = range.startOffset;
-                }
-
-                range = document.createRange();
-                var sel = window.getSelection();
-                range.setStart(textNode, offset);
-                range.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(range);
-            })
-            .on("blur", '.sentence', function(e) {
-                $(this).removeAttr('contenteditable');
-                $('.summary-source').trigger('summaryUpdated');
-            })
-            .on("summaryUpdated", function(e) {
-                updateTargetSummary();
-            });
     }
 
     function enableDragDrop() {
@@ -233,8 +194,54 @@ function prepareArticle(article) {
         });
     }
 
+    function makeArticleInteractive() {
+        // Add event handlers on stuff
+        $('.summary-source')
+            .on('click', '.sentence', function(e) {
+                // Do nothing if already contenteditable
+                if ($(this).attr('contenteditable')) {
+                    return;
+                }
+
+                $(this).attr('contenteditable', true);
+
+                // Focus and set caret position
+                var range;
+                var textNode;
+                var offset;
+
+                if (document.caretPositionFromPoint) {
+                    range = document.caretPositionFromPoint(e.clientX, e.clientY);
+                    textNode = range.offsetNode;
+                    offset = range.offset;
+                } else if (document.caretRangeFromPoint) {
+                    range = document.caretRangeFromPoint(e.clientX, e.clientY);
+                    textNode = range.startContainer;
+                    offset = range.startOffset;
+                }
+
+                range = document.createRange();
+                var sel = window.getSelection();
+                range.setStart(textNode, offset);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            })
+            .on("blur", '.sentence', function(e) {
+                $(this).removeAttr('contenteditable');
+                $('.summary-source').trigger('summaryUpdated');
+            })
+            .on("summaryUpdated", function(e) {
+                updateTargetSummary();
+            });
+    }
+
+    summaryTranslator.initialize(article.orignialArticle.lang, article.lang);
+    summaryTranslator.cacheTranslations(article.summarySentences);
+
     showArticle(article.bodySentences);
     enableDragDrop();
+    makeArticleInteractive();
 
     $('.bench-container').removeClass('loading');
 }
