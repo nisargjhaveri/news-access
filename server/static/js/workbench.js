@@ -234,6 +234,27 @@ function prepareArticle(article) {
             .on("summaryUpdated", function(e) {
                 updateTargetSummary();
             });
+
+        function getLinkedSentences(elem) {
+            var $elem = $(elem);
+            var sentenceId = $elem.attr('data-sentence-id');
+
+            return $('.sentence[data-sentence-id="' + sentenceId + '"]').not($elem);
+        }
+
+        $('.paragraph')
+            .on('mouseover', '.sentence', function(e) {
+                getLinkedSentences(this).addClass('linked-hover');
+            })
+            .on('mouseout', '.sentence', function(e) {
+                getLinkedSentences(this).removeClass('linked-hover');
+            })
+            .on('focus', '.sentence', function(e) {
+                getLinkedSentences(this).addClass('linked-focus');
+            })
+            .on('blur', '.sentence', function(e) {
+                getLinkedSentences(this).removeClass('linked-focus');
+            });
     }
 
     summaryTranslator.initialize(article.orignialArticle.lang, article.lang);

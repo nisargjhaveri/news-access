@@ -38,6 +38,10 @@
     line-height: 1.4em;
 }
 
+.sentence {
+    white-space: pre-wrap;
+}
+
 .sentence:after {
     content: " ";
 }
@@ -46,14 +50,21 @@
     cursor: grab;
 }
 
-.paragraph-draggable .sentence:hover {
-    white-space: pre-wrap;
+.paragraph .sentence:hover {
     background-color: #94ffff;
 }
 
 .paragraph .sentence:focus {
     cursor: auto;
     background-color: #bfffd9;
+}
+
+.paragraph .sentence.linked-hover {
+    background-color: #c7ffff;
+}
+
+.paragraph .sentence.linked-focus {
+    background-color: #d6ffe7;
 }
 
 .sortable-ghost {
