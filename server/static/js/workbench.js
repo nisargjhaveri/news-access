@@ -418,7 +418,7 @@ function manageOptionsAndRefresh() {
 }
 
 function loadArticle() {
-    var selectedLanguage = localStorage.getItem('news-access-language');
+    var selectedLanguage = $('.select-language').val();
     var selectedSummarizer = getSelectedSummarizer();
     var selectedTranslator = getSelectedTranslator();
 
@@ -429,11 +429,11 @@ function loadArticle() {
 }
 
 function getSelectedTranslator() {
-    return localStorage.getItem('news-access-translator');
+    return 'google-translate';
 }
 
 function getSelectedSummarizer() {
-    return localStorage.getItem('news-access-summarizer');
+    return 'veooz';
 }
 
 function panic() {
