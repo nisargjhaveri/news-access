@@ -401,8 +401,7 @@ function setupOptions() {
     var selectedLanguage = localStorage.getItem('news-access-language');
 
     if (selectedLanguage) {
-        $('.select-language option').removeAttr('selected');
-        $('.select-language option[value="' + selectedLanguage + '"]').attr('selected', 'selected');
+        $('.select-language option[value="' + selectedLanguage + '"]').prop('selected', true);
     }
 
     $('.select-language').on('change', manageOptionsAndRefresh);

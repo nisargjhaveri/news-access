@@ -69,16 +69,13 @@ function setupOptions() {
     var selectedTranslator = localStorage.getItem('news-access-translator');
 
     if (selectedLanguage) {
-        $('.select-language option').removeAttr('selected');
-        $('.select-language option[value="' + selectedLanguage + '"]').attr('selected', 'selected');
+        $('.select-language option[value="' + selectedLanguage + '"]').prop('selected', true);
     }
     if (selectedSummarizer) {
-        $('.select-summarizer option').removeAttr('selected');
-        $('.select-summarizer option[value="' + selectedSummarizer + '"]').attr('selected', 'selected');
+        $('.select-summarizer option[value="' + selectedSummarizer + '"]').prop('selected', true);
     }
     if (selectedTranslator) {
-        $('.select-translator option').removeAttr('selected');
-        $('.select-translator option[value="' + selectedTranslator + '"]').attr('selected', 'selected');
+        $('.select-translator option[value="' + selectedTranslator + '"]').prop('selected', true);
     }
 
     $('.select-language').on('change', manageOptionsAndRefresh);
