@@ -1,5 +1,6 @@
 var request = require("request").defaults({
-    'proxy': process.env.http_proxy || process.env.HTTP_PROXY
+    'proxy': process.env.http_proxy || process.env.HTTP_PROXY,
+    'timeout': 20 * 1000
 });
 var cheerio = require("cheerio");
 
@@ -62,7 +63,7 @@ ArticleList.prototype.ensureArticleList = function () {
                 } else {
                     that.articleList = parseArticles(body);
                     if (that.articleList.length === 0) {
-                        reject();
+                        reject("NO_ARTICLES_PARSED");
                     } else {
                         resolve();
                     }

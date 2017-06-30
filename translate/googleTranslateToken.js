@@ -7,8 +7,9 @@
  */
 
 var request = require('request').defaults({
-    'proxy': process.env.http_proxy || process.env.HTTP_PROXY
-});;
+    'proxy': process.env.http_proxy || process.env.HTTP_PROXY,
+    'timeout': 20 * 1000
+});
 var Configstore = require('configstore');
 
 /* eslint-disable */

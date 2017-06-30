@@ -1,5 +1,6 @@
 var request = require('request').defaults({
-    'proxy': process.env.http_proxy || process.env.HTTP_PROXY
+    'proxy': process.env.http_proxy || process.env.HTTP_PROXY,
+    'timeout': 20 * 1000
 });
 var querystring = require('querystring');
 var xml2js = require('xml2js');

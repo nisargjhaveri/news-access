@@ -1,5 +1,6 @@
 var request = require("request").defaults({
-    'proxy': process.env.http_proxy || process.env.HTTP_PROXY
+    'proxy': process.env.http_proxy || process.env.HTTP_PROXY,
+    'timeout': 20 * 1000
 });
 var cheerio = require("cheerio");
 var htmlToText = require('html-to-text');
