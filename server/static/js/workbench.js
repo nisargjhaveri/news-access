@@ -383,6 +383,8 @@ function prepareArticle(article) {
                 // Prevent new line
                 return e.which != 13;
             });
+
+        $('.publish-btn').removeClass('hidden');
     }
 
     summaryTranslator.initialize(article.orignialArticle.lang, article.lang);
@@ -395,14 +397,53 @@ function prepareArticle(article) {
     $('.bench-container').removeClass('loading');
 }
 
+function setupOptions() {
+    var selectedLanguage = localStorage.getItem('news-access-language');
+
+    if (selectedLanguage) {
+        $('.select-language option').removeAttr('selected');
+        $('.select-language option[value="' + selectedLanguage + '"]').attr('selected', 'selected');
+    }
+
+    $('.select-language').on('change', manageOptionsAndRefresh);
+}
+
+function manageOptionsAndRefresh() {
+    $('.select-language').attr('disabled', 'true');
+
+    var selectedLanguage = $('.select-language').val();
+
+    localStorage.setItem('news-access-language', selectedLanguage);
+
+    window.location.reload();
+}
+
+function loadArticle() {
+    var selectedLanguage = localStorage.getItem('news-access-language');
+    var selectedSummarizer = getSelectedSummarizer();
+    var selectedTranslator = getSelectedTranslator();
+
+    socket.emit('workbench get article', articleId, selectedLanguage, {
+        'summarizer': selectedSummarizer,
+        'translator': selectedTranslator
+    });
+}
+
 function getSelectedTranslator() {
     return localStorage.getItem('news-access-translator');
+}
+
+function getSelectedSummarizer() {
+    return localStorage.getItem('news-access-summarizer');
 }
 
 function panic() {
     $('.bench-container').addClass('hidden');
     $('.error-container').removeClass('hidden');
 }
+
+// FIXME: Remove this variable from here, for dev only
+var articleId = '2MwKe8d';
 
 var socket;
 
@@ -418,14 +459,6 @@ $(function () {
         console.log("Error", err);
     });
 
-    var articleId = '2MwKe8d';
-
-    var selectedLanguage = localStorage.getItem('news-access-language');
-    var selectedSummarizer = localStorage.getItem('news-access-summarizer');
-    var selectedTranslator = getSelectedTranslator();
-
-    socket.emit('workbench get article', articleId, selectedLanguage, {
-        'summarizer': selectedSummarizer,
-        'translator': selectedTranslator
-    });
+    setupOptions();
+    loadArticle();
 });

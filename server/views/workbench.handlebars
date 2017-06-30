@@ -18,7 +18,28 @@
         <script src="static/js/workbench.js"></script>
     </head>
     <body class="flex-column">
-        <h1>Workbench - News Access</h1>
+        <div class="bench-header flex-row">
+            <h1>Workbench - News Access</h1>
+            <div class="flex-item"></div>
+            <div class="bench-options flex-column flex-center">
+                <label>
+                    <select class="select-language inline">
+                        <option value="hi">Hindi</option>
+                        <option value="gu">Gujarati</option>
+                        <option value="bn">Bengali</option>
+                        <option value="kn">Kannada</option>
+                        <option value="ml">Malayalam</option>
+                        <option value="mr">Marathi</option>
+                        <option value="ne">Nepali</option>
+                        <option value="pa">Punjabi</option>
+                        <option value="sd">Sindhi</option>
+                        <option value="ta">Tamil</option>
+                        <option value="te">Telugu</option>
+                        <option value="ur">Urdu</option>
+                    </select>
+                </label>
+            </div>
+        </div>
         <div class="bench-container flex-row flex-item loading">
             <div class="flex-item flex-2 bench-article-container">
                 <div class='article-title flex-row'>
@@ -40,7 +61,7 @@
                     <div class="flex-item">
                         <p class="paragraph summary summary-target"></p>
                     </div>
-                    <input type="submit" value="Publish" class="publish-btn">
+                    <input type="submit" value="Publish" class="publish-btn hidden">
                 </div>
             </div>
         </div>

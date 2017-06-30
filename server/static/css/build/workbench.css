@@ -42,12 +42,16 @@
     flex: 3;
 }
 
-.bench-container {
-    border-top: 1px solid black;
+.flex-center {
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -ms-flex-line-pack: center;
+    align-content: center;
 }
 
-.publish-btn {
-    font-size: 1.2em;
+.bench-header {
+    border-bottom: 1px solid #eee;
 }
 
 .article-title h2 {
@@ -132,4 +136,8 @@ div.summary-bin {
 
 .summary-bin .sortable-ghost, .summary-bin .sentence {
     display: none;
+}
+
+.publish-btn {
+    font-size: 1.2em;
 }
