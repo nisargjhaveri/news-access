@@ -8,12 +8,16 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-var handlebars = require('express-handlebars')();
+var viewsDir = path.join(__dirname, 'views');
+
+var handlebars = require('express-handlebars')({
+    partialsDir: path.join(viewsDir, 'partials')
+});
 
 var handleSocket = require('./handleSocket.js');
 
 app.engine('handlebars', handlebars);
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', viewsDir);
 app.set('view engine', 'handlebars');
 
 app.use('/static', express.static(path.join(__dirname, 'static')));

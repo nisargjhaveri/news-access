@@ -366,7 +366,8 @@ function getSelectedTranslator() {
 }
 
 function panic() {
-    alert("Error!");
+    $('.bench-container').addClass('hidden');
+    $('.error-container').removeClass('hidden');
 }
 
 var socket;

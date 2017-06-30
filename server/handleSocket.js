@@ -10,6 +10,10 @@ module.exports = function (socket) {
     socket.articleFactory = new Articles(socket.id);
 
     function handleError(err) {
+        return Promise.reject(err);
+    }
+
+    function throwError(err) {
         socket.emit('new error', err);
     }
 
@@ -19,7 +23,7 @@ module.exports = function (socket) {
         }
 
         for (var i = 0; i < maxArticles; i++) {
-            socket.articleFactory.fetchOne().then(emitArticle, handleError);
+            socket.articleFactory.fetchOne().then(emitArticle, throwError);
         }
     });
 
@@ -27,12 +31,11 @@ module.exports = function (socket) {
         socket.articleFactory.fetchOne(articleId)
             .then(function (article) {
                 return pipeline.accessArticle(article, langs, options);
-            }, function(err) {
-                return Promise.reject(err);
-            })
+            }, handleError)
             .then(function (articles) {
                 socket.emit('accessible articles', articles);
-            }, handleError);
+            }, handleError)
+            .catch(throwError);
     });
 
     socket.on('workbench get article', function (articleId, lang, options) {
@@ -102,13 +105,14 @@ module.exports = function (socket) {
             }, handleError)
             .then(function (article) {
                 socket.emit('workbench article', article);
-            }, handleError);
+            }, handleError)
+            .catch(throwError);
     });
 
     socket.on('translate text', function (text, from, to, method) {
         translate.translateText(text, from, to, method)
             .then(function (translation) {
                 socket.emit('translated text', text, translation);
-            }, handleError);
+            }, throwError);
     });
 };
