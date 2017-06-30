@@ -34,6 +34,10 @@
     font-size: 1.2em;
 }
 
+.article-title h2 {
+    overflow: visible;
+}
+
 .paragraph {
     line-height: 1.4em;
 }
@@ -54,7 +58,8 @@
     background-color: #94ffff;
 }
 
-.paragraph .sentence:focus {
+.paragraph .sentence:focus,
+.article-title h2:focus {
     cursor: auto;
     background-color: #bfffd9;
 }

@@ -97,7 +97,7 @@ function prepareArticle(article) {
         $('.summary-target').addClass('loading');
         $('.summary-target').append(
             summarySentences.map(function (sentence) {
-                return $('<span class="sentence" contenteditable="true">')
+                return $('<span class="sentence ce-text-only" contenteditable="true">')
                     .text(sentence.editedTarget || sentence.target)
                     .addClass(sentence.editedTarget ? 'translation-edited' : '')
                     .attr('data-sentence-id', sentence.id);
@@ -154,7 +154,7 @@ function prepareArticle(article) {
         // Show summary in source language
         $('.summary-source').append(
             article.summarySentences.map(function (sentence) {
-                return $('<span class="sentence">')
+                return $('<span class="sentence ce-text-only">')
                     .text(sentence.source)
                     .attr('data-sentence-id', sentence.id);
             })
@@ -361,8 +361,8 @@ function prepareArticle(article) {
             });
 
         // Make contenteditable safe
-        $('.paragraph')
-            .on('paste', '.sentence[contenteditable="true"]', function(e) {
+        $('body')
+            .on('paste', '.ce-text-only[contenteditable="true"]', function(e) {
                 if ((e.clipboardData || e.originalEvent.clipboardData) &&
                         document.queryCommandSupported('insertText')
                 ) {
@@ -379,7 +379,7 @@ function prepareArticle(article) {
                     e.preventDefault();
                 }
             })
-            .on('keypress', '.sentence[contenteditable="true"]', function(e) {
+            .on('keypress', '.ce-text-only[contenteditable="true"]', function(e) {
                 // Prevent new line
                 return e.which != 13;
             });
