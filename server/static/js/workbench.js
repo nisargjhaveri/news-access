@@ -306,6 +306,40 @@ function prepareArticle(article) {
             return $('.sentence[data-sentence-id="' + sentenceId + '"]').not($elem);
         }
 
+        $('.summary')
+            .on('focus', '.sentence', function(e) {
+                // Scroll linked source sentence into view
+                var sentenceId = $(this).attr('data-sentence-id');
+                var linkedSource = $('.paragraph-source .sentence[data-sentence-id="' + sentenceId + '"]');
+
+                var container = $('.bench-article-container');
+
+                var sentencePosition = {};
+                sentencePosition.top = linkedSource.offset().top;
+                sentencePosition.bottom = sentencePosition.top + linkedSource.outerHeight();
+
+                var containerPosition = {};
+                containerPosition.top = container.offset().top;
+                containerPosition.bottom = containerPosition.top + container.height();
+                containerPosition.scroll = container.scrollTop();
+
+                var visiblityTheshold = linkedSource.outerHeight() * 0.25;
+
+                var optimalScrollTop =
+                    containerPosition.scroll +
+                    sentencePosition.top -
+                    containerPosition.top -
+                    ((container.height() - linkedSource.outerHeight()) / 2);
+
+                if (sentencePosition.top > containerPosition.bottom - visiblityTheshold ||
+                    sentencePosition.bottom < containerPosition.top + visiblityTheshold
+                ) {
+                    container.animate({
+                        scrollTop: optimalScrollTop
+                    });
+                }
+            });
+
         $('.paragraph')
             .on('mouseover', '.sentence', function(e) {
                 getLinkedSentences(this).addClass('linked-hover');

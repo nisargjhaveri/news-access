@@ -20,17 +20,16 @@
     <body class="flex-column">
         <h1>Workbench - News Access</h1>
         <div class="bench-container flex-row flex-item loading">
-            <div class="flex-item flex-2">
+            <div class="flex-item flex-2 bench-article-container">
                 <div class='article-title flex-row'>
                     <h2 class="flex-item article-title-source"></h2>
                     <h2 class="flex-item article-title-target"></h2>
                 </div>
-                <div class="article-body flex-item">
-                </div>
+                <div class="article-body flex-item"></div>
             </div>
             <div class="flex-item flex-column">
                 <div class="flex-item flex-column summary-source-container">
-                    <p class="paragraph paragraph-draggable summary-source flex-item"></p>
+                    <p class="paragraph paragraph-draggable summary summary-source flex-item"></p>
                     <div class="summary-bin-container flex-row hidden">
                         <div class="flex-item"></div>
                         <div class="summary-bin fa fa-trash-o"></div>
@@ -39,7 +38,7 @@
                 </div>
                 <div class="flex-item flex-column">
                     <div class="flex-item">
-                        <p class="paragraph summary-target"></p>
+                        <p class="paragraph summary summary-target"></p>
                     </div>
                     <input type="submit" value="Publish" class="publish-btn">
                 </div>
