@@ -233,6 +233,7 @@ function prepareArticle(article) {
                 }
 
                 $(this).attr('contenteditable', true);
+                $(this).focus();
 
                 // Focus and set caret position
                 var range;
