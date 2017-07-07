@@ -5,6 +5,8 @@ var request = require("request").defaults({
 var cheerio = require("cheerio");
 var htmlToText = require('html-to-text');
 
+var nltk = require('../nltk-binding');
+
 function parseArticle (source, body) {
     var $ = cheerio.load(body);
     var article;
@@ -39,7 +41,7 @@ function parseArticle (source, body) {
 }
 
 exports.addBodyText = function (id, article) {
-    return new Promise(function (resolve, reject) {
+    return (new Promise(function (resolve, reject) {
         console.log(id, "Fetching article");
         request(article.url, function (err, res, body) {
             if (err) {
@@ -53,5 +55,37 @@ exports.addBodyText = function (id, article) {
                 }
             }
         });
+    })).then(function (article) {
+        // Split sentences and paragraphs in body
+        paragraphs = [];
+        article.body.split("\n").map(function (para) {
+            paragraphs.push(nltk.splitSentences(para.trim()));
+        });
+
+        return Promise.all(paragraphs)
+            .then(function (paragraphs) {
+                paragraphs = paragraphs.filter(function (paragraph) {
+                    return paragraph.length;
+                });
+
+                var id = 0;
+
+                paragraphs = paragraphs.map(function (paragraph) {
+                    return paragraph.map(function (sentence) {
+                        return {
+                            id: id++,
+                            source: sentence
+                        };
+                    });
+                });
+
+                article.bodySentences = paragraphs;
+
+                return article;
+            }, function (err) {
+                return Promise.reject(err);
+            });
+    }, function (err) {
+        return Promise.reject(err);
     });
 };
