@@ -40,6 +40,14 @@ function summarize(article) {
                 reject("EXIT_CODE_NOT_ZERO");
             } else {
                 article.summary = summary.trim();
+
+                article.summarySentences =
+                    article.summary.split("\n").map(function (sentence) {
+                        return {
+                            source: sentence
+                        };
+                    });
+
                 resolve(article);
             }
             tmpDir.removeCallback();

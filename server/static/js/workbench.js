@@ -423,7 +423,7 @@ function loadArticle() {
     var selectedSummarizer = getSelectedSummarizer();
     var selectedTranslator = getSelectedTranslator();
 
-    socket.emit('workbench get article', articleId, selectedLanguage, {
+    socket.emit('access article', articleId, [selectedLanguage], {
         'summarizer': selectedSummarizer,
         'translator': selectedTranslator
     });
@@ -446,9 +446,9 @@ var socket;
 
 $(function () {
     socket = io({path: baseUrl + 'socket.io'});
-    socket.on('workbench article', function (article) {
-        console.log(article);
-        prepareArticle(article);
+    socket.on('accessible articles', function (articles) {
+        console.log(articles);
+        prepareArticle(articles[0]);
     });
 
     socket.on('new error', function (err) {

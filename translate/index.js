@@ -43,7 +43,16 @@ exports.translateArticle = function (article, targetLang, method) {
                                 .then(function (translation) {
                                     console.log(article.id, "Summary translated to " + targetLang);
                                     targetArticle.summary = translation.text;
-                                    targetArticle.summarySentences = translation.sentences;
+
+                                    if (targetArticle.summarySentences.length !== translation.sentences.length) {
+                                        console.log(article.id, "Error while translating:", "SENTENCE_COUNT_MISMATCH");
+                                        return Promise.reject("SENTENCE_COUNT_MISMATCH");
+                                    }
+
+                                    // Assume the same order
+                                    for (var i = 0; i < translation.sentences.length; i++) {
+                                        targetArticle.summarySentences[i].target = translation.sentences[i].target;
+                                    }
                                 }, function (err) {
                                     console.log(article.id, "Failed to translate title to " + targetLang + ": ", err);
                                     targetArticle.error = err;
@@ -51,5 +60,7 @@ exports.translateArticle = function (article, targetLang, method) {
 
     return Promise.all([titleTranslateP, summaryTranslateP]).then(function (values) {
         return targetArticle;
+    }, function(err) {
+        return Promise.reject(err);
     });
 };

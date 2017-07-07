@@ -4,6 +4,11 @@ var nltk = require('../nltk-binding');
 function summarize(article) {
     return nltk.splitSentences(article.summary)
         .then(function(sentences) {
+            article.summarySentences = sentences.map(function (sentence) {
+                return {
+                    source: sentence
+                };
+            });
             article.summary = sentences.join("\n");
             return Promise.resolve(article);
         }, function(err) {
