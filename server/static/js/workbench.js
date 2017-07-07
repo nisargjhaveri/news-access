@@ -442,9 +442,6 @@ function panic() {
     $('.error-container').removeClass('hidden');
 }
 
-// FIXME: Remove this variable from here, for dev only
-var articleId = '2MwKe8d';
-
 var socket;
 
 $(function () {

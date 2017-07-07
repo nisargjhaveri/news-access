@@ -35,8 +35,9 @@ app.get('/article/:articleId', function(req, res){
     });
 });
 
-app.get('/workbench', function(req, res){
+app.get('/workbench/:articleId', function(req, res){
     res.render('workbench', {
+        articleId: req.params.articleId,
         baseUrl: config.baseUrl,
     });
 });
