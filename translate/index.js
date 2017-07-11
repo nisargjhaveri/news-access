@@ -17,6 +17,10 @@ function getTranslator(method) {
     return translator;
 }
 
+function propagateError(err) {
+    return Promise.reject(err);
+}
+
 exports.translateText = function(text, sourceLang, targetLang, method) {
     return getTranslator(method)(text, sourceLang, targetLang);
 };
@@ -28,39 +32,56 @@ exports.translateArticle = function (article, targetLang, method) {
     targetArticle.orignialArticle = article;
     targetArticle.lang = targetLang;
 
-    console.log(article.id, "Translating title and summary to " + targetLang);
+    console.log(article.id, "Translating article to " + targetLang);
 
     var titleTranslateP = translateText(article.title, article.lang, targetLang)
                             .then(function (translation) {
                                 console.log(article.id, "Title translated to " + targetLang);
                                 targetArticle.title = translation.text;
-                            }, function (err) {
-                                console.log(article.id, "Failed to translate title to " + targetLang + ": ", err);
-                                targetArticle.error = err;
-                            });
+                            }, propagateError);
 
-    var summaryTranslateP = translateText(article.summary, article.lang, targetLang)
-                                .then(function (translation) {
+    function translateSentences(sentences) {
+        // Adds .target to sentences as side effect
+        var sentencesText = sentences.map(function (sentence) {
+            return sentence.source;
+        }).join("\n");
+
+        return translateText(sentencesText, article.lang, targetLang)
+            .then(function (translation) {
+                if (sentences.length !== translation.sentences.length) {
+                    console.log(article.id, "Error while translating:", "SENTENCE_COUNT_MISMATCH");
+                    return Promise.reject("SENTENCE_COUNT_MISMATCH");
+                }
+
+                // Assume the same order
+                for (var i = 0; i < translation.sentences.length; i++) {
+                    sentences[i].target = translation.sentences[i].target;
+                }
+
+                return sentences;
+            }, propagateError);
+    }
+
+    var bodySentences = [].concat.apply([], targetArticle.bodySentences);
+    var bodyTranslateP = translateSentences(bodySentences)
+                            .then(function (sentences) {
+                                targetArticle.body = targetArticle.bodySentences.map(function (paragraph) {
+                                    return paragraph.map(function (sentence) {
+                                        return sentence.target;
+                                    }).join(" ");
+                                }).join("\n");
+                                console.log(article.id, "Body translated to " + targetLang);
+                            }, propagateError);
+
+    var summaryTranslateP = translateSentences(targetArticle.summarySentences)
+                                .then(function (sentences) {
+                                    targetArticle.summary = sentences.map(function (sentence) {
+                                                                return sentence.target;
+                                                            }).join("\n");
                                     console.log(article.id, "Summary translated to " + targetLang);
-                                    targetArticle.summary = translation.text;
+                                }, propagateError);
 
-                                    if (targetArticle.summarySentences.length !== translation.sentences.length) {
-                                        console.log(article.id, "Error while translating:", "SENTENCE_COUNT_MISMATCH");
-                                        return Promise.reject("SENTENCE_COUNT_MISMATCH");
-                                    }
-
-                                    // Assume the same order
-                                    for (var i = 0; i < translation.sentences.length; i++) {
-                                        targetArticle.summarySentences[i].target = translation.sentences[i].target;
-                                    }
-                                }, function (err) {
-                                    console.log(article.id, "Failed to translate title to " + targetLang + ": ", err);
-                                    targetArticle.error = err;
-                                });
-
-    return Promise.all([titleTranslateP, summaryTranslateP]).then(function (values) {
+    return Promise.all([titleTranslateP, bodyTranslateP, summaryTranslateP]).then(function (values) {
         return targetArticle;
-    }, function(err) {
-        return Promise.reject(err);
-    });
+    }, propagateError);
 };

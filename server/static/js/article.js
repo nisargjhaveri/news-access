@@ -1,13 +1,3 @@
-function getErrorText(article) {
-    var selectedLanguageName = $('.select-language option:selected').text();
-    var selectedSummarizerName = $('.select-translator option:selected').text();
-
-    if (article.error == "LANG_NOT_SUPPORTED") {
-        return "The translator you selected (" + selectedSummarizerName + ") " +
-            "does not support the selected language (" + selectedLanguageName + ")";
-    }
-}
-
 function appendParagraphs($elem, text) {
     var paragraphs = text.split("\n").map(function (para) {
         return para.trim();
@@ -22,17 +12,12 @@ function makeAccessibleArticle(article) {
     var $article = $('#sample-accessible-article').clone();
     $article.removeAttr('id');
 
-    if (article.error) {
-        $article.empty();
-        $article.append($('<div>').addClass('access-error').text(getErrorText(article)));
-    } else {
-        $article.attr('lang', article.lang);
-        $article.find('.show-title').text(article.title);
-        $article.find('.show-summary').text(article.summary);
-        $article.find('.show-source').text(article.source);
-        $article.find('.show-published-time').text(moment(article.published).fromNow());
-        $article.find('.link-original-article').attr('href', article.url);
-    }
+    $article.attr('lang', article.lang);
+    $article.find('.show-title').text(article.title);
+    $article.find('.show-summary').text(article.summary);
+    $article.find('.show-source').text(article.source);
+    $article.find('.show-published-time').text(moment(article.published).fromNow());
+    $article.find('.link-original-article').attr('href', article.url);
 
     return $article;
 }
@@ -124,7 +109,7 @@ function refreshArticle() {
     });
 }
 
-function panic() {
+function panic(err) {
     $('.select-language').removeAttr('disabled');
     $('.select-summarizer').removeAttr('disabled');
     $('.select-translator').removeAttr('disabled');
@@ -147,7 +132,7 @@ $(function () {
     });
 
     socket.on('new error', function (err) {
-        panic();
+        panic(err);
         console.log("Error", err);
     });
 
