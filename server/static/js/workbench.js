@@ -139,8 +139,18 @@ function prepareArticle(article) {
                         .attr('data-sentence-id', sentence.id);
                 });
 
+                var sentencesTarget =  paragraph.map(function (sentence) {
+                    return $('<span class="sentence">')
+                        .text(sentence.target)
+                        .attr('data-sentence-id', sentence.id);
+                });
+
                 $('<p class="paragraph paragraph-draggable paragraph-source flex-item">')
                     .append(sentences)
+                    .appendTo(paraContainer);
+
+                $('<p class="paragraph paragraph-target flex-item">')
+                    .append(sentencesTarget)
                     .appendTo(paraContainer);
 
                 return paraContainer;
@@ -390,6 +400,7 @@ function prepareArticle(article) {
 
     summaryTranslator.initialize(article.orignialArticle.lang, article.lang);
     summaryTranslator.cacheTranslations(article.summarySentences);
+    summaryTranslator.cacheTranslations([].concat.apply([], article.bodySentences));
 
     showArticle(article.bodySentences);
     enableDragDrop();
