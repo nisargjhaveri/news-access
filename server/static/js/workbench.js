@@ -77,11 +77,13 @@ var summaryTranslator = (function () {
         },
         cacheTranslations: function (sentences) {
             sentences.forEach(function (sentence) {
-                translationStore[sentence.source] = {};
+                if (!(sentence.source in translationStore)) {
+                    translationStore[sentence.source] = {};
+                }
                 if (sentence.target) {
                     translationStore[sentence.source].original = sentence.target;
                 }
-                if (sentence.editedTarget && sentence.editedTarget != sentence.target) {
+                if (sentence.editedTarget && sentence.editedTarget != translationStore[sentence.source].original) {
                     translationStore[sentence.source].edited = sentence.editedTarget;
                 } else {
                     delete translationStore[sentence.source].edited;
@@ -125,8 +127,6 @@ function prepareArticle(article) {
 
     function showArticle(paragraphs) {
         articleBody = $('.article-body');
-        // sourceArticleParent = $('<div class="flex-item">').appendTo(articleBody);
-        // translatedArticleParent = $('<div class="flex-item">').appendTo(articleBody);
 
         // Show original article in source and target languages
         articleBody.append(
@@ -294,19 +294,11 @@ function prepareArticle(article) {
                 var sentence = {};
                 sentence.id = $this.attr('data-sentence-id');
                 sentence.source = $('.summary-source .sentence[data-sentence-id="' + sentence.id + '"]').text();
+                sentence.editedTarget = $this.text();
 
-                var currentText = $this.text();
-
-                sentence = summaryTranslator.getCached(sentence);
-
-                if (currentText == sentence.target) {
-                    $this.removeClass('translation-edited');
-                } else {
-                    $this.addClass('translation-edited');
-                }
-
-                sentence.editedTarget = currentText;
                 summaryTranslator.cacheTranslations([sentence]);
+
+                updateTargetSummary();
             });
 
         // To highlight linked sentences on hover or focus
