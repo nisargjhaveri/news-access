@@ -1,5 +1,6 @@
 var ArticleList = require("./listArticles.js");
 var fullArticle = require("./fullArticle.js");
+var articleStore = require("./articleStore.js");
 
 function getErrorFunc (id) {
     return function (err) {
@@ -37,4 +38,5 @@ Articles.prototype.fetchOne = function (id) {
     });
 };
 
-module.exports = Articles;
+module.exports.Articles = Articles;
+module.exports.articleStore = articleStore;

@@ -1,4 +1,4 @@
-var Articles = require("../articles");
+var Articles = require("../articles").Articles;
 var summarize = require("../summarize");
 var translate = require("../translate");
 var pipeline = require("../pipeline");

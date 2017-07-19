@@ -1,0 +1,9 @@
+{
+    "mongodb": {
+        "host": "localhost",
+        "database": "news-access",
+        "user": "user",
+        "password": "password",
+        "authSource": "news-access"
+    }
+}

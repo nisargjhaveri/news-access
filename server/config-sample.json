@@ -1,5 +1,6 @@
 {
     "port": 3000,
     "baseUrl": "/news-access/",
-    "proxy": "http://proxy.iiit.ac.in:8080/"
+    "proxy": "http://proxy.iiit.ac.in:8080/",
+    "apikeys": ["Allowed API key1"]
 }

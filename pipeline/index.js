@@ -4,20 +4,8 @@
 // tokenizer.setEntry("This is an entry. Possibly composed of several sentences.");
 // tokenizer.getSentences();
 
-var Articles = require("../articles");
 var summarize = require("../summarize");
 var translate = require("../translate");
-
-var articles = new Articles();
-
-// articles.fetchOne()
-//     .then(summarize.summarizeArticle)
-//     .then(function (article) {
-//         return translate.translateArticle(article, 'gu');
-//     })
-//     .then(function (article) {
-//         console.log(article);
-//     });
 
 exports.accessArticle = function (article, langs, options) {
     options = options || {};
