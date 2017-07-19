@@ -63,14 +63,18 @@ var summaryTranslator = (function () {
             checkSummaryResolved();
         },
         getCached: function(sentence) {
+            var cachedSentence = {
+                source: sentence.source
+            };
+
             if (sentence.source in translationStore) {
-                sentence.target = translationStore[sentence.source].original;
+                cachedSentence.target = translationStore[sentence.source].original;
 
                 if (translationStore[sentence.source].edited) {
-                    sentence.editedTarget = translationStore[sentence.source].edited;
+                    cachedSentence.editedTarget = translationStore[sentence.source].edited;
                 }
 
-                return sentence;
+                return cachedSentence;
             } else {
                 return false;
             }
@@ -140,7 +144,7 @@ function prepareArticle(article) {
                 });
 
                 var sentencesTarget =  paragraph.map(function (sentence) {
-                    return $('<span class="sentence">')
+                    return $('<span class="sentence ce-text-only" contenteditable="true">')
                         .text(sentence.target)
                         .attr('data-sentence-id', sentence.id);
                 });
@@ -287,18 +291,45 @@ function prepareArticle(article) {
                 updateTargetSummary();
             });
 
-        $('.summary-target')
-            .on("blur", '.sentence', function(e) {
+        $('.bench-container')
+            .on("blur", '.summary-target .sentence, .article-body .paragraph-target .sentence', function(e) {
                 var $this = $(this);
+
+                var sourcePath;
+                var otherSourcePath;
+                var otherTargetPath;
+                if ($this.is('.summary-target .sentence')) {
+                    sourcePath = '.summary-source';
+                    otherSourcePath = '.article-body .paragraph-source';
+                    otherTargetPath = '.article-body .paragraph-target';
+                } else {
+                    // It is '.article-body .paragraph-target .sentence'
+                    sourcePath = '.article-body .paragraph-source';
+                    otherSourcePath = '.summary-source';
+                    otherTargetPath = '.summary-target';
+                }
 
                 var sentence = {};
                 sentence.id = $this.attr('data-sentence-id');
-                sentence.source = $('.summary-source .sentence[data-sentence-id="' + sentence.id + '"]').text();
+                sentence.source = $(sourcePath + ' .sentence[data-sentence-id="' + sentence.id + '"]').text();
                 sentence.editedTarget = $this.text();
 
                 summaryTranslator.cacheTranslations([sentence]);
 
-                updateTargetSummary();
+                // Update the translations
+                var cachedSentence = summaryTranslator.getCached(sentence);
+                $this
+                    .removeClass("translation-edited")
+                    .addClass(cachedSentence.editedTarget ? "translation-edited" : "");
+
+                var $otherSource = $(otherSourcePath + ' .sentence[data-sentence-id="' + sentence.id + '"]');
+
+                if (cachedSentence.source == $otherSource.text()) {
+                    $(otherTargetPath + ' .sentence[data-sentence-id="' + sentence.id + '"]')
+                        .text(cachedSentence.editedTarget || cachedSentence.target)
+                        .removeClass("translation-edited")
+                        .addClass(cachedSentence.editedTarget ? "translation-edited" : "");
+                }
             });
 
         // To highlight linked sentences on hover or focus
