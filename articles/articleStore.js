@@ -38,6 +38,7 @@ module.exports.saveRawArticles = function(rawArticles) {
         console.log("Received " + rawArticles.length + " articles");
         rawArticles.forEach(function (article) {
             article._id = article.id;
+            article.timestamp = new Date();
 
             db.collection('raw-articles').insertOne(article).then(function(res) {
                 console.log(res.insertedCount + " raw article stored in db: " + article.id);
