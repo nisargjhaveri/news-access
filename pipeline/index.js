@@ -7,9 +7,17 @@
 var summarize = require("../summarize");
 var translate = require("../translate");
 
-exports.accessArticle = function (article, langs, options) {
+function preProcessArticle (article, options) {
     options = options || {};
     var summaryPromise = summarize.summarizeArticle(article, options.summarizer);
+
+    return summaryPromise;
+}
+
+function accessArticle (article, langs, options) {
+    options = options || {};
+
+    var summaryPromise = preProcessArticle(article, options);
 
     var langArticlePromises = [];
 
@@ -26,4 +34,9 @@ exports.accessArticle = function (article, langs, options) {
     }
 
     return Promise.all(langArticlePromises);
+}
+
+module.exports = {
+    preProcessArticle,
+    accessArticle
 };
