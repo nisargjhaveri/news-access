@@ -35,9 +35,12 @@ passport.use(new LocalApikeyStrategy(
 ));
 app.use(passport.initialize());
 
-app.use(bodyParser.json());         // to support JSON-encoded bodies
+app.use(bodyParser.json({           // to support JSON-encoded bodies
+    limit: '500kb'
+}));
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-    extended: true
+    extended: true,
+    limit: '500kb'
 }));
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
