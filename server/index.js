@@ -37,7 +37,7 @@ app.use(passport.initialize());
 
 app.use(bodyParser.json());         // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true
+    extended: true
 }));
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
@@ -66,8 +66,18 @@ app.post(
     '/api/veooz/push-articles',
     passport.authenticate('localapikey', {session: false}),
     function(req, res) {
-        handlePushedArticles(req.body.articles);
-        res.end();
+        console.log("API request received on /api/veooz/push-articles");
+
+        var status = false;
+        if ('articles' in req.body) {
+            if (typeof req.body.articles === 'string' || req.body.articles instanceof String) {
+                req.body.articles = JSON.parse(req.body.articles);
+            }
+
+            status = handlePushedArticles(req.body.articles);
+        }
+
+        res.status(status ? 200 : 400).end();
     }
 );
 
