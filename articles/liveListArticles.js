@@ -83,7 +83,7 @@ ArticleList.prototype.getSpecificArticle = function (id) {
     var that = this;
 
     return new Promise(function (resolve, reject) {
-        console.log(that.id, "Fetching specific article");
+        console.log(that.id, "Fetching specific article", id);
         request(url, function (err, res, body) {
             if (err) {
                 reject(err);

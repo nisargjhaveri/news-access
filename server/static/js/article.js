@@ -122,6 +122,8 @@ var socket;
 
 $(function () {
     socket = io({path: baseUrl + 'socket.io'});
+    socket.emit('select article source', 'live');
+
     socket.on('accessible articles', function (articles) {
         showAccessibleArticles(articles);
 

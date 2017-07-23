@@ -8,6 +8,8 @@ var summarize = require("../summarize");
 var translate = require("../translate");
 
 function preProcessArticle (article, options) {
+    console.log(article.id, "Preprocessing article");
+
     options = options || {};
     var summaryPromise = summarize.summarizeArticle(article, options.summarizer);
 
@@ -17,7 +19,13 @@ function preProcessArticle (article, options) {
 function accessArticle (article, langs, options) {
     options = options || {};
 
-    var summaryPromise = preProcessArticle(article, options);
+    var summaryPromise;
+
+    if (article.summary && Array.isArray(article.summarySentences)) {
+        summaryPromise = Promise.resolve(article);
+    } else {
+        summaryPromise = preProcessArticle(article, options);
+    }
 
     var langArticlePromises = [];
 

@@ -22,6 +22,8 @@ function panic() {
 
 $(function () {
     var socket = io({path: baseUrl + 'socket.io'});
+    socket.emit('select article source', 'live');
+
     socket.on('new article', function (article) {
         addNewArticle(article);
         console.log(article);

@@ -1,9 +1,21 @@
-var articleStore = require("../articles").articleStore;
+var Articles = require("../articles");
+var articleUtils = require("../articles/articleUtils.js");
 var summarize = require("../summarize");
 var translate = require("../translate");
 var pipeline = require("../pipeline");
 
 module.exports = function (articles) {
+    var articleStore = new Articles('apicall', 'stored');
+
+    function propagateError(err) {
+        return Promise.reject(err);
+    }
+
+    function throwError(err) {
+        console.log(socket.id, "Throwing error:", err);
+        socket.emit('new error', err);
+    }
+
     if (!Array.isArray(articles)) {
         return false;
     }
@@ -16,6 +28,23 @@ module.exports = function (articles) {
     });
     if (!isValid) return false;
 
-    articleStore.saveRawArticles(articles);
+    console.log("Received " + articles.length + " articles");
+
+    articles.forEach(function (article) {
+        // Sequentially insert the articles
+        articleStore.receiveRaw(article)
+            .then(function (article) {
+                console.log(article.id, "Preprocessing raw article");
+                return articleUtils.populateBodySentences(article);
+            }, propagateError)
+            .then(function (article) {
+                return pipeline.preProcessArticle(article);
+            }, propagateError)
+            .then(function (article) {
+                return articleStore.storePreprocessed(article);
+            }, propagateError)
+            .catch(throwError);
+    });
+
     return true;
 };

@@ -1,42 +1,54 @@
-var ArticleList = require("./listArticles.js");
-var fullArticle = require("./fullArticle.js");
-var articleStore = require("./articleStore.js");
+var liveArticles = require("./liveArticles.js");
+var storedArticle = require("./storedArticles.js");
 
-function getErrorFunc (id) {
-    return function (err) {
-        console.error(id, err);
-        return Promise.reject(err);
-    };
-}
-
-function Articles(id) {
+function Articles(id, source) {
     this.id = id || 'noid';
-    this.articleList = new ArticleList(this.id);
+    this.source = source || 'live';
+
+    switch (this.source) {
+        case 'stored':
+            this.articles = new storedArticle(this.id);
+            break;
+        case 'live': // jshint ignore:line
+        default:
+            this.articles = new liveArticles(this.id);
+    }
 }
 
+/**
+ * Get one article
+ * @param  {string|null} id (optional) id of the article.
+ * @return {promise}        Resolving an article. Ramdom article if id not provided.
+ */
 Articles.prototype.fetchOne = function (id) {
-    id = id || false;
-    var that = this;
-
-    return new Promise(function (resolve, reject) {
-        var articlePromise;
-        if (id) {
-            articlePromise = that.articleList.getSpecificArticle(id);
-        } else {
-            articlePromise = that.articleList.getArticle();
-        }
-
-        articlePromise
-            .then(function (article) {
-                if (id) {
-                    return fullArticle.addBodyText(that.id, article);
-                } else {
-                    return article;
-                }
-            }, getErrorFunc(that.id))
-            .then(resolve, reject);
-    });
+    return this.articles.fetchOne(id);
 };
 
-module.exports.Articles = Articles;
-module.exports.articleStore = articleStore;
+/**
+ * Get article from a raw article
+ * @param  {object}  article raw article
+ * @return {promise}         Resolving an article correspoding to raw article.
+ */
+Articles.prototype.receiveRaw = function (article) {
+    return this.articles.receiveRaw(article);
+};
+
+/**
+ * Store article after processing
+ * @param  {object}  article Article to be stored
+ * @return {promise}         Resolves if successful
+ */
+Articles.prototype.storePreprocessed = function (article) {
+    return this.articles.storePreprocessed(article);
+};
+
+/**
+ * Store a final processed article
+ * @param  {object}  article Article to be stored
+ * @return {promise}         Resolves if successful
+ */
+Articles.prototype.storeEdited = function (article) {
+    return this.articles.storeEdited(article);
+};
+
+module.exports = Articles;

@@ -1,11 +1,9 @@
-var Articles = require("../articles").Articles;
+var Articles = require("../articles");
 var summarize = require("../summarize");
 var translate = require("../translate");
 var pipeline = require("../pipeline");
 
 module.exports = function (socket) {
-    socket.articleFactory = new Articles(socket.id);
-
     function handleError(err) {
         return Promise.reject(err);
     }
@@ -14,6 +12,10 @@ module.exports = function (socket) {
         console.log(socket.id, "Throwing error:", err);
         socket.emit('new error', err);
     }
+
+    socket.on('select article source', function (source) {
+        socket.articleFactory = new Articles(socket.id, source);
+    });
 
     socket.on('get article list', function (maxArticles) {
         function emitArticle (article) {

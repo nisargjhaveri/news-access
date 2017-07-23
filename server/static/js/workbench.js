@@ -480,6 +480,8 @@ var socket;
 
 $(function () {
     socket = io({path: baseUrl + 'socket.io'});
+    socket.emit('select article source', 'stored');
+
     socket.on('accessible articles', function (articles) {
         console.log(articles);
         prepareArticle(articles[0]);
