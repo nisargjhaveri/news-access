@@ -33,18 +33,83 @@ function getDB() {
     });
 }
 
-module.exports.saveRawArticles = function(rawArticles) {
+module.exports.saveRawArticles = function (rawArticles) {
+    // Best effort async save the raw articles
     getDB().then(function (db) {
         console.log("Received " + rawArticles.length + " articles");
         rawArticles.forEach(function (article) {
-            article._id = article.id;
-            article.timestamp = new Date();
+            var collection = db.collection('raw-articles');
 
-            db.collection('raw-articles').insertOne(article).then(function(res) {
-                console.log(res.insertedCount + " raw article stored in db: " + article.id);
-            }, function(err) {
-                console.log("Mongodb error: ", err.errmsg);
+            collection.findOne({
+                _id: article.id
+            }).then(function (oldArticle) {
+                var $set = false;
+                var $history = false;
+
+                if (oldArticle) {
+                    for (var key in article) {
+                        if (article.hasOwnProperty(key) && key[0] != '_') {
+                            if (!(key in oldArticle) || oldArticle[key] != article[key]) {
+                                if (!$history) $history = {};
+                                if (!$set) $set = {};
+                                $history[key] = oldArticle[key];
+                                $set[key] = article[key];
+                            }
+                        }
+                    }
+
+                    if ($history) {
+                        $history._timestamp = oldArticle._timestamp;
+                        $history = [$history];
+                    }
+                } else {
+                    $set = article;
+                }
+
+                if (!$set) {
+                    console.log("Nothing to update in raw article:", article.id);
+                    return;
+                }
+
+                var update = {
+                    $set,
+                    $setOnInsert: {
+                        _history: []
+                    },
+                    $currentDate: {
+                        _timestamp: true
+                    }
+                };
+
+                if ($history) {
+                    update.$push = {
+                        _history: {
+                            $each: $history
+                        }
+                    };
+                }
+
+                collection.updateOne(
+                    { _id: article.id },
+                    update,
+                    { upsert: true }
+                ).then(function(res) {
+                    console.log("Raw article upserted:", article.id);
+                }, function(err) {
+                    console.log("Error in upsert:", err);
+                });
+            }, function (err) {
+                console.log("Error in find:", err);
             });
         });
+    });
+};
+
+module.exports.savePreprocessedArticle = function (article) {
+    return getDB().then(function (db) {
+        var collection = db.collection('raw-articles');
+
+        article._id = article.id;
+        return collection.insertOne(article);
     });
 };
