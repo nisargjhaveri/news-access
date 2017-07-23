@@ -13,7 +13,6 @@ module.exports = function (articles) {
 
     function throwError(err) {
         console.log(socket.id, "Throwing error:", err);
-        socket.emit('new error', err);
     }
 
     if (!Array.isArray(articles)) {
