@@ -2,7 +2,7 @@ var nltk = require('../nltk-binding');
 
 module.exports.populateBodySentences = function (article) {
     // Split sentences and paragraphs in body
-    paragraphs = [];
+    var paragraphs = [];
     article.body.split("\n").map(function (para) {
         paragraphs.push(nltk.splitSentences(para.trim()));
     });

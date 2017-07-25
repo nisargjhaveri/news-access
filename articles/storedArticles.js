@@ -77,8 +77,7 @@ function saveRawArticle (article, logId) {
             }
 
             if (!$set) {
-                console.log(logId, "Nothing to update in raw article:", article.id);
-                return Promise.reject();
+                return Promise.reject("Nothing to update in raw article");
             }
 
             var update = {
@@ -186,6 +185,8 @@ StoredArticles.prototype.receiveRaw = function (rawArticle) {
         .then(function () {
             rawArticle.source = rawArticle.source || "PTI";
             return convertRawArticle(rawArticle);
+        }, function (err) {
+            return Promise.reject(err);
         });
 };
 

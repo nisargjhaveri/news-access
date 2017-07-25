@@ -5,14 +5,17 @@ var translate = require("../translate");
 var pipeline = require("../pipeline");
 
 module.exports = function (articles) {
-    var articleStore = new Articles('apicall', 'stored');
+    var logId = 'apicall';
+    var articleStore = new Articles(logId, 'stored');
 
     function propagateError(err) {
         return Promise.reject(err);
     }
 
-    function throwError(err) {
-        console.log(socket.id, "Throwing error:", err);
+    function getErrorLogger(logId) {
+        return function (err) {
+            console.log(logId, "Error:", err);
+        };
     }
 
     if (!Array.isArray(articles)) {
@@ -27,11 +30,11 @@ module.exports = function (articles) {
     });
     if (!isValid) return false;
 
-    console.log("Received " + articles.length + " articles");
+    console.log(logId, "Received " + articles.length + " articles");
 
     articles.forEach(function (article) {
         // Sequentially insert the articles
-        articleStore.receiveRaw(article)
+        return articleStore.receiveRaw(article)
             .then(function (article) {
                 console.log(article.id, "Preprocessing raw article");
                 return articleUtils.populateBodySentences(article);
@@ -40,9 +43,10 @@ module.exports = function (articles) {
                 return pipeline.preProcessArticle(article);
             }, propagateError)
             .then(function (article) {
+                console.log(article.id, "Preprocessed. Storing");
                 return articleStore.storePreprocessed(article);
             }, propagateError)
-            .catch(throwError);
+            .catch(getErrorLogger(article.id));
     });
 
     return true;

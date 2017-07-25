@@ -27,8 +27,8 @@ function summarizeArticle(article, method) {
 
 function mapSummarySentences(article) {
     // Map sentences in body and summary
-    sentences = [].concat.apply([], article.bodySentences);
-    summarySentences = article.summarySentences;
+    var sentences = [].concat.apply([], article.bodySentences);
+    var summarySentences = article.summarySentences;
 
     summarySentences.map(function (summarySentence) {
         var similarities = sentences.map(function (sentence) {
