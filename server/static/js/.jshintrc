@@ -1,0 +1,10 @@
+{
+    "undef": true,
+    "browser": true,
+    "jquery": true,
+    "devel": true,
+    "globals": {
+        "io": false,
+        "moment": false
+    }
+}

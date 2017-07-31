@@ -1,3 +1,5 @@
+/* globals articleId:false, baseUrl: false */
+
 function appendParagraphs($elem, text) {
     var paragraphs = text.split("\n").map(function (para) {
         return para.trim();

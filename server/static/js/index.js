@@ -1,3 +1,5 @@
+/* globals baseUrl: false */
+
 function getArticleUrl (id) {
     return "article/" + id;
 }

@@ -1,3 +1,6 @@
+/* globals Sortable:false */
+/* globals articleId:false, baseUrl: false */
+
 var summaryTranslator = (function () {
     var translationStore = {};
     var sentencesToTranslate;
@@ -130,7 +133,7 @@ function prepareArticle(article) {
     }
 
     function showArticle(paragraphs) {
-        articleBody = $('.article-body');
+        var articleBody = $('.article-body');
 
         // Show original article in source and target languages
         articleBody.append(
