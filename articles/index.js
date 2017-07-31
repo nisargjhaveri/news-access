@@ -17,11 +17,20 @@ function Articles(id, source) {
 
 /**
  * Get one article
- * @param  {string|null} id (optional) id of the article.
- * @return {promise}        Resolving an article. Ramdom article if id not provided.
+ * @param  {string}  id id of the article.
+ * @return {promise}    Resolves to the article.
  */
 Articles.prototype.fetchOne = function (id) {
     return this.articles.fetchOne(id);
+};
+
+/**
+ * Get list of articles
+ * @param  {object}  options Options
+ * @return {promise}         Resolves to an array of article, depending on options
+ */
+Articles.prototype.fetchList = function (options) {
+    return this.articles.fetchList(options);
 };
 
 /**

@@ -157,25 +157,38 @@ function StoredArticles (id) {
 }
 
 StoredArticles.prototype.fetchOne = function (id) {
-    id = id || false;
+    return getDB().then(function (db) {
+        var collection = db.collection('preprocessed-articles');
 
-    if (id) {
-        return getDB().then(function (db) {
-            var collection = db.collection('preprocessed-articles');
+        return collection.findOne({ _id: id }, { _id: 0 })
+            .then(function (res) {
+                if (!res) {
+                    return Promise.reject("Article not found");
+                }
+                return Promise.resolve(res);
+            }, function (err) {
+                return Promise.reject(err);
+            });
+    });
+};
 
-            return collection.findOne({ _id: id }, { _id: 0 })
-                .then(function (res) {
-                    if (!res) {
-                        return Promise.reject("Article not found");
-                    }
-                    return Promise.resolve(res);
-                }, function (err) {
-                    return Promise.reject(err);
-                });
-        });
-    } else {
-        return Promise.reject("TODO");
-    }
+StoredArticles.prototype.fetchList = function (options) {
+    return getDB().then(function (db) {
+        var collection = db.collection('preprocessed-articles');
+
+        return collection.find({})
+            .sort("published", -1)
+            .limit(options.limit || 10)
+            .toArray()
+            .then(function (docs) {
+                if (!docs.length) {
+                    return Promise.reject("No articles found");
+                }
+                return Promise.resolve(docs);
+            }, function (err) {
+                return Promise.reject(err);
+            });
+    });
 };
 
 StoredArticles.prototype.receiveRaw = function (rawArticle) {

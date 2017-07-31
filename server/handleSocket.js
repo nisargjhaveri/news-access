@@ -22,9 +22,13 @@ module.exports = function (socket) {
             socket.emit('new article', article);
         }
 
-        for (var i = 0; i < maxArticles; i++) {
-            socket.articleFactory.fetchOne().then(emitArticle, throwError);
-        }
+        socket.articleFactory.fetchList({
+                limit: maxArticles
+            }).then(function (articles) {
+                articles.forEach(function (article) {
+                    emitArticle(article);
+                });
+            }, throwError);
     });
 
     socket.on('access article', function (articleId, langs, options) {

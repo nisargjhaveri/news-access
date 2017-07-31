@@ -10,7 +10,7 @@ function parseArticles (body) {
     var articleList = [];
 
     $('.feed-item').each(function (i, elem) {
-        $elem = $(elem);
+        var $elem = $(elem);
         articleList.push(makeArticle($elem));
     });
 
@@ -94,18 +94,25 @@ ArticleList.prototype.getSpecificArticle = function (id) {
     });
 };
 
-ArticleList.prototype.getArticle = function () {
+ArticleList.prototype.getArticleList = function (limit) {
     var that = this;
-    this.articlePromise = this.articlePromise
-                            .then(function() {
-                                return that.ensureArticleList();
-                            }).then(
-                                function() {
-                                    return that.articleList.shift();
-                                }, function(err) {
-                                    return Promise.reject(err);
-                                }
-                            );
+    var articles = [];
+
+    function addOneArticle() {
+        that.articlePromise = that.articlePromise
+                                .then(function() {
+                                    return that.ensureArticleList();
+                                }).then(
+                                    function () {
+                                        articles.push(that.articleList.shift());
+                                        return articles;
+                                    }
+                                );
+    }
+
+    for (var i = 0; i < limit; i++) {
+        addOneArticle();
+    }
 
     return this.articlePromise;
 };

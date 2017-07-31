@@ -1,53 +1,49 @@
 var ArticleList = require("./liveListArticles.js");
 var fullArticle = require("./liveFullArticle.js");
 
-function getErrorFunc (id) {
+function getErrorFunc (logId) {
     return function (err) {
-        console.error(id, err);
+        console.error(logId, err);
         return Promise.reject(err);
     };
 }
 
-function LiveArticles(id, source) {
-    this.id = id || 'noid';
-    this.articleList = new ArticleList(this.id);
+function LiveArticles(logId, source) {
+    this.logId = logId || 'noid';
+    this.articleList = new ArticleList(this.logId);
 }
 
 LiveArticles.prototype.fetchOne = function (id) {
-    id = id || false;
     var that = this;
 
-    return new Promise(function (resolve, reject) {
-        var articlePromise;
-        if (id) {
-            articlePromise = that.articleList.getSpecificArticle(id);
-        } else {
-            articlePromise = that.articleList.getArticle();
-        }
-
-        articlePromise
-            .then(function (article) {
-                if (id) {
-                    return fullArticle.addBodyText(that.id, article);
-                } else {
-                    return article;
-                }
-            }, getErrorFunc(that.id))
-            .then(resolve, reject);
-    });
+    return this.articleList.getSpecificArticle(id)
+        .then(function (article) {
+            if (id) {
+                return fullArticle.addBodyText(that.logId, article);
+            } else {
+                return article;
+            }
+        }, getErrorFunc(that.logId));
 };
 
+LiveArticles.prototype.fetchList = function (options) {
+    var articles = [];
+
+    var limit = options.limit || 10;
+
+    return this.articleList.getArticleList(limit);
+};
 
 LiveArticles.prototype.receiveRaw = function (rawArticle) {
-    return Promise.reject(this.id, "Cannot recieve raw article");
+    return Promise.reject(this.logId, "Cannot recieve raw article");
 };
 
 LiveArticles.prototype.storePreprocessed = function (article) {
-    return Promise.reject(this.id, "Cannot store article");
+    return Promise.reject(this.logId, "Cannot store article");
 };
 
 LiveArticles.prototype.storeEdited = function (article) {
-    return Promise.reject(this.id, "Cannot store article");
+    return Promise.reject(this.logId, "Cannot store article");
 };
 
 

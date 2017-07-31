@@ -33,7 +33,6 @@ module.exports = function (articles) {
     console.log(logId, "Received " + articles.length + " articles");
 
     articles.forEach(function (article) {
-        // Sequentially insert the articles
         return articleStore.receiveRaw(article)
             .then(function (article) {
                 console.log(article.id, "Preprocessing raw article");
