@@ -1,5 +1,5 @@
 /* globals Sortable:false */
-/* globals articleId:false, baseUrl: false */
+/* globals articleSource: false, articleId:false, baseUrl: false */
 
 var summaryTranslator = (function () {
     var translationStore = {};
@@ -483,7 +483,7 @@ var socket;
 
 $(function () {
     socket = io({path: baseUrl + 'socket.io'});
-    socket.emit('select article source', 'stored');
+    socket.emit('select article source', articleSource);
 
     socket.on('accessible articles', function (articles) {
         console.log(articles);

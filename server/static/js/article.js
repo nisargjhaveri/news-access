@@ -1,4 +1,4 @@
-/* globals articleId:false, baseUrl: false */
+/* globals articleSource: false, articleId:false, baseUrl: false */
 
 function appendParagraphs($elem, text) {
     var paragraphs = text.split("\n").map(function (para) {
@@ -126,7 +126,7 @@ var socket;
 
 $(function () {
     socket = io({path: baseUrl + 'socket.io'});
-    socket.emit('select article source', 'live');
+    socket.emit('select article source', articleSource);
 
     socket.on('accessible articles', function (articles) {
         showAccessibleArticles(articles);

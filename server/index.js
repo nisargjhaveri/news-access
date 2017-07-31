@@ -45,21 +45,24 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
-app.get('/', function(req, res){
+app.get('/:articleSource?', function(req, res){
     res.render('index', {
+        articleSource: req.params.articleSource || "thehindu",
         baseUrl: config.baseUrl,
     });
 });
 
-app.get('/article/:articleId', function(req, res){
+app.get('/article/:articleSource/:articleId', function(req, res){
     res.render('article', {
+        articleSource: req.params.articleSource,
         articleId: req.params.articleId,
         baseUrl: config.baseUrl,
     });
 });
 
-app.get('/workbench/:articleId', function(req, res){
+app.get('/workbench/:articleSource/:articleId', function(req, res){
     res.render('workbench', {
+        articleSource: req.params.articleSource,
         articleId: req.params.articleId,
         baseUrl: config.baseUrl,
     });

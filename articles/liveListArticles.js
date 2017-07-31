@@ -36,8 +36,8 @@ function makeArticle ($elem) {
     };
 }
 
-function ArticleList(id) {
-    this.id = id || "noid";
+function ArticleList(logId) {
+    this.logId = logId || "noid";
     this.page = 1;
 
     this.articlePromise = Promise.resolve();
@@ -56,7 +56,7 @@ ArticleList.prototype.ensureArticleList = function () {
 
     return new Promise(function (resolve, reject) {
         if (that.articleList.length === 0) {
-            console.log(that.id, "Fetching list of articles");
+            console.log(that.logId, "Fetching list of articles");
             request(url, function (err, res, body) {
                 if (err) {
                     reject(err);
@@ -83,7 +83,7 @@ ArticleList.prototype.getSpecificArticle = function (id) {
     var that = this;
 
     return new Promise(function (resolve, reject) {
-        console.log(that.id, "Fetching specific article", id);
+        console.log(that.logId, "Fetching specific article", id);
         request(url, function (err, res, body) {
             if (err) {
                 reject(err);

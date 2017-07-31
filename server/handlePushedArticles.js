@@ -6,7 +6,7 @@ var pipeline = require("../pipeline");
 
 module.exports = function (articles) {
     var logId = 'apicall';
-    var articleStore = new Articles(logId, 'stored');
+    var articleStore = new Articles(logId, 'pti');
 
     function propagateError(err) {
         return Promise.reject(err);

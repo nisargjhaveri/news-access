@@ -3,13 +3,13 @@ var storedArticle = require("./storedArticles.js");
 
 function Articles(id, source) {
     this.id = id || 'noid';
-    this.source = source || 'live';
+    this.source = source || 'thehindu';
 
     switch (this.source) {
-        case 'stored':
+        case 'pti':
             this.articles = new storedArticle(this.id);
             break;
-        case 'live': // jshint ignore:line
+        case 'thehindu': // jshint ignore:line
         default:
             this.articles = new liveArticles(this.id);
     }

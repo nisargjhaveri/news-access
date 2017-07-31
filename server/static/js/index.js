@@ -1,7 +1,7 @@
-/* globals baseUrl: false */
+/* globals articleSource: false, baseUrl: false */
 
 function getArticleUrl (id) {
-    return "article/" + id;
+    return ["article", articleSource, id].join("/");
 }
 
 function addNewArticle (article) {
@@ -24,7 +24,7 @@ function panic() {
 
 $(function () {
     var socket = io({path: baseUrl + 'socket.io'});
-    socket.emit('select article source', 'live');
+    socket.emit('select article source', articleSource);
 
     socket.on('new article', function (article) {
         addNewArticle(article);
