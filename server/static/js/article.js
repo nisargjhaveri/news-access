@@ -40,8 +40,10 @@ function showAccessibleArticles(articles) {
     $article.find('.show-published-time').text(moment(orignialArticle.published).fromNow());
     $article.find('.show-summary').text(orignialArticle.summary);
     appendParagraphs($article.find('.show-full-article'), orignialArticle.body);
-    $article.find('.show-image').attr('src', orignialArticle.picture);
     $article.find('.link-original-article').attr('href', orignialArticle.url);
+    $article.find('.show-image')
+        .attr('src', orignialArticle.picture)
+        .addClass(orignialArticle.picture ? "" : "hidden");
 
     for (var i = 0; i < articles.length; i++) {
         $article.find('.accessible-article-list').append(makeAccessibleArticle(articles[i]));
