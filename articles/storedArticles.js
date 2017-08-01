@@ -1,19 +1,9 @@
 var MongoClient = require("mongodb").MongoClient;
-var htmlToText = require("html-to-text");
 
 var config = require("./config.json");
 
 var articleUtils = require('./articleUtils.js');
-
-function getCleanId (id) {
-    return id
-        .replace(/https?:\/\//g, '')
-        .replace('veooz.com/articles/pti/', '')
-        .replace('.html', '')
-        .replace(/[^\.a-zA-Z0-9_-]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/(^-|-$)/, '');
-}
+var storedArticleUtils = require('./storedArticleUtils.js');
 
 var dbPromise = null;
 function getDB() {
@@ -51,7 +41,7 @@ function saveRawArticle (article, logId) {
         var collection = db.collection('raw-articles');
 
         return collection.findOne({
-            _id: getCleanId(article.id)
+            _id: articleUtils.getCleanId(article.id)
         }).then(function (oldArticle) {
             var $set = false;
             var $history = false;
@@ -99,7 +89,7 @@ function saveRawArticle (article, logId) {
             }
 
             return collection.updateOne(
-                { _id: getCleanId(article.id) },
+                { _id: articleUtils.getCleanId(article.id) },
                 update,
                 { upsert: true }
             ).then(function(res) {
@@ -113,47 +103,8 @@ function saveRawArticle (article, logId) {
     });
 }
 
-function convertRawArticle(rawArticle) {
-    var article = {
-        id: getCleanId(rawArticle.id),
-        title: rawArticle.title,
-        summary: rawArticle.summary,
-        picture: rawArticle.image,
-        url: rawArticle.url,
-        lang: rawArticle.language,
-        source: rawArticle.source,
-        published: new Date(parseInt(rawArticle.publishedTime)),
-        publishedPlace: null,
-        body: null
-    };
-
-    article.body = htmlToText.fromString(
-        rawArticle.taggedText,
-        {
-            wordwrap: false,
-            uppercaseHeadings: false,
-            ignoreImages: true,
-            ignoreHref: true
-        }
-    );
-
-    // FIXME: Find a better way?
-    if (article.body.split(" ").indexOf("(PTI)") <= 10) {
-        var cutPosition = article.body.indexOf("(PTI)") + 5;
-
-        article.publishedPlace = article.body.substr(0, cutPosition).trim();
-        article.body = article.publishedPlace + '. ' + article.body.substr(cutPosition).trim();
-
-        if (article.summary.indexOf(article.publishedPlace) <= 5) {
-            article.summary = article.summary.replace(article.publishedPlace, '').trim();
-        }
-    }
-
-    return article;
-}
-
-function StoredArticles (id) {
-    this.id = id || 'noid';
+function StoredArticles (logId) {
+    this.logId = logId || 'noid';
 }
 
 StoredArticles.prototype.fetchOne = function (id) {
@@ -194,10 +145,9 @@ StoredArticles.prototype.fetchList = function (options) {
 StoredArticles.prototype.receiveRaw = function (rawArticle) {
     var that = this;
 
-    return saveRawArticle(rawArticle, that.id)
+    return saveRawArticle(rawArticle, that.logId)
         .then(function () {
-            rawArticle.source = rawArticle.source || "PTI";
-            return convertRawArticle(rawArticle);
+            return storedArticleUtils.convertRawArticle(rawArticle);
         }, function (err) {
             return Promise.reject(err);
         });

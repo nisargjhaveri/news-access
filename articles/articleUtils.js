@@ -31,3 +31,13 @@ module.exports.populateBodySentences = function (article) {
             return Promise.reject(err);
         });
 };
+
+module.exports.getCleanId = function (id) {
+    return id
+        .replace(/https?:\/\//g, '')
+        .replace('veooz.com/articles/pti/', '')
+        .replace('.html', '')
+        .replace(/[^\.a-zA-Z0-9_-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/(^-|-$)/, '');
+};

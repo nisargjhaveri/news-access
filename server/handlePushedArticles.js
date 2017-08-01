@@ -1,7 +1,5 @@
 var Articles = require("../articles");
 var articleUtils = require("../articles/articleUtils.js");
-var summarize = require("../summarize");
-var translate = require("../translate");
 var pipeline = require("../pipeline");
 
 module.exports = function (articles) {
