@@ -10,7 +10,7 @@ function getErrorFunc (logId) {
 
 function LiveArticles(logId, source) {
     this.logId = logId || 'noid';
-    this.articleList = new ArticleList(this.logId);
+    this.articleList = new ArticleList(this.logId, source);
 }
 
 LiveArticles.prototype.fetchOne = function (id) {

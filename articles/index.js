@@ -9,9 +9,10 @@ function Articles(id, source) {
         case 'pti':
             this.articles = new storedArticle(this.id);
             break;
-        case 'thehindu': // jshint ignore:line
-        default:
-            this.articles = new liveArticles(this.id);
+        // case 'timesofindia':
+        case 'indianexpress':
+        case 'thehindu':
+            this.articles = new liveArticles(this.id, this.source);
     }
 }
 
@@ -21,6 +22,7 @@ function Articles(id, source) {
  * @return {promise}    Resolves to the article.
  */
 Articles.prototype.fetchOne = function (id) {
+    if (!this.articles) return Promise.reject("Bad article source selected");
     return this.articles.fetchOne(id);
 };
 
@@ -30,6 +32,7 @@ Articles.prototype.fetchOne = function (id) {
  * @return {promise}         Resolves to an array of article, depending on options
  */
 Articles.prototype.fetchList = function (options) {
+    if (!this.articles) return Promise.reject("Bad article source selected");
     return this.articles.fetchList(options);
 };
 
@@ -39,6 +42,7 @@ Articles.prototype.fetchList = function (options) {
  * @return {promise}         Resolving an article correspoding to raw article.
  */
 Articles.prototype.receiveRaw = function (article) {
+    if (!this.articles) return Promise.reject("Bad article source selected");
     return this.articles.receiveRaw(article);
 };
 
@@ -48,6 +52,7 @@ Articles.prototype.receiveRaw = function (article) {
  * @return {promise}         Resolves if successful
  */
 Articles.prototype.storePreprocessed = function (article) {
+    if (!this.articles) return Promise.reject("Bad article source selected");
     return this.articles.storePreprocessed(article);
 };
 
@@ -57,6 +62,7 @@ Articles.prototype.storePreprocessed = function (article) {
  * @return {promise}         Resolves if successful
  */
 Articles.prototype.storeEdited = function (article) {
+    if (!this.articles) return Promise.reject("Bad article source selected");
     return this.articles.storeEdited(article);
 };
 

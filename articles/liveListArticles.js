@@ -36,9 +36,16 @@ function makeArticle ($elem) {
     };
 }
 
-function ArticleList(logId) {
+function ArticleList(logId, source) {
     this.logId = logId || "noid";
     this.page = 1;
+
+    var sources = {
+        'thehindu': 'www.thehindu.com',
+        'indianexpress': 'indianexpress.com',
+        'timesofindia': 'timesofindia.indiatimes.com'
+    };
+    this.sourceId = sources[source];
 
     this.articlePromise = Promise.resolve();
     this.articleList = [];
@@ -46,11 +53,8 @@ function ArticleList(logId) {
 
 ArticleList.prototype.ensureArticleList = function () {
     var page = this.page || 1;
-    // var source = 'timesofindia.indiatimes.com';
-    // var source = 'indianexpress.com';
-    var source = 'www.thehindu.com';
 
-    var url = 'http://www.veooz.com/ajax/source?langEdition=en&geo=IN&sourceId=' + source + '&feedType=fpopular&page=' + page;
+    var url = 'http://www.veooz.com/ajax/source?langEdition=en&geo=IN&sourceId=' + this.sourceId + '&feedType=fpopular&page=' + page;
 
     var that = this;
 
