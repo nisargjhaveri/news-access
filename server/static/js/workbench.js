@@ -421,7 +421,55 @@ function prepareArticle(article) {
                 return e.which != 13;
             });
 
-        $('.publish-btn').removeClass('hidden');
+        $('.publish-btn')
+            .on('click', function (e) {
+                var editedArticle = JSON.parse(JSON.stringify(article));
+
+                // Set title
+                editedArticle.title = $('.article-title-target').text();
+
+                // Set summarySentences
+                var summarySentences = [];
+                $('.summary-source .sentence').each(function () {
+                    var $this = $(this);
+
+                    var targetSentence = summaryTranslator.getCached({
+                        source: $this.text()
+                    });
+
+                    summarySentences.push({
+                        id: parseInt($this.attr('data-sentence-id')),
+                        source: $this.text(),
+                        target: targetSentence.target,
+                        editedTarget: targetSentence.editedTarget
+                    });
+                });
+                editedArticle.summarySentences = summarySentences;
+
+                // Set summary
+                editedArticle.summary = editedArticle.summarySentences.map(function (sentence) {
+                    return sentence.editedTarget || sentence.target;
+                }).join(" ");
+
+                // Set bodySentences
+                editedArticle.bodySentences.forEach(function (paragraph) {
+                    paragraph.forEach(function (sentence) {
+                        var targetSentence = summaryTranslator.getCached(sentence);
+
+                        sentence.editedTarget = targetSentence.editedTarget;
+                    });
+                });
+
+                // Set body
+                editedArticle.body = editedArticle.bodySentences.map(function (paragraph) {
+                    return paragraph.map(function (sentence) {
+                        return sentence.editedTarget || sentence.target;
+                    }).join(" ");
+                }).join("\n");
+
+                console.log(editedArticle);
+            })
+            .removeClass('hidden');
     }
 
     summaryTranslator.initialize(article.orignialArticle.lang, article.lang);
