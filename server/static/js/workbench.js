@@ -3,67 +3,65 @@
 
 var summaryTranslator = (function () {
     var translationStore = {};
-    var sentencesToTranslate;
-    var summaryCallback;
     var fromLang, toLang;
 
-    function translateSentence(sentence) {
-        socket.emit('translate text', sentence.source, fromLang, toLang, getSelectedTranslator());
-    }
-
-    function checkSummaryResolved() {
-        if (!sentencesToTranslate) return;
-
-        var resolved = true;
-
-        sentencesToTranslate.forEach(function (sentence) {
-            if (sentence.target) return;
-
-            if (sentence.source in translationStore) {
-                sentence.target = translationStore[sentence.source].original;
-
-                if (translationStore[sentence.source].edited) {
-                    sentence.editedTarget = translationStore[sentence.source].edited;
-                }
-            } else {
-                resolved = false;
+    function translateSentence(sentence, callback) {
+        socket.emit(
+            'translate text',
+            sentence.source,
+            fromLang, toLang,
+            getSelectedTranslator(),
+            function (translation) {
+                callback({
+                    source: sentence.source,
+                    target: translation.text
+                });
             }
-        });
-
-        if (resolved) {
-            var callback = summaryCallback;
-            var summarySentences = sentencesToTranslate;
-
-            summaryCallback = false;
-            sentencesToTranslate = false;
-
-            callback(summarySentences);
-        }
+        );
     }
 
     return {
         initialize: function (sourceLang, targetLang) {
             fromLang = sourceLang;
             toLang = targetLang;
-
-            socket.on('translated text', function (text, translation) {
-                translationStore[text] = {
-                    original: translation.text
-                };
-                checkSummaryResolved();
-            });
         },
         translate: function (summarySentences, callback) {
-            sentencesToTranslate = summarySentences;
-            summaryCallback = callback;
+            var pendingCallbacks = 0;
+
+            function translationCallback(sentence) {
+                translationStore[sentence.source] = {
+                    original: sentence.target
+                };
+
+                pendingCallbacks--;
+
+                if (!pendingCallbacks) {
+                    doneTranslations();
+                }
+            }
+
+            function doneTranslations() {
+                summarySentences.forEach(function (sentence) {
+                    sentence.target = translationStore[sentence.source].original;
+
+                    if (translationStore[sentence.source].edited) {
+                        sentence.editedTarget = translationStore[sentence.source].edited;
+                    }
+                });
+
+                callback(summarySentences);
+            }
 
             summarySentences.map(function (sentence) {
                 if (!(sentence.source in translationStore)) {
-                    translateSentence(sentence);
+                    pendingCallbacks++;
+                    translateSentence(sentence, translationCallback);
                 }
             });
 
-            checkSummaryResolved();
+            if (!pendingCallbacks) {
+                doneTranslations();
+            }
         },
         getCached: function(sentence) {
             var cachedSentence = {

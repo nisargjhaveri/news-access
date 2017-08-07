@@ -42,10 +42,8 @@ module.exports = function (socket) {
             .catch(throwError);
     });
 
-    socket.on('translate text', function (text, from, to, method) {
+    socket.on('translate text', function (text, from, to, method, callback) {
         translate.translateText(text, from, to, method)
-            .then(function (translation) {
-                socket.emit('translated text', text, translation);
-            }, throwError);
+            .then(callback, throwError);
     });
 };
