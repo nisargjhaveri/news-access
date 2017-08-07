@@ -1,43 +1,9 @@
-var MongoClient = require("mongodb").MongoClient;
-
-var config = require("./config.json");
-
 var articleUtils = require('./articleUtils.js');
 var storedArticleUtils = require('./storedArticleUtils.js');
 
-var dbPromise = null;
-function getDB() {
-    if (!dbPromise) {
-        dbPromise = new Promise(function(resolve, reject) {
-            var mongoServerUri = 'mongodb://' +
-                config.mongodb.user + ':' + config.mongodb.password + '@' +
-                config.mongodb.host + '/' + config.mongodb.database +
-                '?authSource=' + config.mongodb.authSource;
-
-            MongoClient
-                .connect(mongoServerUri)
-                .then(function(db) {
-                    console.log("Connected to mongodb");
-                    var dbConnection = db;
-
-                    dbConnection.on("close", function(err) {
-                        console.log("Mongodb connection closed. Reason:", err);
-                    }).on("error", function(err) {
-                        console.log("Mongodb error:", err);
-                    });
-
-                    resolve(dbConnection);
-                }, function(err) {
-                    reject(err);
-                });
-        });
-    }
-    return dbPromise;
-}
-
 function saveRawArticle (article, logId) {
     // Best effort async save the raw article
-    return getDB().then(function (db) {
+    return storedArticleUtils.getDB().then(function (db) {
         var collection = db.collection('raw-articles');
 
         return collection.findOne({
@@ -108,7 +74,7 @@ function StoredArticles (logId) {
 }
 
 StoredArticles.prototype.fetchOne = function (id) {
-    return getDB().then(function (db) {
+    return storedArticleUtils.getDB().then(function (db) {
         var collection = db.collection('preprocessed-articles');
 
         return collection.findOne({ _id: id }, { _id: 0 })
@@ -124,7 +90,7 @@ StoredArticles.prototype.fetchOne = function (id) {
 };
 
 StoredArticles.prototype.fetchList = function (options) {
-    return getDB().then(function (db) {
+    return storedArticleUtils.getDB().then(function (db) {
         var collection = db.collection('preprocessed-articles');
 
         return collection.find({})
@@ -154,7 +120,7 @@ StoredArticles.prototype.receiveRaw = function (rawArticle) {
 };
 
 StoredArticles.prototype.storePreprocessed = function (article) {
-    return getDB().then(function (db) {
+    return storedArticleUtils.getDB().then(function (db) {
         var collection = db.collection('preprocessed-articles');
 
         return collection.replaceOne(
@@ -166,7 +132,7 @@ StoredArticles.prototype.storePreprocessed = function (article) {
 };
 
 StoredArticles.prototype.storeEdited = function (article) {
-    return getDB().then(function (db) {
+    return storedArticleUtils.getDB().then(function (db) {
         var collection = db.collection('accessible-articles');
 
         delete article._id;
