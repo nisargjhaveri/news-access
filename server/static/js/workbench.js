@@ -509,6 +509,9 @@ function loadArticle() {
     socket.emit('access article', articleId, [selectedLanguage], {
         'summarizer': selectedSummarizer,
         'translator': selectedTranslator
+    }, function (articles) {
+        console.log(articles);
+        prepareArticle(articles[0]);
     });
 }
 
@@ -530,11 +533,6 @@ var socket;
 $(function () {
     socket = io({path: baseUrl + 'socket.io'});
     socket.emit('select article source', articleSource);
-
-    socket.on('accessible articles', function (articles) {
-        console.log(articles);
-        prepareArticle(articles[0]);
-    });
 
     socket.on('new error', function (err) {
         panic();

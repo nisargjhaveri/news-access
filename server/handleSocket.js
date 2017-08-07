@@ -31,14 +31,12 @@ module.exports = function (socket) {
             }, throwError);
     });
 
-    socket.on('access article', function (articleId, langs, options) {
+    socket.on('access article', function (articleId, langs, options, callback) {
         socket.articleFactory.fetchOne(articleId)
             .then(function (article) {
                 return pipeline.accessArticle(article, langs, options);
             }, handleError)
-            .then(function (articles) {
-                socket.emit('accessible articles', articles);
-            }, handleError)
+            .then(callback, handleError)
             .catch(throwError);
     });
 

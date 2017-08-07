@@ -110,6 +110,13 @@ function refreshArticle() {
     socket.emit('access article', articleId, [selectedLanguage], {
         'summarizer': selectedSummarizer,
         'translator': selectedTranslator
+    }, function (articles) {
+        showAccessibleArticles(articles);
+
+        $('.select-language').removeAttr('disabled');
+        $('.select-summarizer').removeAttr('disabled');
+        $('.select-translator').removeAttr('disabled');
+        console.log(articles);
     });
 }
 
@@ -127,15 +134,6 @@ var socket;
 $(function () {
     socket = io({path: baseUrl + 'socket.io'});
     socket.emit('select article source', articleSource);
-
-    socket.on('accessible articles', function (articles) {
-        showAccessibleArticles(articles);
-
-        $('.select-language').removeAttr('disabled');
-        $('.select-summarizer').removeAttr('disabled');
-        $('.select-translator').removeAttr('disabled');
-        console.log(articles);
-    });
 
     socket.on('new error', function (err) {
         panic(err);
