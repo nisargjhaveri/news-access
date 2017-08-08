@@ -18,7 +18,6 @@ module.exports.pushArticle = function (article) {
                 }
             },
             function (err, res, body) {
-                console.log(err, res, body);
                 if (err) {
                     reject(err);
                 } else {

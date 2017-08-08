@@ -44,11 +44,13 @@ module.exports = function (socket) {
 
     socket.on('publish article', function (article, callback) {
         socket.articleFactory.storeEdited(article)
-            .then(callback, handleError)
+            .then(callback, throwError)
             .then(function () {
                 return veoozInterface.pushArticle(article);
             }, handleError)
-            .catch(throwError);
+            .catch(function (err) {
+                console.log(socket.id, "Error:", err);
+            });
     });
 
     socket.on('translate text', function (text, from, to, method, callback) {
