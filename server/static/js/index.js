@@ -9,7 +9,7 @@ function addNewArticle (article) {
     $article.removeAttr('id');
     $article.find('.show-title').text(article.title);
     $article.find('.show-source').text(article.source);
-    $article.find('.show-published-time').text(moment(article.published).fromNow());
+    $article.find('.show-published-time').text(moment(article.publishedTime).fromNow());
     $article.find('.show-image').attr('src', article.picture).addClass(article.picture ? "" : "hidden");
     $article.find('.link-article').attr('href', getArticleUrl(article.id));
     $article.find('.link-original-article').attr('href', article.url);

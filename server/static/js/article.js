@@ -18,7 +18,7 @@ function makeAccessibleArticle(article) {
     $article.find('.show-title').text(article.title);
     $article.find('.show-summary').text(article.summary);
     $article.find('.show-source').text(article.source);
-    $article.find('.show-published-time').text(moment(article.published).fromNow());
+    $article.find('.show-published-time').text(moment(article.publishedTime).fromNow());
     $article.find('.link-original-article').attr('href', article.url);
 
     return $article;
@@ -37,7 +37,7 @@ function showAccessibleArticles(articles) {
 
     $article.find('.show-title').text(orignialArticle.title);
     $article.find('.show-source').text(orignialArticle.source);
-    $article.find('.show-published-time').text(moment(orignialArticle.published).fromNow());
+    $article.find('.show-published-time').text(moment(orignialArticle.publishedTime).fromNow());
     $article.find('.show-summary').text(orignialArticle.summary);
     appendParagraphs($article.find('.show-full-article'), orignialArticle.body);
     $article.find('.link-original-article').attr('href', orignialArticle.url);

@@ -34,6 +34,7 @@ module.exports.getDB = function () {
     return dbPromise;
 };
 
+// Convert article sent by Veooz to internal format
 module.exports.convertRawArticle = function (rawArticle) {
     var article = {
         _meta: {
@@ -46,7 +47,7 @@ module.exports.convertRawArticle = function (rawArticle) {
         url: rawArticle.url,
         lang: rawArticle.language,
         source: rawArticle.source || "PTI",
-        published: new Date(parseInt(rawArticle.publishedTime)),
+        publishedTime: new Date(parseInt(rawArticle.publishedTime)),
         publishedPlace: null,
         body: null
     };

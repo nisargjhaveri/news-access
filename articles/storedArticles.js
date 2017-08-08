@@ -94,7 +94,7 @@ StoredArticles.prototype.fetchList = function (options) {
         var collection = db.collection('preprocessed-articles');
 
         return collection.find({})
-            .sort("published", -1)
+            .sort("publishedTime", -1)
             .limit(options.limit || 10)
             .toArray()
             .then(function (docs) {
@@ -132,11 +132,23 @@ StoredArticles.prototype.storePreprocessed = function (article) {
 };
 
 StoredArticles.prototype.storeEdited = function (article) {
+    var that = this;
     return storedArticleUtils.getDB().then(function (db) {
+        console.log(that.logId, "Storing accessible article", article.id, article.lang);
         var collection = db.collection('accessible-articles');
 
         delete article._id;
-        return collection.insertOne(article);
+
+        return collection.updateOne(
+            { $and: [{ _id: { $gt: 0 }}, { _id: { $lt: 0 }}] },
+            {
+                $set: article,
+                $currentDate: {
+                    _timestamp: true
+                }
+            },
+            { upsert: true }
+        );
     });
 };
 

@@ -40,6 +40,11 @@ module.exports = function (socket) {
             .catch(throwError);
     });
 
+    socket.on('publish article', function (article, callback) {
+        socket.articleFactory.storeEdited(article)
+            .then(callback, throwError);
+    });
+
     socket.on('translate text', function (text, from, to, method, callback) {
         translate.translateText(text, from, to, method)
             .then(callback, throwError);

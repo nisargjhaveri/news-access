@@ -32,7 +32,7 @@ function makeArticle ($elem) {
         url: $elem.data('webUrl'),
         lang: $elem.data('language'),
         source: $elem.find('.news-source-info .news-source').text().trim(),
-        published: Date.parse($elem.find('.news-source-info .timeago').attr('datetime')),
+        publishedTime: Date.parse($elem.find('.news-source-info .timeago').attr('datetime')),
     };
 }
 

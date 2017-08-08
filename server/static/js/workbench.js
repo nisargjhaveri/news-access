@@ -466,6 +466,8 @@ function prepareArticle(article) {
                 }).join("\n");
 
                 console.log(editedArticle);
+
+                socket.emit('publish article', editedArticle);
             })
             .removeClass('hidden');
     }
