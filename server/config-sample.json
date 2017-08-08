@@ -2,5 +2,7 @@
     "port": 3000,
     "baseUrl": "/news-access/",
     "proxy": "http://proxy.iiit.ac.in:8080/",
-    "apikeys": ["Allowed API key1"]
+    "apikeys": ["Allowed API key1"],
+
+    "veoozApikey": "API key for pushing article to veooz"
 }

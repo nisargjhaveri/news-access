@@ -1,5 +1,6 @@
 var articleUtils = require('./articleUtils.js');
 var storedArticleUtils = require('./storedArticleUtils.js');
+var veoozArticleUtils = require('./veoozArticleUtils.js');
 
 function saveRawArticle (article, logId) {
     // Best effort async save the raw article
@@ -113,7 +114,7 @@ StoredArticles.prototype.receiveRaw = function (rawArticle) {
 
     return saveRawArticle(rawArticle, that.logId)
         .then(function () {
-            return storedArticleUtils.convertRawArticle(rawArticle);
+            return veoozArticleUtils.convertRawArticle(rawArticle);
         }, function (err) {
             return Promise.reject(err);
         });
@@ -148,7 +149,11 @@ StoredArticles.prototype.storeEdited = function (article) {
                 }
             },
             { upsert: true }
-        );
+        ).then(function (res) {
+            return Promise.resolve(article);
+        }, function (err) {
+            return Promise.reject(err);
+        });
     });
 };
 

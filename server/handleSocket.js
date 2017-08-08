@@ -3,6 +3,8 @@ var summarize = require("../summarize");
 var translate = require("../translate");
 var pipeline = require("../pipeline");
 
+var veoozInterface = require("./veoozInterface.js");
+
 module.exports = function (socket) {
     function handleError(err) {
         return Promise.reject(err);
@@ -42,7 +44,11 @@ module.exports = function (socket) {
 
     socket.on('publish article', function (article, callback) {
         socket.articleFactory.storeEdited(article)
-            .then(callback, throwError);
+            .then(callback, handleError)
+            .then(function () {
+                return veoozInterface.pushArticle(article);
+            }, handleError)
+            .catch(throwError);
     });
 
     socket.on('translate text', function (text, from, to, method, callback) {

@@ -1,6 +1,7 @@
 var Articles = require("../articles");
 var articleUtils = require("../articles/articleUtils.js");
 var storedArticleUtils = require("../articles/storedArticleUtils.js");
+var veoozArticleUtils = require("../articles/veoozArticleUtils.js");
 
 var pipeline = require("../pipeline");
 
@@ -25,7 +26,7 @@ storedArticleUtils.getDB().then(function (db) {
 
     articlesCursor.forEach(function (rawArticle) {
         promises.push(
-            Promise.resolve(storedArticleUtils.convertRawArticle(rawArticle))
+            Promise.resolve(veoozArticleUtils.convertRawArticle(rawArticle))
                 .then(function (article) {
                     console.log(article.id, "Preprocessing raw article");
                     return articleUtils.populateBodySentences(article);
