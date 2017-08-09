@@ -86,6 +86,21 @@
     overflow: visible;
 }
 
+.summary {
+    margin-bottom: 0;
+}
+
+.summary-status-container {
+    background-color: rgba(232, 232, 232, 1);
+    background: linear-gradient(to top, rgba(232, 232, 232, 1) 0%, rgba(255, 255, 255, 0) 100%);
+    border-bottom: 1px solid #ddd;
+
+    text-align: right;
+    font-size: .8em;
+    color: #666;
+    padding: 0 1em;
+}
+
 .summary-bin-container {
     position: absolute;
     width: 100%;

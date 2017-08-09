@@ -110,6 +110,7 @@ function prepareArticle(article) {
                     .attr('data-sentence-id', sentence.id);
             })
         );
+        updateTargetSummaryStatus();
         $('.summary-target').removeClass('loading');
     }
 
@@ -128,6 +129,22 @@ function prepareArticle(article) {
         });
 
         summaryTranslator.translate(sentences, updateSummaryDisplay);
+    }
+
+    function updateSourceSummaryStatus() {
+        var totalSize = 0;
+        $('.summary-source .sentence').each(function () {
+            totalSize += $(this).text().length;
+        });
+        $('.summary-source-status-char').text(totalSize);
+    }
+
+    function updateTargetSummaryStatus() {
+        var totalSize = 0;
+        $('.summary-target .sentence').each(function () {
+            totalSize += $(this).text().length;
+        });
+        $('.summary-target-status-char').text(totalSize);
     }
 
     function showArticle(paragraphs) {
@@ -174,6 +191,7 @@ function prepareArticle(article) {
                     .attr('data-sentence-id', sentence.id);
             })
         );
+        updateSourceSummaryStatus();
 
         // Show summary in target language
         updateSummaryDisplay(article.summarySentences);
@@ -285,12 +303,22 @@ function prepareArticle(article) {
 
                 $this.removeData('on-focus-sentence');
             })
+            .on("input", '.sentence', function(e) {
+                updateSourceSummaryStatus();
+            })
             .on("change", '.sentence', function(e) {
                 $('.summary-source').trigger('summaryUpdated');
             })
             .on("summaryUpdated", function(e) {
+                updateSourceSummaryStatus();
                 updateTargetSummary();
             });
+
+        $('.summary-target')
+            .on("input", '.sentence', function(e) {
+                updateTargetSummaryStatus();
+            });
+
 
         $('.bench-container')
             .on("blur", '.summary-target .sentence, .article-body .paragraph-target .sentence', function(e) {
@@ -346,6 +374,10 @@ function prepareArticle(article) {
                 // Scroll linked source sentence into view
                 var sentenceId = $(this).attr('data-sentence-id');
                 var linkedSource = $('.paragraph-source .sentence[data-sentence-id="' + sentenceId + '"]');
+
+                if (!linkedSource.length) {
+                    return;
+                }
 
                 var container = $('.bench-article-container');
 
@@ -468,8 +500,7 @@ function prepareArticle(article) {
                 console.log(editedArticle);
 
                 socket.emit('publish article', editedArticle);
-            })
-            .removeClass('hidden');
+            });
     }
 
     summaryTranslator.initialize(article.orignialArticle.lang, article.lang);
@@ -479,6 +510,9 @@ function prepareArticle(article) {
     showArticle(article.bodySentences);
     enableDragDrop();
     makeArticleInteractive();
+
+    $('.summary-status-container').removeClass('hidden');
+    $('.publish-btn').removeClass('hidden');
 
     $('.bench-container').removeClass('loading');
 }

@@ -53,6 +53,9 @@
             <div class="flex-item flex-column">
                 <div class="flex-item flex-column summary-source-container">
                     <p class="paragraph paragraph-draggable summary summary-source flex-item"></p>
+                    <div class="summary-status-container hidden">
+                        <span class="summary-source-status-char"></span> characters
+                    </div>
                     <div class="summary-bin-container flex-row hidden">
                         <div class="flex-item"></div>
                         <div class="summary-bin fa fa-trash-o"></div>
@@ -60,8 +63,9 @@
                     </div>
                 </div>
                 <div class="flex-item flex-column">
-                    <div class="flex-item">
-                        <p class="paragraph summary summary-target"></p>
+                    <p class="paragraph summary summary-target flex-item"></p>
+                    <div class="summary-status-container hidden">
+                        <span class="summary-target-status-char"></span> characters
                     </div>
                     <input type="submit" value="Publish" class="publish-btn hidden">
                 </div>
