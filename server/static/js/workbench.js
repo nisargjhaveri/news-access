@@ -324,23 +324,25 @@ function prepareArticle(article) {
             .on("blur", '.summary-target .sentence, .article-body .paragraph-target .sentence', function(e) {
                 var $this = $(this);
 
-                var sourcePath;
+                var sentenceId = $this.attr('data-sentence-id');    // Can be undefined
+
+                var sourceText;
                 var otherSourcePath;
                 var otherTargetPath;
                 if ($this.is('.summary-target .sentence')) {
-                    sourcePath = '.summary-source';
+                    var sentenceIndex = $('.summary-target .sentence').index($this);
+                    sourceText = $('.summary-source .sentence').eq(sentenceIndex).text();
                     otherSourcePath = '.article-body .paragraph-source';
                     otherTargetPath = '.article-body .paragraph-target';
                 } else {
                     // It is '.article-body .paragraph-target .sentence'
-                    sourcePath = '.article-body .paragraph-source';
+                    sourceText = $('.article-body .paragraph-source .sentence[data-sentence-id="' + sentenceId + '"]').text();
                     otherSourcePath = '.summary-source';
                     otherTargetPath = '.summary-target';
                 }
 
                 var sentence = {};
-                sentence.id = $this.attr('data-sentence-id');
-                sentence.source = $(sourcePath + ' .sentence[data-sentence-id="' + sentence.id + '"]').text();
+                sentence.source = sourceText;
                 sentence.editedTarget = $this.text();
 
                 summaryTranslator.cacheTranslations([sentence]);
@@ -351,10 +353,14 @@ function prepareArticle(article) {
                     .removeClass("translation-edited")
                     .addClass(cachedSentence.editedTarget ? "translation-edited" : "");
 
-                var $otherSource = $(otherSourcePath + ' .sentence[data-sentence-id="' + sentence.id + '"]');
+                if (!sentenceId && sentenceId !== 0) {
+                    return;
+                }
+
+                var $otherSource = $(otherSourcePath + ' .sentence[data-sentence-id="' + sentenceId + '"]');
 
                 if (cachedSentence.source == $otherSource.text()) {
-                    $(otherTargetPath + ' .sentence[data-sentence-id="' + sentence.id + '"]')
+                    $(otherTargetPath + ' .sentence[data-sentence-id="' + sentenceId + '"]')
                         .text(cachedSentence.editedTarget || cachedSentence.target)
                         .removeClass("translation-edited")
                         .addClass(cachedSentence.editedTarget ? "translation-edited" : "");
@@ -366,6 +372,7 @@ function prepareArticle(article) {
             var $elem = $(elem);
             var sentenceId = $elem.attr('data-sentence-id');
 
+            // FIXME: doesn't work if sentenceId is not present
             return $('.sentence[data-sentence-id="' + sentenceId + '"]').not($elem);
         }
 
@@ -373,11 +380,12 @@ function prepareArticle(article) {
             .on('focus', '.sentence', function(e) {
                 // Scroll linked source sentence into view
                 var sentenceId = $(this).attr('data-sentence-id');
-                var linkedSource = $('.paragraph-source .sentence[data-sentence-id="' + sentenceId + '"]');
 
-                if (!linkedSource.length) {
+                if (!sentenceId && sentenceId !== 0) {
                     return;
                 }
+
+                var linkedSource = $('.paragraph-source .sentence[data-sentence-id="' + sentenceId + '"]');
 
                 var container = $('.bench-article-container');
 

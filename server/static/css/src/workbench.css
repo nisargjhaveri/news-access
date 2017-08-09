@@ -55,22 +55,27 @@
     cursor: grab;
 }
 
-.paragraph .sentence:hover {
-    background-color: #94ffff;
+.paragraph .sentence:hover,
+.article-title-target:hover {
+    background-color: #4FC3F7;
 }
 
 .paragraph .sentence:focus,
 .article-title h2:focus {
     cursor: auto;
-    background-color: #bfffd9;
+    background-color: #C5E1A5;
 }
 
 .paragraph .sentence.linked-hover {
-    background-color: #c7ffff;
+    background-color: #B3E5FC;
 }
 
 .paragraph .sentence.linked-focus {
-    background-color: #d6ffe7;
+    background-color: #DCEDC8;
+}
+
+.translation-edited {
+    background: linear-gradient(to top, #F8BBD0 0%, rgba(255, 255, 255, 0) 25%);
 }
 
 .sortable-ghost {
