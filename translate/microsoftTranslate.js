@@ -29,54 +29,80 @@ function translate (text, from, to) {
         return Promise.reject("LANG_NOT_SUPPORTED");
     }
 
+    var sourceSentences = text.split("\n").filter(function (sentence) {
+        return sentence;
+    });
+
     return getAccessToken().then(function (token) {
-        var url = 'http://api.microsofttranslator.com/v2/Http.svc/Translate';
+        var url = 'http://api.microsofttranslator.com/v2/Http.svc/TranslateArray';
+
         var data = {
-            appid: 'Bearer ' + token,
-            from: from,
-            to: to,
-            text: text,
+            AppId: 'Bearer ' + token,
+            From: from,
+            Texts: {
+                string: sourceSentences.map(function (sentence) {
+                    return {
+                        $: {
+                            xmlns: "http://schemas.microsoft.com/2003/10/Serialization/Arrays"
+                        },
+                        _: sentence
+                    };
+                })
+            },
+            To: to,
         };
 
-        url = url + '?' + querystring.stringify(data);
+        var xmlBuilder = new xml2js.Builder({
+            rootName: "TranslateArrayRequest",
+            headless: true
+        });
+        var requestXml = xmlBuilder.buildObject(data);
 
         return new Promise(function(resolve, reject) {
-            request(url, function (err, res, body) {
-                if (err || res.statusCode !== 200) {
-                    reject(err);
-                } else {
-                    xml2js.parseString(body, function (err, result) {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            var targetText = result.string._;
-                            var sourceSentences = text.split("\n");
-                            var targetSentences = targetText.split("\n");
-                            var sentences = [];
-
-                            if (sourceSentences.length != targetSentences.length) {
-                                // FIXME: find a better way to handle this
-                                sentences.push({
-                                    source: text,
-                                    target: targetText
-                                });
+            request.post(
+                {
+                    url: url,
+                    body: requestXml,
+                    headers: {
+                        "Content-Type": "application/xml"
+                    }
+                },
+                function (err, res, body) {
+                    if (err || res.statusCode !== 200) {
+                        reject(err);
+                    } else {
+                        xml2js.parseString(body, function (err, result) {
+                            if (err) {
+                                reject(err);
                             } else {
-                                for (var i = 0; i < sourceSentences.length; i++) {
-                                    sentences.push({
-                                        source: sourceSentences[i].trim(),
-                                        target: targetSentences[i].trim()
+                                var targetSentences = result.ArrayOfTranslateArrayResponse.TranslateArrayResponse
+                                    .map(function (trans) {
+                                        return trans.TranslatedText[0];
                                     });
-                                }
-                            }
+                                var sentences = [];
 
-                            resolve({
-                                'text': targetText,
-                                'sentences': sentences
-                            });
-                        }
-                    });
+                                if (sourceSentences.length != targetSentences.length) {
+                                    reject("MS_TRANSLATION_ERROR");
+                                } else {
+                                    for (var i = 0; i < sourceSentences.length; i++) {
+                                        sentences.push({
+                                            source: sourceSentences[i].trim(),
+                                            target: targetSentences[i].trim()
+                                        });
+                                    }
+                                }
+
+                                resolve({
+                                    'text': sentences.map(function (sentence) {
+                                        return sentence.target;
+                                    }).join("\n"),
+                                    'sentences': sentences
+                                });
+                            }
+                        });
+                    }
                 }
-            });
+            );
         });
     });
 }
