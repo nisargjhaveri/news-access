@@ -64,6 +64,8 @@ function translateText (text, from, to) {
 }
 
 /*
+// Keeping this code commented, in case the other solution doesn't work
+
 function translate (text, from, to) {
     var sourceSentences = text.split("\n").filter(function (sentence) {
         return sentence;
@@ -95,7 +97,7 @@ function translate (text, from, to) {
             return Promise.reject(err);
         });
 }
-*/
+ */
 
 function translate (text, from, to) {
     return translateText(text, from, to)
