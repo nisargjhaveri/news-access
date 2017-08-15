@@ -1,7 +1,7 @@
 /* globals articleSource: false, baseUrl: false, availableSources: false */
 
-function getArticleUrl (id) {
-    return ["article", articleSource, id].join("/");
+function getActionUrl (id, action) {
+    return [action, articleSource, id].join("/");
 }
 
 function addNewArticle (article) {
@@ -11,8 +11,9 @@ function addNewArticle (article) {
     $article.find('.show-source').text(article.source);
     $article.find('.show-published-time').text(moment(article.publishedTime).fromNow());
     $article.find('.show-image').attr('src', article.picture).addClass(article.picture ? "" : "hidden");
-    $article.find('.link-article').attr('href', getArticleUrl(article.id));
+    $article.find('.link-article').attr('href', getActionUrl(article.id, "article"));
     $article.find('.link-original-article').attr('href', article.url);
+    $article.find('.link-workbench').attr('href', getActionUrl(article.id, "workbench"));
 
     $('.article-list').removeClass('loading').append($article);
 }

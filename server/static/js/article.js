@@ -10,6 +10,10 @@ function appendParagraphs($elem, text) {
     });
 }
 
+function getActionUrl (id, action) {
+    return [action, articleSource, id].join("/");
+}
+
 function makeAccessibleArticle(article) {
     var $article = $('#sample-accessible-article').clone();
     $article.removeAttr('id');
@@ -20,6 +24,7 @@ function makeAccessibleArticle(article) {
     $article.find('.show-source').text(article.source);
     $article.find('.show-published-time').text(moment(article.publishedTime).fromNow());
     $article.find('.link-original-article').attr('href', article.url);
+    $article.find('.link-workbench').attr('href', getActionUrl(article.id, "workbench"));
 
     return $article;
 }
@@ -41,6 +46,7 @@ function showAccessibleArticles(articles) {
     $article.find('.show-summary').text(orignialArticle.summary);
     appendParagraphs($article.find('.show-full-article'), orignialArticle.body);
     $article.find('.link-original-article').attr('href', orignialArticle.url);
+    $article.find('.link-workbench').attr('href', getActionUrl(orignialArticle.id, "workbench"));
     $article.find('.show-image')
         .attr('src', orignialArticle.picture)
         .addClass(orignialArticle.picture ? "" : "hidden");
