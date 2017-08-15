@@ -111,10 +111,14 @@ select.inline {
     color: #f17575;
 }
 
-.news-heading .show-source + .show-published-time:before {
+.news-heading .show-source + .show-published-time:before,
+.link-workbench:before {
     content: " ⋅ ";
     margin: 0 5px 0 5px;
-    /*background-color: red;*/
+}
+
+.link-workbench {
+    color: green;
 }
 
 .article-small {

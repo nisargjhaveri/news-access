@@ -12,10 +12,26 @@
         <script>
             var baseUrl = "{{baseUrl}}";
             var articleSource = "{{articleSource}}";
+            var availableSources = ["pti", "thehindu", "indianexpress"];
         </script>
         <script src="static/js/index.js"></script>
     </head>
     <body>
+        <div class="header-container">
+            <div class="header">
+                <h1><a href="{{baseUrl}}" class="link-home">News Access</a></h1>
+                <div class="access-options">
+                    <label>
+                        Article source:
+                        <select class="select-source inline">
+                            <option value="pti">PTI</option>
+                            <option value="thehindu">The Hindu</option>
+                            <option value="indianexpress">The Indian Express</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+        </div>
         <div class="article-list loading"></div>
         <div class="hidden">
             <article id="sample-article" class="clear-fix">

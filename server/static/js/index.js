@@ -1,4 +1,4 @@
-/* globals articleSource: false, baseUrl: false */
+/* globals articleSource: false, baseUrl: false, availableSources: false */
 
 function getArticleUrl (id) {
     return ["article", articleSource, id].join("/");
@@ -17,14 +17,40 @@ function addNewArticle (article) {
     $('.article-list').removeClass('loading').append($article);
 }
 
+function setupOptionsAndLoad() {
+    if (availableSources.indexOf(articleSource) == -1) {
+        var selectedSource = localStorage.getItem('news-access-source') || "pti";
+        changeSource(selectedSource);
+    } else {
+        $('.select-source option[value="' + articleSource + '"]').prop('selected', true);
+        loadArticleList();
+    }
+
+    $('.select-source').on('change', manageOptionsAndRefresh);
+}
+
+function manageOptionsAndRefresh() {
+    var selectedSource = $('.select-source').val();
+
+    localStorage.setItem('news-access-source', selectedSource);
+
+    changeSource(selectedSource);
+}
+
+function changeSource(source) {
+    var targetUrl = (baseUrl + '/' + source).replace(/\/+/g, "/");
+    window.location.href = targetUrl;
+}
+
 function panic() {
     $('.article-list').removeClass('loading');
     $('.error-container').removeClass('hidden');
 }
 
-$(function () {
-    var socket = io({path: baseUrl + 'socket.io'});
-    socket.emit('select article source', articleSource);
+var socket;
+
+function loadArticleList() {
+    socket = io({path: baseUrl + 'socket.io'});
 
     socket.on('new article', function (article) {
         addNewArticle(article);
@@ -36,6 +62,12 @@ $(function () {
         console.log("Error", err);
     });
 
+    socket.emit('select article source', articleSource);
+
     console.log("Requesting article list");
     socket.emit('get article list', 10);
+}
+
+$(function () {
+    setupOptionsAndLoad();
 });

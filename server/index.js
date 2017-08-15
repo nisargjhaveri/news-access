@@ -47,7 +47,7 @@ app.use('/static', express.static(path.join(__dirname, 'static')));
 
 app.get('/:articleSource?', function(req, res){
     res.render('index', {
-        articleSource: req.params.articleSource || "thehindu",
+        articleSource: req.params.articleSource,
         baseUrl: config.baseUrl,
     });
 });
