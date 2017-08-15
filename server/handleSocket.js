@@ -46,11 +46,15 @@ module.exports = function (socket) {
         socket.articleFactory.storeEdited(article)
             .then(callback, throwError)
             .then(function () {
-                return veoozInterface.pushArticle(article);
+                if (!article._meta || !article._meta.rawId) {
+                    // Don't push to Veooz
+                    return;
+                } else {
+                    console.log(socket.id, "Pushing accessible article to Veooz:", article.id);
+                    return veoozInterface.pushArticle(article);
+                }
             }, handleError)
-            .then(function () {
-                console.log(socket.id, "Pushed accessible article to Veooz:", article.id);
-            }, function (err) {
+            .catch(function (err) {
                 console.log(socket.id, "Error:", err);
             });
     });

@@ -461,6 +461,9 @@ function prepareArticle(article) {
 
         $('.publish-btn')
             .on('click', function (e) {
+                $('.bench-article-container, .bench-summary-container').addClass('hidden');
+                $('.bench-container').addClass('loading');
+
                 var editedArticle = JSON.parse(JSON.stringify(article));
 
                 // Set title
@@ -507,7 +510,12 @@ function prepareArticle(article) {
 
                 console.log(editedArticle);
 
-                socket.emit('publish article', editedArticle);
+                socket.emit('publish article', editedArticle, function () {
+                    $('.bench-container').removeClass('loading');
+
+                    $('.bench-container').addClass('hidden');
+                    $('.success-container').removeClass('hidden');
+                });
             });
     }
 

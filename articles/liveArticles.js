@@ -1,5 +1,6 @@
 var ArticleList = require("./liveListArticles.js");
 var fullArticle = require("./liveFullArticle.js");
+var storedArticleUtils = require('./storedArticleUtils.js');
 
 function getErrorFunc (logId) {
     return function (err) {
@@ -35,16 +36,14 @@ LiveArticles.prototype.fetchList = function (options) {
 };
 
 LiveArticles.prototype.receiveRaw = function (rawArticle) {
-    return Promise.reject(this.logId, "Cannot recieve raw article");
+    return Promise.reject("Cannot recieve raw article");
 };
 
 LiveArticles.prototype.storePreprocessed = function (article) {
-    return Promise.reject(this.logId, "Cannot store article");
+    return Promise.reject("Cannot store preprocessed article");
 };
 
-LiveArticles.prototype.storeEdited = function (article) {
-    return Promise.reject(this.logId, "Cannot store article");
-};
+LiveArticles.prototype.storeEdited = storedArticleUtils.storeEdited;
 
 
 module.exports = LiveArticles;

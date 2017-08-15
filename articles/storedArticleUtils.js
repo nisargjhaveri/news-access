@@ -3,7 +3,7 @@ var MongoClient = require("mongodb").MongoClient;
 var config = require("./config.json");
 
 var dbPromise = null;
-module.exports.getDB = function () {
+function getDB () {
     if (!dbPromise) {
         dbPromise = new Promise(function(resolve, reject) {
             var mongoServerUri = 'mongodb://' +
@@ -30,4 +30,34 @@ module.exports.getDB = function () {
         });
     }
     return dbPromise;
+}
+
+function storeEdited (article) {
+    var that = this;
+    return getDB().then(function (db) {
+        console.log(that.logId, "Storing accessible article", article.id, article.lang);
+        var collection = db.collection('accessible-articles');
+
+        delete article._id;
+
+        return collection.updateOne(
+            { $and: [{ _id: { $gt: 0 }}, { _id: { $lt: 0 }}] },
+            {
+                $set: article,
+                $currentDate: {
+                    _timestamp: true
+                }
+            },
+            { upsert: true }
+        ).then(function (res) {
+            return Promise.resolve(article);
+        }, function (err) {
+            return Promise.reject(err);
+        });
+    });
+}
+
+module.exports = {
+    getDB,
+    storeEdited
 };

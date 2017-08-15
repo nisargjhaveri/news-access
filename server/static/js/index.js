@@ -39,8 +39,7 @@ function manageOptionsAndRefresh() {
 }
 
 function changeSource(source) {
-    var targetUrl = (baseUrl + '/' + source).replace(/\/+/g, "/");
-    window.location.href = targetUrl;
+    window.location.href = source;
 }
 
 function panic() {

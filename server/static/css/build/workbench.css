@@ -166,3 +166,13 @@ div.summary-bin {
 .publish-btn {
     font-size: 1.2em;
 }
+
+.success-container {
+    text-align: center;
+    color: #444;
+    margin-top: 2em;
+}
+
+.success-suggestion {
+    margin-top: 4em;
+}

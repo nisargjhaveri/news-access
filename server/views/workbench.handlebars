@@ -50,7 +50,7 @@
                 </div>
                 <div class="article-body flex-item"></div>
             </div>
-            <div class="flex-item flex-column">
+            <div class="flex-item flex-column bench-summary-container">
                 <div class="flex-item flex-column summary-source-container">
                     <p class="paragraph paragraph-draggable summary summary-source flex-item"></p>
                     <div class="summary-status-container hidden">
@@ -69,6 +69,12 @@
                     </div>
                     <input type="submit" value="Publish" class="publish-btn hidden">
                 </div>
+            </div>
+        </div>
+        <div class="success-container hidden">
+            Done!
+            <div class="success-suggestion">
+                You may now want to proceed to <a href="{{articleSource}}">article list</a>
             </div>
         </div>
         {{> panic-error}}
