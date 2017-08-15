@@ -8,7 +8,7 @@ var safeEval = require('safe-eval');
 
 var supported_langs = ['en', 'hi', 'gu', 'bn', 'kn', 'ml', 'mr', 'ne', 'pa', 'sd', 'ta', 'te', 'ur'];
 
-function translateSentence (text, from, to) {
+function translateText (text, from, to) {
     if (supported_langs.indexOf(from) < 0 || supported_langs.indexOf(to) < 0) {
         return Promise.reject("LANG_NOT_SUPPORTED");
     }
@@ -63,13 +63,14 @@ function translateSentence (text, from, to) {
     });
 }
 
+/*
 function translate (text, from, to) {
     var sourceSentences = text.split("\n").filter(function (sentence) {
         return sentence;
     });
     var translatePromises = [];
     sourceSentences.forEach(function (sentence) {
-        translatePromises.push(translateSentence(sentence, from, to));
+        translatePromises.push(translateText(sentence, from, to));
     });
 
     return Promise.all(translatePromises)
@@ -92,6 +93,34 @@ function translate (text, from, to) {
             });
         }, function (err) {
             return Promise.reject(err);
+        });
+}
+*/
+
+function translate (text, from, to) {
+    return translateText(text, from, to)
+        .then(function (translation) {
+            var sentences = [];
+            var sourceSentences = text.split("\n");
+            var targetSentences = translation.text.split("\n");
+
+            if (sourceSentences.length != targetSentences.length) {
+                return Promise.reject("GOOGLE_TRANSLATION_ERROR");
+            } else {
+                for (var i = 0; i < sourceSentences.length; i++) {
+                    sentences.push({
+                        source: sourceSentences[i].trim(),
+                        target: targetSentences[i].trim()
+                    });
+                }
+            }
+
+            return Promise.resolve({
+                'text': sentences.map(function (sentence) {
+                    return sentence.target;
+                }).join("\n"),
+                'sentences': sentences
+            });
         });
 }
 
