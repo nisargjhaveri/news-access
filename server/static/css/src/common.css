@@ -137,6 +137,12 @@ select.inline {
     border-bottom: 1px solid #eee;
 }
 
+@media (min-width: 640px) {
+    .header {
+        min-width: 640px;
+    }
+}
+
 .header-container {
     text-align: center;
 }
