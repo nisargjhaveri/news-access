@@ -48,7 +48,9 @@ module.exports = function (socket) {
             .then(function () {
                 return veoozInterface.pushArticle(article);
             }, handleError)
-            .catch(function (err) {
+            .then(function () {
+                console.log(socket.id, "Pushed accessible article to Veooz:", article.id);
+            }, function (err) {
                 console.log(socket.id, "Error:", err);
             });
     });
