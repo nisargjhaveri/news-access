@@ -14,9 +14,8 @@ var handlebars = require('express-handlebars')({
     partialsDir: path.join(viewsDir, 'partials')
 });
 var bodyParser = require('body-parser');
-var passport = require('passport');
-var LocalApikeyStrategy = require('passport-localapikey').Strategy;
 
+var passport = require('./passportConfig.js');
 var handleSocket = require('./handleSocket.js');
 var handlePushedArticles = require('./handlePushedArticles.js');
 
@@ -24,15 +23,6 @@ app.engine('handlebars', handlebars);
 app.set('views', viewsDir);
 app.set('view engine', 'handlebars');
 
-passport.use(new LocalApikeyStrategy(
-    function(apikey, done) {
-        if (config.apikeys.indexOf(apikey) > -1) {
-            return done(null, true);
-        } else {
-            return done(null, false, { message: 'Unknown apikey'});
-        }
-    }
-));
 app.use(passport.initialize());
 
 app.use(bodyParser.json({           // to support JSON-encoded bodies
