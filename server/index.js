@@ -15,7 +15,7 @@ var handlebars = require('express-handlebars')({
 });
 var bodyParser = require('body-parser');
 
-var passport = require('./passportConfig.js');
+var auth = require('./auth.js');
 var handleSocket = require('./handleSocket.js');
 var handlePushedArticles = require('./handlePushedArticles.js');
 
@@ -23,7 +23,7 @@ app.engine('handlebars', handlebars);
 app.set('views', viewsDir);
 app.set('view engine', 'handlebars');
 
-app.use(passport.initialize());
+app.use(auth.passport.initialize());
 
 app.use(bodyParser.json({           // to support JSON-encoded bodies
     limit: '500kb'
@@ -60,7 +60,7 @@ app.get('/workbench/:articleSource/:articleId', function(req, res){
 
 app.post(
     '/api/veooz/push-articles',
-    passport.authenticate('localapikey', {session: false}),
+    auth.passport.authenticate('localapikey', {session: false}),
     function(req, res) {
         console.log("API request received on /api/veooz/push-articles");
 

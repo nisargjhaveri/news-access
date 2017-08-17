@@ -1,5 +1,6 @@
 var passport = require('passport');
 var LocalApikeyStrategy = require('passport-localapikey').Strategy;
+var LocalStrategy = require('passport-local').Strategy;
 
 var config = require('./config.json');
 
@@ -13,4 +14,6 @@ passport.use(new LocalApikeyStrategy(
     }
 ));
 
-module.exports = passport;
+module.exports = {
+    passport
+};
