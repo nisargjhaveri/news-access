@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>News Access</title>
+        <base href="{{baseUrl}}">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <link rel="stylesheet" href="static/css/build/common.css">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script>
+            var baseUrl = "{{baseUrl}}";
+        </script>
+    </head>
+    <body>
+        <div class="header-container">
+            <div class="header">
+                <h1><a href="{{baseUrl}}" class="link-home">News Access</a></h1>
+            </div>
+        </div>
+        <div class="login-form-container">
+            <h2>Login</h2>
+            <div class="login-error-message">{{errorMessage}}</div>
+            <form class="login-form" action="" method="post">
+                <input type="text" name="username" placeholder="Username" class="input-text" autofocus required>
+                <input type="password" name="password" placeholder="Password" class="input-text" required>
+                <input type="submit" value="Login" class="input-button">
+            </form>
+        </div>
+        {{> analytics}}
+    </body>
+</html>

@@ -148,6 +148,37 @@ select.inline {
     text-align: center;
 }
 
+.login-form-container {
+    text-align: center;
+}
+
+.login-form {
+    display: inline-block;
+    text-align: left;
+}
+
+.login-form input {
+    display: block;
+    margin: .5em;
+    padding: .3em;
+}
+
+.login-form input.input-text {
+    /*width: 20em;*/
+    font-size: 1em;
+    border: 1px solid #ccc;
+    background-color: transparent;
+    outline: none;
+}
+
+.login-form input.input-button {
+    min-width: 5em;
+}
+
+.login-error-message {
+    color: red;
+}
+
 .error-container {
     text-align: center;
     color: #444;
@@ -155,5 +186,15 @@ select.inline {
 }
 
 .error-suggestion {
+    margin-top: 4em;
+}
+
+.success-container {
+    text-align: center;
+    color: #444;
+    margin-top: 2em;
+}
+
+.success-suggestion {
     margin-top: 4em;
 }

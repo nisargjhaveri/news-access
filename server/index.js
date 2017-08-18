@@ -14,6 +14,8 @@ var handlebars = require('express-handlebars')({
     partialsDir: path.join(viewsDir, 'partials')
 });
 var bodyParser = require('body-parser');
+var expressSession = require('express-session');
+var connectFlash = require('connect-flash');
 
 var auth = require('./auth.js');
 var handleSocket = require('./handleSocket.js');
@@ -23,8 +25,6 @@ app.engine('handlebars', handlebars);
 app.set('views', viewsDir);
 app.set('view engine', 'handlebars');
 
-app.use(auth.passport.initialize());
-
 app.use(bodyParser.json({           // to support JSON-encoded bodies
     limit: '500kb'
 }));
@@ -33,11 +33,47 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     limit: '500kb'
 }));
 
+app.use(expressSession({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true
+}));
+app.use(connectFlash());
+app.use(auth.passport.initialize());
+app.use(auth.passport.session());
+
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
+app.get('/login', function (req, res) {
+  res.render('login', {
+      errorMessage: req.flash('error'),
+      baseUrl: config.baseUrl
+  });
+});
+
+app.post(
+    '/login',
+    auth.passport.authenticate('local', {
+        successReturnToOrRedirect: '/',
+        failureRedirect: '/login',
+        failureFlash: 'Invalid username or password.'
+    })
+);
+
+app.get('/logout', function (req, res) {
+    req.logout();
+    res.redirect('/login');
+});
+
 app.get('/:articleSource?', function(req, res){
+    var availableSources = ["pti", "thehindu", "indianexpress"];
+    if (req.params.articleSource && availableSources.indexOf(req.params.articleSource) == -1) {
+        return res.sendStatus(404);
+    }
+
     res.render('index', {
         articleSource: req.params.articleSource,
+        availableSources: JSON.stringify(availableSources),
         baseUrl: config.baseUrl,
     });
 });
@@ -50,7 +86,7 @@ app.get('/article/:articleSource/:articleId', function(req, res){
     });
 });
 
-app.get('/workbench/:articleSource/:articleId', function(req, res){
+app.get('/workbench/:articleSource/:articleId', auth.ensureLoggedIn, function(req, res){
     res.render('workbench', {
         articleSource: req.params.articleSource,
         articleId: req.params.articleId,
