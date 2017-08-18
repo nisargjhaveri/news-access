@@ -90,6 +90,7 @@ app.get('/workbench/:articleSource/:articleId', auth.ensureLoggedIn, function(re
     res.render('workbench', {
         articleSource: req.params.articleSource,
         articleId: req.params.articleId,
+        username: req.user.username,
         baseUrl: config.baseUrl,
     });
 });

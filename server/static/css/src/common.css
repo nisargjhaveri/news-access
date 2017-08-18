@@ -117,7 +117,7 @@ select.inline {
     margin: 0 5px 0 5px;
 }
 
-.link-workbench {
+.link-workbench, .link-action {
     color: green;
 }
 

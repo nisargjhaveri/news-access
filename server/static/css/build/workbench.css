@@ -52,6 +52,15 @@
 
 .bench-header {
     border-bottom: 1px solid #eee;
+    padding: 0 1em;
+}
+
+.bench-options {
+    text-align: right;
+}
+
+.display-username {
+    color: #666;
 }
 
 .article-title h2 {
