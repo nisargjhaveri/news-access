@@ -65,36 +65,6 @@ app.get('/logout', function (req, res) {
     res.redirect('/login');
 });
 
-app.get('/:articleSource?', function(req, res){
-    var availableSources = ["pti", "thehindu", "indianexpress"];
-    if (req.params.articleSource && availableSources.indexOf(req.params.articleSource) == -1) {
-        return res.sendStatus(404);
-    }
-
-    res.render('index', {
-        articleSource: req.params.articleSource,
-        availableSources: JSON.stringify(availableSources),
-        baseUrl: config.baseUrl,
-    });
-});
-
-app.get('/article/:articleSource/:articleId', function(req, res){
-    res.render('article', {
-        articleSource: req.params.articleSource,
-        articleId: req.params.articleId,
-        baseUrl: config.baseUrl,
-    });
-});
-
-app.get('/workbench/:articleSource/:articleId', auth.ensureLoggedIn, function(req, res){
-    res.render('workbench', {
-        articleSource: req.params.articleSource,
-        articleId: req.params.articleId,
-        username: req.user.username,
-        baseUrl: config.baseUrl,
-    });
-});
-
 app.post(
     '/api/veooz/push-articles',
     auth.passport.authenticate('localapikey', {session: false}),
@@ -113,6 +83,37 @@ app.post(
         res.status(status ? 200 : 400).end();
     }
 );
+
+app.get('/workbench/:articleSource/:articleId', auth.ensureLoggedIn, function(req, res){
+    res.render('workbench', {
+        articleSource: req.params.articleSource,
+        articleId: req.params.articleId,
+        username: req.user.username,
+        baseUrl: config.baseUrl,
+    });
+});
+
+app.get('/article/:articleSource/:articleId', function(req, res){
+    res.render('article', {
+        articleSource: req.params.articleSource,
+        articleId: req.params.articleId,
+        baseUrl: config.baseUrl,
+    });
+});
+
+// Keep this route last
+app.get('/:articleSource?', function(req, res){
+    var availableSources = ["pti", "thehindu", "indianexpress"];
+    if (req.params.articleSource && availableSources.indexOf(req.params.articleSource) == -1) {
+        return res.sendStatus(404);
+    }
+
+    res.render('index', {
+        articleSource: req.params.articleSource,
+        availableSources: JSON.stringify(availableSources),
+        baseUrl: config.baseUrl,
+    });
+});
 
 io.on('connection', function(socket){
   console.log('a user connected', socket.id);
