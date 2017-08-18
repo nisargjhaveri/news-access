@@ -54,7 +54,7 @@ app.get('/login', function (req, res) {
 app.post(
     '/login',
     auth.passport.authenticate('local', {
-        successReturnToOrRedirect: '/',
+        successReturnToOrRedirect: '/workbench',
         failureRedirect: '/login',
         failureFlash: 'Invalid username or password.'
     })
@@ -84,7 +84,7 @@ app.post(
     }
 );
 
-app.get('/workbench/:articleSource/:articleId', auth.ensureLoggedIn, function(req, res){
+app.get('/workbench/:articleSource/:articleId?', auth.ensureLoggedIn, function(req, res) {
     res.render('workbench', {
         articleSource: req.params.articleSource,
         articleId: req.params.articleId,
@@ -93,7 +93,11 @@ app.get('/workbench/:articleSource/:articleId', auth.ensureLoggedIn, function(re
     });
 });
 
-app.get('/article/:articleSource/:articleId', function(req, res){
+app.get('/workbench', auth.ensureLoggedIn, function(req, res) {
+    res.redirect('/workbench/pti');
+});
+
+app.get('/article/:articleSource/:articleId', function(req, res) {
     res.render('article', {
         articleSource: req.params.articleSource,
         articleId: req.params.articleId,
@@ -102,7 +106,7 @@ app.get('/article/:articleSource/:articleId', function(req, res){
 });
 
 // Keep this route last
-app.get('/:articleSource?', function(req, res){
+app.get('/:articleSource?', function(req, res) {
     var availableSources = ["pti", "thehindu", "indianexpress"];
     if (req.params.articleSource && availableSources.indexOf(req.params.articleSource) == -1) {
         return res.sendStatus(404);
@@ -115,12 +119,12 @@ app.get('/:articleSource?', function(req, res){
     });
 });
 
-io.on('connection', function(socket){
+io.on('connection', function(socket) {
   console.log('a user connected', socket.id);
 
   handleSocket(socket);
 });
 
-http.listen(config.port, function(){
+http.listen(config.port, function() {
   console.log('listening on *:' + config.port);
 });

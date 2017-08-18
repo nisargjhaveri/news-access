@@ -150,3 +150,9 @@ div.summary-bin {
 .publish-btn {
     font-size: 1.2em;
 }
+
+.whats-next-text {
+    text-align: center;
+    margin: 3em 0;
+    font-size: 1.2em;
+}

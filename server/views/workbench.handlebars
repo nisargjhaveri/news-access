@@ -78,10 +78,22 @@
                 </div>
             </div>
         </div>
-        <div class="success-container hidden">
-            Done!
-            <div class="success-suggestion">
-                You may now want to proceed to <a href="{{articleSource}}">article list</a>
+        <div class="whats-next-container flex-item loading hidden">
+            <div class="whats-next hidden">
+                <div class="whats-next-text">Here is an article you can edit next!</div>
+                <div class="article-list">
+                    <article id="whats-next-article" class="clear-fix">
+                        <div class="img-wrapper float-left">
+                            <img src="" alt="Image" class="show-image small-img">
+                        </div>
+                        <div class="news-heading">
+                            <h2 class="show-title"></h2>
+                            <span class="show-source"></span>
+                            <span class="show-published-time"></span>
+                            <a href="#" class="link-workbench">Edit in workbench</a>
+                        </div>
+                    </article>
+                </div>
             </div>
         </div>
         {{> panic-error}}

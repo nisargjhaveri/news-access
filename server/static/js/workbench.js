@@ -510,12 +510,7 @@ function prepareArticle(article) {
 
                 console.log(editedArticle);
 
-                socket.emit('publish article', editedArticle, function () {
-                    $('.bench-container').removeClass('loading');
-
-                    $('.bench-container').addClass('hidden');
-                    $('.success-container').removeClass('hidden');
-                });
+                socket.emit('publish article', editedArticle, showWhatsNext);
             });
     }
 
@@ -531,6 +526,32 @@ function prepareArticle(article) {
     $('.publish-btn').removeClass('hidden');
 
     $('.bench-container').removeClass('loading');
+}
+
+function showWhatsNext() {
+    $('.bench-container').addClass('hidden');
+    $('.whats-next-container').removeClass('hidden');
+
+    function getActionUrl (id, action) {
+        return [action, articleSource, id].join("/");
+    }
+
+    socket.emit('get article list', 1, function (articles) {
+        console.log(articles);
+        var article = articles[0];
+
+        var $article = $("#whats-next-article");
+
+        $article.find('.show-title').text(article.title);
+        $article.find('.show-source').text(article.source);
+        $article.find('.show-published-time').text(moment(article.publishedTime).fromNow());
+        $article.find('.show-image').attr('src', article.picture).addClass(article.picture ? "" : "hidden");
+        $article.find('.link-article').attr('href', getActionUrl(article.id, "article"));
+        $article.find('.link-workbench').attr('href', getActionUrl(article.id, "workbench"));
+
+        $('.whats-next').removeClass('hidden');
+        $('.whats-next-container').removeClass('loading');
+    });
 }
 
 function setupOptions() {
@@ -577,6 +598,7 @@ function getSelectedSummarizer() {
 
 function panic() {
     $('.bench-container').addClass('hidden');
+    $('.whats-next-container').addClass('hidden');
     $('.error-container').removeClass('hidden');
 }
 
@@ -592,5 +614,10 @@ $(function () {
     });
 
     setupOptions();
-    loadArticle();
+
+    if (articleId) {
+        loadArticle();
+    } else {
+        showWhatsNext();
+    }
 });
