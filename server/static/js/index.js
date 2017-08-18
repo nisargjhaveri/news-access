@@ -52,11 +52,6 @@ var socket;
 function loadArticleList() {
     socket = io({path: baseUrl + 'socket.io'});
 
-    socket.on('new article', function (article) {
-        addNewArticle(article);
-        console.log(article);
-    });
-
     socket.on('new error', function (err) {
         panic();
         console.log("Error", err);
@@ -65,7 +60,12 @@ function loadArticleList() {
     socket.emit('select article source', articleSource);
 
     console.log("Requesting article list");
-    socket.emit('get article list', 10);
+    socket.emit('get article list', 10, function (articles) {
+        console.log(articles);
+        articles.forEach(function (article) {
+            addNewArticle(article);
+        });
+    });
 }
 
 $(function () {

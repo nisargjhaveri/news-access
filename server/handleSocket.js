@@ -19,18 +19,10 @@ module.exports = function (socket) {
         socket.articleFactory = new Articles(socket.id, source);
     });
 
-    socket.on('get article list', function (maxArticles) {
-        function emitArticle (article) {
-            socket.emit('new article', article);
-        }
-
+    socket.on('get article list', function (maxArticles, callback) {
         socket.articleFactory.fetchList({
                 limit: maxArticles
-            }).then(function (articles) {
-                articles.forEach(function (article) {
-                    emitArticle(article);
-                });
-            }, throwError);
+            }).then(callback, throwError);
     });
 
     socket.on('access article', function (articleId, langs, options, callback) {
