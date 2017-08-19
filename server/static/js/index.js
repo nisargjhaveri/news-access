@@ -60,7 +60,7 @@ function loadArticleList() {
     socket.emit('select article source', articleSource);
 
     console.log("Requesting article list");
-    socket.emit('get article list', 10, function (articles) {
+    socket.emit('get article list', {limit: 10}, function (articles) {
         console.log(articles);
         articles.forEach(function (article) {
             addNewArticle(article);

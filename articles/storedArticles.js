@@ -94,8 +94,35 @@ StoredArticles.prototype.fetchList = function (options) {
     return storedArticleUtils.getDB().then(function (db) {
         var collection = db.collection('preprocessed-articles');
 
-        return collection.find({})
-            .sort("publishedTime", -1)
+        var results;
+
+        if (options.lang) {
+            results = collection.aggregate([
+                {
+                    $lookup: {
+                        from: 'accessible-articles',
+                        localField: 'id',
+                        foreignField: 'id',
+                        as: 'accessibleArticles'
+                    }
+                }, {
+                    $match: {
+                        accessibleArticles: {
+                            $not: { $elemMatch: { lang: options.lang } }
+                        }
+                    }
+                }, {
+                    $project: {
+                        accessibleArticles: 0
+                    }
+                }
+            ]);
+        } else {
+            results = collection.find({});
+        }
+
+        return results
+            .sort({"publishedTime": -1})
             .limit(options.limit || 10)
             .toArray()
             .then(function (docs) {

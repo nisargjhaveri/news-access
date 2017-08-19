@@ -510,7 +510,9 @@ function prepareArticle(article) {
 
                 console.log(editedArticle);
 
-                socket.emit('publish article', editedArticle, showWhatsNext);
+                socket.emit('publish article', editedArticle, function () {
+                    window.location.href = '/workbench';
+                });
             });
     }
 
@@ -536,7 +538,9 @@ function showWhatsNext() {
         return [action, articleSource, id].join("/");
     }
 
-    socket.emit('get article list', 1, function (articles) {
+    var selectedLanguage = $('.select-language').val();
+
+    socket.emit('get article list', {limit: 1, lang: selectedLanguage}, function (articles) {
         console.log(articles);
         var article = articles[0];
 
