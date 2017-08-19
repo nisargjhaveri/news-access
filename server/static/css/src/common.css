@@ -67,6 +67,13 @@ select.inline {
     box-sizing: border-box;
 }
 
+.info-line {
+    text-align: center;
+    margin: 3em 0;
+    font-size: 1.2em;
+}
+
+
 .link-home {
     color: #555;
 }

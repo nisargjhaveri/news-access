@@ -544,16 +544,22 @@ function showWhatsNext() {
         console.log(articles);
         var article = articles[0];
 
-        var $article = $("#whats-next-article");
+        if (article) {
+            var $article = $("#whats-next-article");
 
-        $article.find('.show-title').text(article.title);
-        $article.find('.show-source').text(article.source);
-        $article.find('.show-published-time').text(moment(article.publishedTime).fromNow());
-        $article.find('.show-image').attr('src', article.picture).addClass(article.picture ? "" : "hidden");
-        $article.find('.link-article').attr('href', getActionUrl(article.id, "article"));
-        $article.find('.link-workbench').attr('href', getActionUrl(article.id, "workbench"));
+            $article.find('.show-title').text(article.title);
+            $article.find('.show-source').text(article.source);
+            $article.find('.show-published-time').text(moment(article.publishedTime).fromNow());
+            $article.find('.show-image').attr('src', article.picture).addClass(article.picture ? "" : "hidden");
+            $article.find('.link-article').attr('href', getActionUrl(article.id, "article"));
+            $article.find('.link-workbench').attr('href', getActionUrl(article.id, "workbench"));
 
-        $('.whats-next').removeClass('hidden');
+            $('.article-list').removeClass('hidden');
+            $('.whats-next-text .here-is-more').removeClass('hidden');
+        } else {
+            $('.whats-next-text .nothing-more').removeClass('hidden');
+        }
+
         $('.whats-next-container').removeClass('loading');
     });
 }

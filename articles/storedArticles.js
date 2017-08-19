@@ -124,15 +124,7 @@ StoredArticles.prototype.fetchList = function (options) {
         return results
             .sort({"publishedTime": -1})
             .limit(options.limit || 10)
-            .toArray()
-            .then(function (docs) {
-                if (!docs.length) {
-                    return Promise.reject("No articles found");
-                }
-                return Promise.resolve(docs);
-            }, function (err) {
-                return Promise.reject(err);
-            });
+            .toArray();
     });
 };
 

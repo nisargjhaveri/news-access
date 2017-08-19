@@ -15,7 +15,7 @@ function addNewArticle (article) {
     $article.find('.link-original-article').attr('href', article.url);
     $article.find('.link-workbench').attr('href', getActionUrl(article.id, "workbench"));
 
-    $('.article-list').removeClass('loading').append($article);
+    $('.article-list').append($article);
 }
 
 function setupOptionsAndLoad() {
@@ -62,9 +62,16 @@ function loadArticleList() {
     console.log("Requesting article list");
     socket.emit('get article list', {limit: 10}, function (articles) {
         console.log(articles);
-        articles.forEach(function (article) {
-            addNewArticle(article);
-        });
+
+        if (articles.length) {
+            articles.forEach(function (article) {
+                addNewArticle(article);
+            });
+        } else {
+            $('.article-list .info-line').removeClass('hidden');
+        }
+
+        $('.article-list').removeClass('loading');
     });
 }
 
