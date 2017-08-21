@@ -18,8 +18,8 @@ module.exports.pushArticle = function (article) {
                 }
             },
             function (err, res, body) {
-                if (err) {
-                    reject(err);
+                if (err || res.statusCode != 200) {
+                    reject(err || res.statusCode + " - " + body);
                 } else {
                     resolve();
                 }
