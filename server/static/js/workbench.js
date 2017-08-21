@@ -511,7 +511,7 @@ function prepareArticle(article) {
                 console.log(editedArticle);
 
                 socket.emit('publish article', editedArticle, function () {
-                    window.location.href = '/workbench';
+                    window.location.href = 'workbench';
                 });
             });
     }
