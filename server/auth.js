@@ -2,12 +2,12 @@ var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 
+var config = require('./config.json');
+
 var passport = require('passport');
 var LocalApikeyStrategy = require('passport-localapikey').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
-var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn();
-
-var config = require('./config.json');
+var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn(path.join(config.baseUrl, 'login'));
 
 var Users = (function () {
     function User (username, password) {

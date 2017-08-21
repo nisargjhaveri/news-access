@@ -54,15 +54,15 @@ app.get('/login', function (req, res) {
 app.post(
     '/login',
     auth.passport.authenticate('local', {
-        successReturnToOrRedirect: '/workbench',
-        failureRedirect: '/login',
+        successReturnToOrRedirect: path.join(config.baseUrl, 'workbench'),
+        failureRedirect: path.join(config.baseUrl, 'login'),
         failureFlash: 'Invalid username or password.'
     })
 );
 
 app.get('/logout', function (req, res) {
     req.logout();
-    res.redirect('/login');
+    res.redirect(path.join(config.baseUrl, 'login'));
 });
 
 app.post(
@@ -94,7 +94,7 @@ app.get('/workbench/:articleSource/:articleId?', auth.ensureLoggedIn, function(r
 });
 
 app.get('/workbench', auth.ensureLoggedIn, function(req, res) {
-    res.redirect('/workbench/pti');
+    res.redirect(path.join(config.baseUrl, 'workbench/pti'));
 });
 
 app.get('/article/:articleSource/:articleId', function(req, res) {
