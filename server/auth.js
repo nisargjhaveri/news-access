@@ -2,12 +2,11 @@ var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 
-var config = require('./config.json');
-
 var passport = require('passport');
 var LocalApikeyStrategy = require('passport-localapikey').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
-var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn(path.join(config.baseUrl, 'login'));
+
+var config = require('./config.json');
 
 var Users = (function () {
     function User (username, password) {
@@ -82,6 +81,19 @@ passport.deserializeUser(function (username, callback) {
         callback(null, user);
     });
 });
+
+function ensureLoggedIn(req, res, next) {
+    var loginUrl = path.join(config.baseUrl, 'login');
+
+    if (!req.isAuthenticated || !req.isAuthenticated()) {
+        if (req.session) {
+            req.session.returnTo = path.join(config.baseUrl, req.originalUrl || req.url);
+        }
+        return res.redirect(loginUrl);
+    }
+
+    next();
+}
 
 module.exports = {
     passport,
