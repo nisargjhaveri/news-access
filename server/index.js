@@ -45,10 +45,10 @@ app.use(auth.passport.session());
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
 app.get('/login', function (req, res) {
-  res.render('login', {
-      errorMessage: req.flash('error'),
-      baseUrl: config.baseUrl
-  });
+    res.render('login', {
+        errorMessage: req.flash('error'),
+        baseUrl: config.baseUrl
+    });
 });
 
 app.post(
@@ -120,11 +120,11 @@ app.get('/:articleSource?', function(req, res) {
 });
 
 io.on('connection', function(socket) {
-  console.log('a user connected', socket.id);
+    console.log('a user connected', socket.id);
 
-  handleSocket(socket);
+    handleSocket(socket);
 });
 
 http.listen(config.port, function() {
-  console.log('listening on *:' + config.port);
+    console.log('listening on *:' + config.port);
 });
