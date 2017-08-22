@@ -69,7 +69,7 @@ module.exports.convertAccessibleArticle = function (article) {
     var veoozArticle = {
         id: article._meta.rawId,
         url: article.url,
-        publishedTime: article.publishedTime,
+        publishedTime: new Date(article.publishedTime).getTime().toString(),
         title: article.orignialArticle.title,
         text: article.orignialArticle.body,
         taggedText: getTaggedText(article.orignialArticle.body),
@@ -80,7 +80,7 @@ module.exports.convertAccessibleArticle = function (article) {
         translatedTaggedText: getTaggedText(article.body),
         translatedSummary: article.summary,
         translatedLanguage: article.lang,
-        manuallyEdited: true
+        manuallyEdited: "true"
     };
 
     return veoozArticle;
