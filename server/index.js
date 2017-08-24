@@ -14,7 +14,6 @@ var handlebars = require('express-handlebars')({
     partialsDir: path.join(viewsDir, 'partials')
 });
 var bodyParser = require('body-parser');
-var expressSession = require('express-session');
 var connectFlash = require('connect-flash');
 
 var auth = require('./auth.js');
@@ -33,11 +32,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     limit: '500kb'
 }));
 
-app.use(expressSession({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: true
-}));
+app.use(auth.session);
 app.use(connectFlash());
 app.use(auth.passport.initialize());
 app.use(auth.passport.session());
@@ -118,6 +113,8 @@ app.get('/:articleSource?', function(req, res) {
         baseUrl: config.baseUrl,
     });
 });
+
+// Socket.io setup
 
 io.on('connection', function(socket) {
     console.log('a user connected', socket.id);

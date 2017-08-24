@@ -2,11 +2,16 @@ var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 
+var expressSession = require('express-session');
+var MongoStore = require('connect-mongo')(expressSession);
+
 var passport = require('passport');
 var LocalApikeyStrategy = require('passport-localapikey').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
 
 var config = require('./config.json');
+
+var storedArticleUtils = require('../articles/storedArticleUtils.js');
 
 var Users = (function () {
     function User (username, password) {
@@ -95,7 +100,20 @@ function ensureLoggedIn(req, res, next) {
     next();
 }
 
+var sessionsStore = new MongoStore({
+    dbPromise: storedArticleUtils.getDB(),
+    collection: '_sessions'
+});
+
 module.exports = {
     passport,
-    ensureLoggedIn
+    ensureLoggedIn,
+    sessionsStore,
+    session: expressSession({
+        name: 'news-access.sid',
+        secret: 'keyboard cat',
+        resave: false,
+        saveUninitialized: true,
+        store: sessionsStore
+    }),
 };
