@@ -32,7 +32,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     limit: '500kb'
 }));
 
-app.use(auth.session);
+app.use(auth.expressSession);
 app.use(connectFlash());
 app.use(auth.passport.initialize());
 app.use(auth.passport.session());
@@ -119,8 +119,10 @@ app.get('/:articleSource?', function(req, res) {
 io.on('connection', function(socket) {
     console.log('a user connected', socket.id);
 
-    handleSocket(socket);
+    handleSocket(auth.socketEnsureLoggedIn, socket);
 });
+
+io.use(auth.socketPassportAuth);
 
 http.listen(config.port, function() {
     console.log('listening on *:' + config.port);

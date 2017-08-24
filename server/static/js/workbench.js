@@ -590,8 +590,9 @@ function loadArticle() {
     var selectedTranslator = getSelectedTranslator();
 
     socket.emit('access article', articleId, [selectedLanguage], {
-        'summarizer': selectedSummarizer,
-        'translator': selectedTranslator
+        summarizer: selectedSummarizer,
+        translator: selectedTranslator,
+        requireAuth: true
     }, function (articles) {
         console.log(articles);
         prepareArticle(articles[0]);

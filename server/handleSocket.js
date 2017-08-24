@@ -5,7 +5,7 @@ var pipeline = require("../pipeline");
 
 var veoozInterface = require("./veoozInterface.js");
 
-module.exports = function (socket) {
+module.exports = function (socketEnsureLoggedIn, socket) {
     function handleError(err) {
         return Promise.reject(err);
     }
@@ -24,7 +24,17 @@ module.exports = function (socket) {
     });
 
     socket.on('access article', function (articleId, langs, options, callback) {
-        socket.articleFactory.fetchOne(articleId)
+        var authPromise;
+        if (options.requireAuth) {
+            authPromise = socketEnsureLoggedIn(socket);
+        } else {
+            authPromise = Promise.resolve();
+        }
+
+        authPromise
+            .then(function () {
+                return socket.articleFactory.fetchOne(articleId);
+            }, handleError)
             .then(function (article) {
                 return pipeline.accessArticle(article, langs, options);
             }, handleError)
@@ -33,20 +43,26 @@ module.exports = function (socket) {
     });
 
     socket.on('publish article', function (article, callback) {
-        socket.articleFactory.storeEdited(article)
-            .then(callback, throwError)
-            .then(function () {
-                if (!article._meta || !article._meta.rawId) {
-                    // Don't push to Veooz
-                    return;
-                } else {
-                    console.log(socket.id, "Pushing accessible article to Veooz:", article.id);
-                    return veoozInterface.pushArticle(article);
+        socketEnsureLoggedIn(socket)
+            .then(function (user) {
+                if (!article._meta) {
+                    article._meta = {};
                 }
+                article._meta.username = user.username;
+
+                return article;
             }, handleError)
-            .catch(function (err) {
-                console.log(socket.id, "Error:", err);
-            });
+            .then(function (article) {
+                socket.articleFactory.storeEdited(article)
+                    .then(callback, throwError);
+
+                if (article._meta.rawId) {
+                    console.log(socket.id, "Pushing accessible article to Veooz:", article.id);
+                    return veoozInterface.pushArticle(article).catch(function (err) {
+                        console.log(socket.id, "Error pushing article:", err);
+                    });
+                }
+            }, throwError);
     });
 
     socket.on('translate text', function (text, from, to, method, callback) {

@@ -9,6 +9,8 @@ var passport = require('passport');
 var LocalApikeyStrategy = require('passport-localapikey').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
 
+var passportSocketIo = require("passport.socketio");
+
 var config = require('./config.json');
 
 var storedArticleUtils = require('../articles/storedArticleUtils.js');
@@ -100,20 +102,49 @@ function ensureLoggedIn(req, res, next) {
     next();
 }
 
-var sessionsStore = new MongoStore({
+function socketEnsureLoggedIn(socket) {
+    return new Promise(function(resolve, reject) {
+        var user = socket.request.user;
+        if (user && user.logged_in && user.username) {
+            return resolve(user);
+        }
+        return reject("Authentication required");
+    });
+}
+
+// Sessions and auth middlewares
+var sessionStore = new MongoStore({
     dbPromise: storedArticleUtils.getDB(),
     collection: '_sessions'
 });
 
+var expressSession = expressSession({
+    name: 'news-access.sid',
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true,
+    store: sessionStore
+});
+
+var socketPassportAuth = passportSocketIo.authorize({
+    cookieParser: require('cookie-parser'),
+    key: 'news-access.sid',
+    secret: 'keyboard cat',
+    store: sessionStore,
+    success: function(data, accept) {
+        accept();
+    },
+    fail: function(data, message, error, accept) {
+        accept();
+    },
+});
+
 module.exports = {
     passport,
+    passportSocketIo,
+    sessionStore,
+    expressSession,
+    socketPassportAuth,
     ensureLoggedIn,
-    sessionsStore,
-    session: expressSession({
-        name: 'news-access.sid',
-        secret: 'keyboard cat',
-        resave: false,
-        saveUninitialized: true,
-        store: sessionsStore
-    }),
+    socketEnsureLoggedIn,
 };
