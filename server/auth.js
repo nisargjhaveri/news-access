@@ -112,7 +112,6 @@ function socketEnsureLoggedIn(socket) {
     });
 }
 
-// Sessions and auth middlewares
 var sessionStore = new MongoStore({
     dbPromise: storedArticleUtils.getDB(),
     collection: '_sessions'
