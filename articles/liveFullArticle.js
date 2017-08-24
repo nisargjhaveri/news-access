@@ -12,11 +12,8 @@ function parseArticle (source, body) {
     var article;
 
     if (source == "The Indian Express") {
-        // FIXME: use htmlToText
-        return $("[itemprop='articleBody'] p:not(.appstext)")
-            .map(function(i, p) {
-                return $(p).text();
-            }).get().join("\n");
+        article = $("<div>");
+        article.append($("[itemprop='articleBody'] p:not(.appstext)"));
     } else if (source == "The Times of India") {
         article = $("[itemprop='articleBody'] arttextxml");
     } else if (source == "The Hindu") {
