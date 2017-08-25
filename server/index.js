@@ -72,7 +72,26 @@ app.post(
                 req.body.articles = JSON.parse(req.body.articles);
             }
 
-            status = handlePushedArticles(req.body.articles);
+            status = handlePushedArticles.receiveArticles(req.body.articles);
+        }
+
+        res.status(status ? 200 : 400).end();
+    }
+);
+
+app.post(
+    '/api/veooz/update-article',
+    auth.passport.authenticate('localapikey', {session: false}),
+    function(req, res) {
+        console.log("API request received on /api/veooz/update-article");
+
+        var status = false;
+        if ('article' in req.body) {
+            if (typeof req.body.article === 'string' || req.body.article instanceof String) {
+                req.body.article = JSON.parse(req.body.article);
+            }
+
+            status = handlePushedArticles.updateArticle(req.body.article);
         }
 
         res.status(status ? 200 : 400).end();

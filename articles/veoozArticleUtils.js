@@ -6,18 +6,20 @@ var articleUtils = require('./articleUtils.js');
 module.exports.convertRawArticle = function (rawArticle) {
     var article = {
         _meta: {
-            rawId: rawArticle.id
+            rawId: rawArticle.id,
+            priority: rawArticle.priority || 0,
+            category: rawArticle.category,
         },
         id: articleUtils.getCleanId(rawArticle.id),
+        url: rawArticle.url,
+        picture: rawArticle.image,
         title: rawArticle.title,
         summary: rawArticle.summary,
-        picture: rawArticle.image,
-        url: rawArticle.url,
+        body: null,
         lang: rawArticle.language,
         source: rawArticle.source || "PTI",
         publishedTime: new Date(parseInt(rawArticle.publishedTime)),
         publishedPlace: null,
-        body: null
     };
 
     article.body = htmlToText.fromString(

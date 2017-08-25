@@ -2,20 +2,20 @@ var Articles = require("../articles");
 var articleUtils = require("../articles/articleUtils.js");
 var pipeline = require("../pipeline");
 
-module.exports = function (articles) {
-    var logId = 'apicall';
-    var articleStore = new Articles(logId, 'pti');
+var logId = 'apicall';
+var articleStore = new Articles(logId, 'pti');
 
-    function propagateError(err) {
-        return Promise.reject(err);
-    }
+function propagateError(err) {
+    return Promise.reject(err);
+}
 
-    function getErrorLogger(logId) {
-        return function (err) {
-            console.log(logId, "Error:", err);
-        };
-    }
+function getErrorLogger(logId) {
+    return function (err) {
+        console.log(logId, "Error:", err);
+    };
+}
 
+function receiveArticles(articles) {
     if (!Array.isArray(articles)) {
         return false;
     }
@@ -47,4 +47,51 @@ module.exports = function (articles) {
     });
 
     return true;
+}
+
+function updateArticle(article) {
+    if (!article.id) {
+        return false;
+    }
+
+    articleStore.receiveRaw(article)
+        .then(function (article) {
+            return articleStore.fetchOne(article.id)
+                .then(function (preprocessedArticle) {
+                    var prop;
+                    for (prop of ['url']) {
+                        if (article[prop]) {
+                            preprocessedArticle[prop] = article[prop];
+                        }
+                    }
+
+                    if (!article._meta) {
+                        return preprocessedArticle;
+                    }
+
+                    if (!preprocessedArticle._meta) {
+                        preprocessedArticle._meta = {};
+                    }
+
+                    for (prop of ['priority', 'category']) {
+                        if (article._meta[prop]) {
+                            preprocessedArticle._meta[prop] = article._meta[prop];
+                        }
+                    }
+
+                    return preprocessedArticle;
+                }, propagateError);
+        }, propagateError)
+        .then(function (article) {
+            console.log(article.id, "Preprocessed. Storing");
+            return articleStore.storePreprocessed(article);
+        }, propagateError)
+        .catch(getErrorLogger(article.id));
+
+    return true;
+}
+
+module.exports = {
+    receiveArticles,
+    updateArticle
 };
