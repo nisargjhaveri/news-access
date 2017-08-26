@@ -75,7 +75,10 @@ app.post(
             status = handlePushedArticles.receiveArticles(req.body.articles);
         }
 
-        res.status(status ? 200 : 400).end();
+        var statusCode = status ? 200 : 400;
+
+        console.log("API response sent for /api/veooz/push-articles", statusCode);
+        res.status(statusCode).end();
     }
 );
 
@@ -86,15 +89,18 @@ app.post(
         console.log("API request received on /api/veooz/update-article");
 
         var status = false;
-        if ('article' in req.body) {
-            if (typeof req.body.article === 'string' || req.body.article instanceof String) {
-                req.body.article = JSON.parse(req.body.article);
+        if ('articles' in req.body) {
+            if (typeof req.body.articles === 'string' || req.body.articles instanceof String) {
+                req.body.articles = JSON.parse(req.body.articles);
             }
 
-            status = handlePushedArticles.updateArticle(req.body.article);
+            status = handlePushedArticles.updateArticles(req.body.articles);
         }
 
-        res.status(status ? 200 : 400).end();
+        var statusCode = status ? 200 : 400;
+
+        console.log("API response sent for /api/veooz/update-article", statusCode);
+        res.status(statusCode).end();
     }
 );
 

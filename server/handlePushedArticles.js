@@ -49,49 +49,61 @@ function receiveArticles(articles) {
     return true;
 }
 
-function updateArticle(article) {
-    if (!article.id) {
+function updateArticles(articles) {
+    if (!Array.isArray(articles)) {
         return false;
     }
 
-    articleStore.receiveRaw(article)
-        .then(function (article) {
-            return articleStore.fetchOne(article.id)
-                .then(function (preprocessedArticle) {
-                    var prop;
-                    for (prop of ['url']) {
-                        if (article[prop]) {
-                            preprocessedArticle[prop] = article[prop];
-                        }
-                    }
+    var isValid = false;
+    articles.forEach(function(article) {
+        if (article.id) {
+            isValid = true;
+        }
+    });
+    if (!isValid) return false;
 
-                    if (!article._meta) {
+    console.log(logId, "Received " + articles.length + " articles");
+
+    articles.forEach(function (article) {
+        articleStore.receiveRaw(article)
+            .then(function (article) {
+                return articleStore.fetchOne(article.id)
+                    .then(function (preprocessedArticle) {
+                        var prop;
+                        for (prop of ['url']) {
+                            if (article[prop]) {
+                                preprocessedArticle[prop] = article[prop];
+                            }
+                        }
+
+                        if (!article._meta) {
+                            return preprocessedArticle;
+                        }
+
+                        if (!preprocessedArticle._meta) {
+                            preprocessedArticle._meta = {};
+                        }
+
+                        for (prop of ['priority', 'category']) {
+                            if (article._meta[prop]) {
+                                preprocessedArticle._meta[prop] = article._meta[prop];
+                            }
+                        }
+
                         return preprocessedArticle;
-                    }
-
-                    if (!preprocessedArticle._meta) {
-                        preprocessedArticle._meta = {};
-                    }
-
-                    for (prop of ['priority', 'category']) {
-                        if (article._meta[prop]) {
-                            preprocessedArticle._meta[prop] = article._meta[prop];
-                        }
-                    }
-
-                    return preprocessedArticle;
-                }, propagateError);
-        }, propagateError)
-        .then(function (article) {
-            console.log(article.id, "Preprocessed. Storing");
-            return articleStore.storePreprocessed(article);
-        }, propagateError)
-        .catch(getErrorLogger(article.id));
+                    }, propagateError);
+            }, propagateError)
+            .then(function (article) {
+                console.log(article.id, "Preprocessed. Storing");
+                return articleStore.storePreprocessed(article);
+            }, propagateError)
+            .catch(getErrorLogger(article.id));
+        });
 
     return true;
 }
 
 module.exports = {
     receiveArticles,
-    updateArticle
+    updateArticles
 };
