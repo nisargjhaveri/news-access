@@ -36,8 +36,8 @@ function translateText (text, from, to) {
 
         return new Promise(function(resolve, reject) {
             request(url, function (err, res, body) {
-                if (err) {
-                    reject(err);
+                if (err || res.statusCode !== 200) {
+                    reject(err || (res.statusCode + ' ' + res.statusMessage));
                 } else {
                     body = safeEval(body);
                     var translation = "";
