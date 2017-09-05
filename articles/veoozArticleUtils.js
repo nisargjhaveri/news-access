@@ -7,7 +7,7 @@ module.exports.convertRawArticle = function (rawArticle) {
     var article = {
         _meta: {
             rawId: rawArticle.id,
-            priority: rawArticle.priority || -1,
+            priority: Number.isNaN(parseFloat(rawArticle.priority)) ? -1 : parseFloat(rawArticle.priority),
             category: rawArticle.category,
         },
         id: articleUtils.getCleanId(rawArticle.id),
