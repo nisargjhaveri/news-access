@@ -85,7 +85,7 @@ function updateArticles(articles) {
                         }
 
                         for (prop of ['priority', 'category']) {
-                            if (article._meta[prop]) {
+                            if (article._meta.hasOwnProperty(prop)) {
                                 preprocessedArticle._meta[prop] = article._meta[prop];
                             }
                         }
