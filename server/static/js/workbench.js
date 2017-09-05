@@ -156,7 +156,7 @@ function prepareArticle(article) {
                 var paraContainer = $('<div class="flex-row">');
 
                 var sentences =  paragraph.map(function (sentence) {
-                    return $('<span class="sentence">')
+                    return $('<span class="sentence" tabindex="-1">')
                         .text(sentence.source)
                         .attr('data-sentence-id', sentence.id);
                 });
@@ -205,7 +205,11 @@ function prepareArticle(article) {
                     pull: "clone",
                     put: false
                 },
-                sort: false
+                sort: false,
+                preventOnFilter: false,
+                filter: function(e, target) {
+                    return $(target).is(':focus');
+                },
             });
         });
 
@@ -258,6 +262,15 @@ function prepareArticle(article) {
 
     function makeArticleInteractive() {
         // Add event handlers on stuff
+        $('.paragraph-source')
+            .on('click', '.sentence', function(e) {
+                if ($(this).is(':focus')) {
+                    return;
+                }
+
+                $(this).focus();
+            });
+
         $('.summary-source')
             .on('click', '.sentence', function(e) {
                 // Do nothing if already contenteditable
