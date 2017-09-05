@@ -7,7 +7,7 @@ module.exports.convertRawArticle = function (rawArticle) {
     var article = {
         _meta: {
             rawId: rawArticle.id,
-            priority: rawArticle.priority || 0,
+            priority: rawArticle.priority || -1,
             category: rawArticle.category,
         },
         id: articleUtils.getCleanId(rawArticle.id),
