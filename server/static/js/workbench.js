@@ -194,7 +194,7 @@ function prepareArticle(article) {
         updateSourceSummaryStatus();
 
         // Show summary in target language
-        updateSummaryDisplay(article.summarySentences);
+        updateTargetSummary();
     }
 
     function enableDragDrop() {
