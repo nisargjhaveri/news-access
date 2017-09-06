@@ -332,30 +332,73 @@ function prepareArticle(article) {
                 updateTargetSummaryStatus();
             });
 
+        function getLinkedSentencesArray(elem) {
+            var linkedSentences = getLinkedSentences(elem);
+            var linkedSentencesArray = [
+                linkedSentences.sourceSentence,
+                linkedSentences.targetSentence,
+                linkedSentences.otherSourceSentence,
+                linkedSentences.otherTargetSentence
+            ];
+
+            return $(linkedSentencesArray).map(function() {
+                return $(this).toArray();
+            });
+        }
+
+        function getLinkedSentences(elem) {
+            var $elem = $(elem);
+            var $targetSentence, $sourceSentence, $otherSourceSentence, $otherTargetSentence;
+            var otherSourcePath, otherTargetPath;
+            var sentenceId = $elem.attr('data-sentence-id');
+
+            if ($elem.is('.summary-target .sentence') || $elem.is('.summary-source .sentence')) {
+                var sentenceIndex;
+                if ($elem.is('.summary-target .sentence')) {
+                    sentenceIndex = $('.summary-target .sentence').index($elem);
+                    $sourceSentence = $('.summary-source .sentence').eq(sentenceIndex);
+                    $targetSentence = $elem;
+                } else {
+                    sentenceIndex = $('.summary-source .sentence').index($elem);
+                    $sourceSentence = $elem;
+                    $targetSentence = $('.summary-target .sentence').eq(sentenceIndex);
+                }
+                otherSourcePath = '.article-body .paragraph-source';
+                otherTargetPath = '.article-body .paragraph-target';
+            } else {
+                // It is '.article-body .paragraph-target .sentence' or '.article-body .paragraph-source .sentence'
+                if ($elem.is('.article-body .paragraph-target .sentence')) {
+                    $sourceSentence = $('.article-body .paragraph-source .sentence[data-sentence-id="' + sentenceId + '"]');
+                    $targetSentence = $elem;
+                } else {
+                    $sourceSentence = $elem;
+                    $targetSentence = $('.article-body .paragraph-target .sentence[data-sentence-id="' + sentenceId + '"]');
+                }
+                otherSourcePath = '.summary-source';
+                otherTargetPath = '.summary-target';
+            }
+
+            if (sentenceId || sentenceId === 0) {
+                $otherSourceSentence = $(otherSourcePath + ' .sentence[data-sentence-id="' + sentenceId + '"]');
+                $otherTargetSentence = $(otherTargetPath + ' .sentence[data-sentence-id="' + sentenceId + '"]');
+            }
+
+            return {
+                sourceSentence: $sourceSentence,
+                targetSentence: $targetSentence,
+                otherSourceSentence: $otherSourceSentence,
+                otherTargetSentence: $otherTargetSentence
+            };
+        }
 
         $('.bench-container')
             .on("blur", '.summary-target .sentence, .article-body .paragraph-target .sentence', function(e) {
                 var $this = $(this);
 
-                var sentenceId = $this.attr('data-sentence-id');    // Can be undefined
-
-                var sourceText;
-                var otherSourcePath;
-                var otherTargetPath;
-                if ($this.is('.summary-target .sentence')) {
-                    var sentenceIndex = $('.summary-target .sentence').index($this);
-                    sourceText = $('.summary-source .sentence').eq(sentenceIndex).text();
-                    otherSourcePath = '.article-body .paragraph-source';
-                    otherTargetPath = '.article-body .paragraph-target';
-                } else {
-                    // It is '.article-body .paragraph-target .sentence'
-                    sourceText = $('.article-body .paragraph-source .sentence[data-sentence-id="' + sentenceId + '"]').text();
-                    otherSourcePath = '.summary-source';
-                    otherTargetPath = '.summary-target';
-                }
+                var linkedSentences = getLinkedSentences(this);
 
                 var sentence = {};
-                sentence.source = sourceText;
+                sentence.source = linkedSentences.sourceSentence.text();
                 sentence.editedTarget = $this.text();
 
                 summaryTranslator.cacheTranslations([sentence]);
@@ -366,28 +409,15 @@ function prepareArticle(article) {
                     .removeClass("translation-edited")
                     .addClass(cachedSentence.editedTarget ? "translation-edited" : "");
 
-                if (!sentenceId && sentenceId !== 0) {
-                    return;
-                }
-
-                var $otherSource = $(otherSourcePath + ' .sentence[data-sentence-id="' + sentenceId + '"]');
-
-                if (cachedSentence.source == $otherSource.text()) {
-                    $(otherTargetPath + ' .sentence[data-sentence-id="' + sentenceId + '"]')
+                if (linkedSentences.otherSourceSentence && linkedSentences.otherTargetSentence &&
+                    cachedSentence.source == linkedSentences.otherSourceSentence.text()
+                ) {
+                    linkedSentences.otherTargetSentence
                         .text(cachedSentence.editedTarget || cachedSentence.target)
                         .removeClass("translation-edited")
                         .addClass(cachedSentence.editedTarget ? "translation-edited" : "");
                 }
             });
-
-        // To highlight linked sentences on hover or focus
-        function getLinkedSentences(elem) {
-            var $elem = $(elem);
-            var sentenceId = $elem.attr('data-sentence-id');
-
-            // FIXME: doesn't work if sentenceId is not present
-            return $('.sentence[data-sentence-id="' + sentenceId + '"]').not($elem);
-        }
 
         $('.summary')
             .on('focus', '.sentence', function(e) {
@@ -430,22 +460,22 @@ function prepareArticle(article) {
 
         $('.paragraph')
             .on('mouseover', '.sentence', function(e) {
-                getLinkedSentences(this).addClass('linked-hover');
+                getLinkedSentencesArray(this).addClass('linked-hover');
             })
             .on('mouseout', '.sentence', function(e) {
-                getLinkedSentences(this).removeClass('linked-hover');
+                getLinkedSentencesArray(this).removeClass('linked-hover');
             })
             .on('focus', '.sentence', function(e) {
-                getLinkedSentences(this).addClass('linked-focus');
+                getLinkedSentencesArray(this).addClass('linked-focus');
             })
             .on('blur', '.sentence', function(e) {
-                getLinkedSentences(this).removeClass('linked-focus');
+                getLinkedSentencesArray(this).removeClass('linked-focus');
             });
 
         $('.summary-bin')
             .on('removeSentence', '.sentence', function(e) {
-                getLinkedSentences(this).removeClass('linked-hover');
-                getLinkedSentences(this).removeClass('linked-focus');
+                getLinkedSentencesArray(this).removeClass('linked-hover');
+                getLinkedSentencesArray(this).removeClass('linked-focus');
             });
 
         // Make contenteditable safe
