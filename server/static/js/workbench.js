@@ -352,7 +352,10 @@ function prepareArticle(article) {
             var otherSourcePath, otherTargetPath;
             var sentenceId = $elem.attr('data-sentence-id');
 
-            if ($elem.is('.summary-target .sentence') || $elem.is('.summary-source .sentence')) {
+            if ($elem.is('.article-title-target')) {
+                $sourceSentence = $('.article-title-source');
+                $targetSentence = $elem;
+            } else if ($elem.is('.summary-target .sentence') || $elem.is('.summary-source .sentence')) {
                 var sentenceIndex;
                 if ($elem.is('.summary-target .sentence')) {
                     sentenceIndex = $('.summary-target .sentence').index($elem);
@@ -392,7 +395,7 @@ function prepareArticle(article) {
         }
 
         $('.bench-container')
-            .on("blur", '.summary-target .sentence, .article-body .paragraph-target .sentence', function(e) {
+            .on("blur", '.summary-target .sentence, .article-body .paragraph-target .sentence, .article-title-target', function(e) {
                 var $this = $(this);
 
                 var linkedSentences = getLinkedSentences(this);
@@ -504,13 +507,16 @@ function prepareArticle(article) {
 
         $('.publish-btn')
             .on('click', function (e) {
+                console.log(performance.now(), "Article Published");
                 $('.bench-article-container, .bench-summary-container').addClass('hidden');
                 $('.bench-container').addClass('loading');
 
                 var editedArticle = JSON.parse(JSON.stringify(article));
 
                 // Set title
-                editedArticle.title = $('.article-title-target').text();
+                editedArticle.titleSentence.editedTarget = summaryTranslator.getCached(editedArticle.titleSentence).editedTarget;
+
+                editedArticle.title = editedArticle.titleSentence.editedTarget || editedArticle.titleSentence.target;
 
                 // Set summarySentences
                 var summarySentences = [];
@@ -554,12 +560,14 @@ function prepareArticle(article) {
                 console.log(editedArticle);
 
                 socket.emit('publish article', editedArticle, function () {
+                    console.log(performance.now(), "Article Published Successful");
                     window.location.href = 'workbench';
                 });
             });
     }
 
     summaryTranslator.initialize(article.orignialArticle.lang, article.lang);
+    summaryTranslator.cacheTranslations([article.titleSentence]);
     summaryTranslator.cacheTranslations(article.summarySentences);
     summaryTranslator.cacheTranslations([].concat.apply([], article.bodySentences));
 
@@ -571,6 +579,7 @@ function prepareArticle(article) {
     $('.publish-btn').removeClass('hidden');
 
     $('.bench-container').removeClass('loading');
+    console.log(performance.now(), "Article Loaded");
 }
 
 function showWhatsNext() {
@@ -659,6 +668,7 @@ function panic() {
 var socket;
 
 $(function () {
+    console.log(performance.now(), "Page loaded");
     socket = io({path: baseUrl + 'socket.io'});
     socket.emit('select article source', articleSource);
 

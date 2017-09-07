@@ -38,6 +38,10 @@ exports.translateArticle = function (article, targetLang, method) {
                             .then(function (translation) {
                                 console.log(article.id, "Title translated to " + targetLang);
                                 targetArticle.title = translation.text;
+                                targetArticle.titleSentence = {
+                                    source: article.title,
+                                    target: translation.text
+                                };
                             }, propagateError);
 
     function translateSentences(sentences) {
