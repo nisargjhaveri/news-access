@@ -29,9 +29,11 @@ var summaryTranslator = (function () {
             var pendingCallbacks = 0;
 
             function translationCallback(sentence) {
-                translationStore[sentence.source] = {
-                    original: sentence.target
-                };
+                if (!(sentence.source in translationStore)) {
+                    translationStore[sentence.source] = {};
+                }
+
+                translationStore[sentence.source].original = sentence.target;
 
                 pendingCallbacks--;
 
@@ -53,7 +55,7 @@ var summaryTranslator = (function () {
             }
 
             summarySentences.map(function (sentence) {
-                if (!(sentence.source in translationStore)) {
+                if (!(sentence.source in translationStore && translationStore[sentence.source].original)) {
                     pendingCallbacks++;
                     translateSentence(sentence, translationCallback);
                 }
@@ -74,6 +76,11 @@ var summaryTranslator = (function () {
                 if (translationStore[sentence.source].edited) {
                     cachedSentence.editedTarget = translationStore[sentence.source].edited;
                 }
+
+                if (!Array.isArray(translationStore[sentence.source].logs)) {
+                    translationStore[sentence.source].logs = [];
+                }
+                cachedSentence.logs = translationStore[sentence.source].logs;
 
                 return cachedSentence;
             } else {
@@ -97,6 +104,67 @@ var summaryTranslator = (function () {
         }
     };
 })();
+
+var globalLogs = [];
+
+var Events = (function() {
+    var id = 0;
+    function getDefaultEvent(type) {
+        return {
+            id: id++,
+            timestamp: performance.now(),
+            type: type
+        };
+    }
+    return {
+        pageLoad: function() {
+            var ev = getDefaultEvent('pageLoad');
+            return ev;
+        },
+        articleLoad: function() {
+            var ev = getDefaultEvent('articleLoad');
+            return ev;
+        },
+        publishArticle: function() {
+            var ev = getDefaultEvent('articlePublish');
+            return ev;
+        },
+        publishArticleSuccess: function() {
+            var ev = getDefaultEvent('articlePublishSuccess');
+            return ev;
+        },
+
+        focus: function() {
+            var ev = getDefaultEvent('focus');
+            return ev;
+        },
+        blur: function() {
+            var ev = getDefaultEvent('blur');
+            return ev;
+        },
+        keydown: function() {
+            var ev = getDefaultEvent('keydown');
+            return ev;
+        },
+        input: function() {
+            var ev = getDefaultEvent('input');
+            return ev;
+        },
+    };
+})();
+
+function getEnvironment() {
+    return {
+        navigationStart: new Date(performance.timing.navigationStart),
+        nagigator: {
+            platform: navigator.platform,
+            userAgent: navigator.userAgent,
+            vendor: navigator.vendor,
+            language: navigator.language,
+            languages: navigator.languages
+        }
+    };
+}
 
 function prepareArticle(article) {
     function updateSummaryDisplay(summarySentences) {
@@ -394,8 +462,19 @@ function prepareArticle(article) {
             };
         }
 
+        // For translations
+        var selectorTranslatable = '.summary-target .sentence, .article-body .paragraph-target .sentence, .article-title-target';
         $('.bench-container')
-            .on("blur", '.summary-target .sentence, .article-body .paragraph-target .sentence, .article-title-target', function(e) {
+            .on("focus", selectorTranslatable, function(e) {
+                var linkedSentences = getLinkedSentences(this);
+
+                var cachedSentence = summaryTranslator.getCached({
+                    source: linkedSentences.sourceSentence.text()
+                });
+
+                cachedSentence.logs.push(Events.focus());
+            })
+            .on("blur", selectorTranslatable, function(e) {
                 var $this = $(this);
 
                 var linkedSentences = getLinkedSentences(this);
@@ -406,8 +485,10 @@ function prepareArticle(article) {
 
                 summaryTranslator.cacheTranslations([sentence]);
 
-                // Update the translations
                 var cachedSentence = summaryTranslator.getCached(sentence);
+                cachedSentence.logs.push(Events.blur());
+
+                // Update the translations
                 $this
                     .removeClass("translation-edited")
                     .addClass(cachedSentence.editedTarget ? "translation-edited" : "");
@@ -507,14 +588,16 @@ function prepareArticle(article) {
 
         $('.publish-btn')
             .on('click', function (e) {
-                console.log(performance.now(), "Article Published");
+                globalLogs.push(Events.publishArticle());
                 $('.bench-article-container, .bench-summary-container').addClass('hidden');
                 $('.bench-container').addClass('loading');
 
                 var editedArticle = JSON.parse(JSON.stringify(article));
 
                 // Set title
-                editedArticle.titleSentence.editedTarget = summaryTranslator.getCached(editedArticle.titleSentence).editedTarget;
+                var targetTitle = summaryTranslator.getCached(editedArticle.titleSentence);
+                editedArticle.titleSentence.editedTarget = targetTitle.editedTarget;
+                editedArticle.titleSentence.logs = targetTitle.logs;
 
                 editedArticle.title = editedArticle.titleSentence.editedTarget || editedArticle.titleSentence.target;
 
@@ -531,7 +614,8 @@ function prepareArticle(article) {
                         id: parseInt($this.attr('data-sentence-id')),
                         source: $this.text(),
                         target: targetSentence.target,
-                        editedTarget: targetSentence.editedTarget
+                        editedTarget: targetSentence.editedTarget,
+                        logs: targetSentence.logs
                     });
                 });
                 editedArticle.summarySentences = summarySentences;
@@ -547,6 +631,7 @@ function prepareArticle(article) {
                         var targetSentence = summaryTranslator.getCached(sentence);
 
                         sentence.editedTarget = targetSentence.editedTarget;
+                        sentence.logs = targetSentence.logs;
                     });
                 });
 
@@ -557,10 +642,14 @@ function prepareArticle(article) {
                     }).join(" ");
                 }).join("\n");
 
+                // Set environment
+                editedArticle._meta.environment = getEnvironment();
+                editedArticle._meta.logs = globalLogs;
+
                 console.log(editedArticle);
 
                 socket.emit('publish article', editedArticle, function () {
-                    console.log(performance.now(), "Article Published Successful");
+                    globalLogs.push(Events.publishArticleSuccess());
                     window.location.href = 'workbench';
                 });
             });
@@ -579,7 +668,7 @@ function prepareArticle(article) {
     $('.publish-btn').removeClass('hidden');
 
     $('.bench-container').removeClass('loading');
-    console.log(performance.now(), "Article Loaded");
+    globalLogs.push(Events.articleLoad());
 }
 
 function showWhatsNext() {
@@ -668,7 +757,7 @@ function panic() {
 var socket;
 
 $(function () {
-    console.log(performance.now(), "Page loaded");
+    globalLogs.push(Events.pageLoad());
     socket = io({path: baseUrl + 'socket.io'});
     socket.emit('select article source', articleSource);
 
