@@ -142,6 +142,14 @@ var Events = (function() {
             var ev = getDefaultEvent('blur');
             return ev;
         },
+        click: function(type) {
+            if (type != 'click' && type != 'dblclick') {
+                type = 'click';
+            }
+
+            var ev = getDefaultEvent(type);
+            return ev;
+        },
         keydown: function(key, isTrusted) {
             var ev = getDefaultEvent('keydown');
             ev.key = key;
@@ -483,7 +491,7 @@ function prepareArticle(article) {
         // For translations
         var selectorTranslatable = '.summary-target .sentence, .article-body .paragraph-target .sentence, .article-title-target';
         $('.bench-container')
-            .on("focus blur keydown input compositionstart compositionupdate compositionend", selectorTranslatable, function(e) {
+            .on("click dblclick focus blur keydown input compositionstart compositionupdate compositionend", selectorTranslatable, function(e) {
                 var linkedSentences = getLinkedSentences(this);
 
                 var cachedSentence = summaryTranslator.getCached({
@@ -491,6 +499,10 @@ function prepareArticle(article) {
                 });
 
                 switch(e.type) {
+                    case "click":
+                    case "dblclick":
+                        cachedSentence.logs.push(Events.click(e.type));
+                        break;
                     case "focus":
                     case "focusin":
                         cachedSentence.logs.push(Events.focus());
@@ -696,7 +708,7 @@ function prepareArticle(article) {
 
                 socket.emit('publish article', editedArticle, function () {
                     globalLogs.push(Events.publishArticleSuccess());
-                    window.location.href = 'workbench';
+                    // window.location.href = 'workbench';
                 });
             });
     }
