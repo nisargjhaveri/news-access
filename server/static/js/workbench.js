@@ -142,12 +142,27 @@ var Events = (function() {
             var ev = getDefaultEvent('blur');
             return ev;
         },
-        keydown: function() {
+        keydown: function(key, isTrusted) {
             var ev = getDefaultEvent('keydown');
+            ev.key = key;
+            ev.isTrusted = isTrusted;
             return ev;
         },
-        input: function() {
+        // type can be 'compositionstart', 'compositionupdate' or 'compositionend'
+        composition: function(type, data, isTrusted) {
+            var ev = getDefaultEvent('composition');
+            ev.subType = type;
+            ev.data = data;
+            ev.isTrusted = isTrusted;
+            return ev;
+        },
+        input: function(value, inputType, data, isComposing, isTrusted) {
             var ev = getDefaultEvent('input');
+            ev.value = value;
+            ev.data = data;
+            ev.inputType = inputType;
+            ev.isComposing = isComposing;
+            ev.isTrusted = isTrusted;
             return ev;
         },
     };
@@ -161,7 +176,10 @@ function getEnvironment() {
             userAgent: navigator.userAgent,
             vendor: navigator.vendor,
             language: navigator.language,
-            languages: navigator.languages
+            languages: navigator.languages,
+            extensions: {
+                googleInputTools: $('#GOOGLE_INPUT_CHEXT_FLAG').length ? true : false,
+            },
         }
     };
 }
@@ -465,14 +483,44 @@ function prepareArticle(article) {
         // For translations
         var selectorTranslatable = '.summary-target .sentence, .article-body .paragraph-target .sentence, .article-title-target';
         $('.bench-container')
-            .on("focus", selectorTranslatable, function(e) {
+            .on("focus blur keydown input compositionstart compositionupdate compositionend", selectorTranslatable, function(e) {
                 var linkedSentences = getLinkedSentences(this);
 
                 var cachedSentence = summaryTranslator.getCached({
                     source: linkedSentences.sourceSentence.text()
                 });
 
-                cachedSentence.logs.push(Events.focus());
+                switch(e.type) {
+                    case "focus":
+                    case "focusin":
+                        cachedSentence.logs.push(Events.focus());
+                        break;
+                    case "blur":
+                    case "focusout":
+                        cachedSentence.logs.push(Events.blur());
+                        break;
+                    case "keydown":
+                        cachedSentence.logs.push(Events.keydown(e.key, e.originalEvent.isTrusted));
+                        break;
+                    case "input":
+                        cachedSentence.logs.push(
+                            Events.input(
+                                $(this).text(),
+                                e.originalEvent.inputType,
+                                e.originalEvent.data,
+                                e.originalEvent.isComposing,
+                                e.originalEvent.isTrusted
+                            )
+                        );
+                        break;
+                    case "compositionstart":
+                    case "compositionupdate":
+                    case "compositionend":
+                        cachedSentence.logs.push(
+                            Events.composition(e.type, e.originalEvent.data, e.originalEvent.isTrusted)
+                        );
+                        break;
+                }
             })
             .on("blur", selectorTranslatable, function(e) {
                 var $this = $(this);
@@ -485,10 +533,8 @@ function prepareArticle(article) {
 
                 summaryTranslator.cacheTranslations([sentence]);
 
-                var cachedSentence = summaryTranslator.getCached(sentence);
-                cachedSentence.logs.push(Events.blur());
-
                 // Update the translations
+                var cachedSentence = summaryTranslator.getCached(sentence);
                 $this
                     .removeClass("translation-edited")
                     .addClass(cachedSentence.editedTarget ? "translation-edited" : "");
