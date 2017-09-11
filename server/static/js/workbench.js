@@ -433,11 +433,13 @@ function prepareArticle(article) {
                 linkedSentences.targetSentence,
                 linkedSentences.otherSourceSentence,
                 linkedSentences.otherTargetSentence
-            ];
+            ].filter(function (e) {
+                return e;
+            });
 
             return $(linkedSentencesArray).map(function() {
                 return $(this).toArray();
-            });
+            }).not(elem);
         }
 
         function getLinkedSentences(elem) {
@@ -449,6 +451,9 @@ function prepareArticle(article) {
             if ($elem.is('.article-title-target')) {
                 $sourceSentence = $('.article-title-source');
                 $targetSentence = $elem;
+            } else if ($elem.is('.summary-bin .sentence')) {
+                otherSourcePath = '.article-body .paragraph-source';
+                otherTargetPath = '.article-body .paragraph-target';
             } else if ($elem.is('.summary-target .sentence') || $elem.is('.summary-source .sentence')) {
                 var sentenceIndex;
                 if ($elem.is('.summary-target .sentence')) {
