@@ -708,7 +708,7 @@ function prepareArticle(article) {
 
                 socket.emit('publish article', editedArticle, function () {
                     globalLogs.push(Events.publishArticleSuccess());
-                    // window.location.href = 'workbench';
+                    window.location.href = 'workbench';
                 });
             });
     }
