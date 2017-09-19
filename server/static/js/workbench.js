@@ -77,11 +77,6 @@ var summaryTranslator = (function () {
                     cachedSentence.editedTarget = translationStore[sentence.source].edited;
                 }
 
-                if (!Array.isArray(translationStore[sentence.source].logs)) {
-                    translationStore[sentence.source].logs = [];
-                }
-                cachedSentence.logs = translationStore[sentence.source].logs;
-
                 return cachedSentence;
             } else {
                 return false;
@@ -101,6 +96,18 @@ var summaryTranslator = (function () {
                     delete translationStore[sentence.source].edited;
                 }
             });
+        }
+    };
+})();
+
+var networkLogger = (function () {
+    var _loggerId;
+    return {
+        initialize: function (loggerId) {
+            _loggerId = loggerId;
+        },
+        translationSentenceLog: function(source, event) {
+
         }
     };
 })();
@@ -498,29 +505,27 @@ function prepareArticle(article) {
         $('.bench-container')
             .on("click dblclick focus blur keydown input compositionstart compositionupdate compositionend", selectorTranslatable, function(e) {
                 var linkedSentences = getLinkedSentences(this);
-
-                var cachedSentence = summaryTranslator.getCached({
-                    source: linkedSentences.sourceSentence.text()
-                });
+                var source = linkedSentences.sourceSentence.text();
 
                 switch(e.type) {
                     case "click":
                     case "dblclick":
-                        cachedSentence.logs.push(Events.click(e.type));
+                        networkLogger.translationSentenceLog(source, Events.click(e.type));
                         break;
                     case "focus":
                     case "focusin":
-                        cachedSentence.logs.push(Events.focus());
+                        networkLogger.translationSentenceLog(source, Events.focus());
                         break;
                     case "blur":
                     case "focusout":
-                        cachedSentence.logs.push(Events.blur());
+                        networkLogger.translationSentenceLog(source, Events.blur());
                         break;
                     case "keydown":
-                        cachedSentence.logs.push(Events.keydown(e.key, e.originalEvent.isTrusted));
+                        networkLogger.translationSentenceLog(source, Events.keydown(e.key, e.originalEvent.isTrusted));
                         break;
                     case "input":
-                        cachedSentence.logs.push(
+                        networkLogger.translationSentenceLog(
+                            source,
                             Events.input(
                                 $(this).text(),
                                 e.originalEvent.inputType,
@@ -533,7 +538,8 @@ function prepareArticle(article) {
                     case "compositionstart":
                     case "compositionupdate":
                     case "compositionend":
-                        cachedSentence.logs.push(
+                        networkLogger.translationSentenceLog(
+                            source,
                             Events.composition(e.type, e.originalEvent.data, e.originalEvent.isTrusted)
                         );
                         break;
@@ -660,7 +666,6 @@ function prepareArticle(article) {
                 // Set title
                 var targetTitle = summaryTranslator.getCached(editedArticle.titleSentence);
                 editedArticle.titleSentence.editedTarget = targetTitle.editedTarget;
-                editedArticle.titleSentence.logs = targetTitle.logs;
 
                 editedArticle.title = editedArticle.titleSentence.editedTarget || editedArticle.titleSentence.target;
 
@@ -678,7 +683,6 @@ function prepareArticle(article) {
                         source: $this.text(),
                         target: targetSentence.target,
                         editedTarget: targetSentence.editedTarget,
-                        logs: targetSentence.logs
                     });
                 });
                 editedArticle.summarySentences = summarySentences;
@@ -694,7 +698,6 @@ function prepareArticle(article) {
                         var targetSentence = summaryTranslator.getCached(sentence);
 
                         sentence.editedTarget = targetSentence.editedTarget;
-                        sentence.logs = targetSentence.logs;
                     });
                 });
 
@@ -707,7 +710,7 @@ function prepareArticle(article) {
 
                 // Set environment
                 editedArticle._meta.environment = getEnvironment();
-                editedArticle._meta.logs = globalLogs;
+                editedArticle._meta.globalLogs = globalLogs;
 
                 console.log(editedArticle);
 
@@ -717,6 +720,8 @@ function prepareArticle(article) {
                 });
             });
     }
+
+    networkLogger.initialize(article._meta.loggerId);
 
     summaryTranslator.initialize(article.orignialArticle.lang, article.lang);
     summaryTranslator.cacheTranslations([article.titleSentence]);
@@ -796,7 +801,8 @@ function loadArticle() {
     socket.emit('access article', articleId, [selectedLanguage], {
         summarizer: selectedSummarizer,
         translator: selectedTranslator,
-        requireAuth: true
+        requireAuth: true,
+        initializeLog: true
     }, function (articles) {
         console.log(articles);
         prepareArticle(articles[0]);

@@ -152,5 +152,6 @@ StoredArticles.prototype.storePreprocessed = function (article) {
 };
 
 StoredArticles.prototype.storeEdited = storedArticleUtils.storeEdited;
+StoredArticles.prototype.initializeLogger = storedArticleUtils.initializeLogger;
 
 module.exports = StoredArticles;

@@ -38,6 +38,28 @@ module.exports = function (socketEnsureLoggedIn, socket) {
             .then(function (article) {
                 return pipeline.accessArticle(article, langs, options);
             }, handleError)
+            .then(function (articles) {
+                if (options.initializeLog) {
+                    var loggerPromises = [];
+                    articles.forEach(function (article) {
+                        loggerPromises.push(
+                            socket.articleFactory.initializeLogger(article)
+                                .then(function (loggerId) {
+                                    if (!("_meta" in article)) {
+                                        article._meta = {};
+                                    }
+                                    article._meta.loggerId = loggerId;
+                                }, handleError)
+                        );
+                    });
+
+                    return Promise.all(loggerPromises).then(function () {
+                        return articles;
+                    }, handleError);
+                } else {
+                    return articles;
+                }
+            })
             .then(callback, handleError)
             .catch(throwError);
     });

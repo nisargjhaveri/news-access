@@ -66,4 +66,14 @@ Articles.prototype.storeEdited = function (article) {
     return this.articles.storeEdited(article);
 };
 
+/**
+ * initialize logger for editing article
+ * @param  {object}  article Article to be edited
+ * @return {promise}         Resolves to logger id if successful
+ */
+Articles.prototype.initializeLogger = function (article) {
+    if (!this.articles) return Promise.reject("Bad article source selected");
+    return this.articles.initializeLogger(article);
+};
+
 module.exports = Articles;

@@ -57,7 +57,26 @@ function storeEdited (article) {
     });
 }
 
+function initializeLogger (article) {
+    return getDB().then(function (db) {
+        var collection = db.collection('accessible-articles-logs');
+
+        return collection.insertOne({
+            id: article.id,
+            lang: article.lang,
+            translationSentencesLogs: [],
+            summarySentencesLogs: [],
+            summaryLogs: []
+        }).then(function (res) {
+            return Promise.resolve(res.insertedId);
+        }, function (err) {
+            return Promise.reject(err);
+        });
+    });
+}
+
 module.exports = {
     getDB,
-    storeEdited
+    storeEdited,
+    initializeLogger
 };
