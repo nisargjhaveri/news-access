@@ -45,6 +45,7 @@ LiveArticles.prototype.storePreprocessed = function (article) {
 
 LiveArticles.prototype.storeEdited = storedArticleUtils.storeEdited;
 LiveArticles.prototype.initializeLogger = storedArticleUtils.initializeLogger;
+LiveArticles.prototype.insertLogs = storedArticleUtils.insertLogs;
 
 
 module.exports = LiveArticles;

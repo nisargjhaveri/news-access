@@ -1,4 +1,5 @@
 var MongoClient = require("mongodb").MongoClient;
+var ObjectID = require("mongodb").ObjectID;
 
 var config = require("./config.json");
 
@@ -50,7 +51,16 @@ function storeEdited (article) {
             },
             { upsert: true }
         ).then(function (res) {
-            return Promise.resolve(article);
+            var loggerPromise = Promise.resolve();
+            if (article._meta.loggerId) {
+                loggerPromise = finalizeLogger(article._meta.loggerId, res.upsertedId._id);
+            }
+
+            return loggerPromise.then(function () {
+                Promise.resolve(article);
+            }, function () {
+                Promise.resolve(article);
+            });
         }, function (err) {
             return Promise.reject(err);
         });
@@ -61,22 +71,99 @@ function initializeLogger (article) {
     return getDB().then(function (db) {
         var collection = db.collection('accessible-articles-logs');
 
-        return collection.insertOne({
-            id: article.id,
-            lang: article.lang,
-            translationSentencesLogs: [],
-            summarySentencesLogs: [],
-            summaryLogs: []
-        }).then(function (res) {
-            return Promise.resolve(res.insertedId);
+        return collection.updateOne(
+            { $and: [{ _id: { $gt: 0 }}, { _id: { $lt: 0 }}] },
+            {
+                $set: {
+                    id: article.id,
+                    lang: article.lang,
+                    translationSentencesLogs: [],
+                    summarySentencesLogs: [],
+                    summaryLogs: []
+                },
+                $currentDate: {
+                    _timestamp: true
+                }
+            },
+            { upsert: true }
+        ).then(function (res) {
+            return Promise.resolve(res.upsertedId._id);
         }, function (err) {
             return Promise.reject(err);
         });
     });
 }
 
+function insertLogs (loggerId, logs) {
+    return getDB().then(function (db) {
+        var collection = db.collection('accessible-articles-logs');
+
+        function mergeLogs(storedLogArray, newLogMap) {
+            if (!Array.isArray(storedLogArray)) {
+                storedLogArray = [];
+            }
+            var storedLogMap = {};
+            storedLogArray.forEach(function(sentenceEntry) {
+                storedLogMap[sentenceEntry.key] = sentenceEntry;
+            });
+
+            for (var source in newLogMap) {
+                if (newLogMap.hasOwnProperty(source)) {
+                    if (source in storedLogMap) {
+                        storedLogMap[source].logs.push.apply(storedLogMap[source].logs, newLogMap[source]);
+                    } else {
+                        storedLogMap[source] = {
+                            key: source,
+                            logs: newLogMap[source]
+                        };
+                        storedLogArray.push(storedLogMap[source]);
+                    }
+                }
+            }
+
+            return storedLogArray;
+        }
+
+        return collection.findOne({ _id: ObjectID(loggerId) })
+            .then(function (logger) {
+                if (!logger) {
+                    return Promise.reject("Logger not found");
+                }
+
+                logger.translationSentencesLogs = mergeLogs(logger.translationSentencesLogs, logs.translationSentencesLogs);
+
+                return logger;
+            }, function (err) {
+                return Promise.reject(err);
+            }).then(function (logger) {
+                return collection.replaceOne(
+                    { _id: ObjectID(loggerId) },
+                    logger
+                );
+            }, function (err) {
+                return Promise.reject(err);
+            });
+    });
+}
+
+function finalizeLogger (loggerId, accessibleArticleId) {
+    return getDB().then(function (db) {
+        var collection = db.collection('accessible-articles-logs');
+
+        return collection.updateOne(
+            { _id: ObjectID(loggerId) },
+            {
+                $set: {
+                    accessibleArticleId: accessibleArticleId
+                }
+            }
+        );
+    });
+}
+
 module.exports = {
     getDB,
     storeEdited,
-    initializeLogger
+    initializeLogger,
+    insertLogs
 };

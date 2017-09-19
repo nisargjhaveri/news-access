@@ -107,7 +107,14 @@ var networkLogger = (function () {
             _loggerId = loggerId;
         },
         translationSentenceLog: function(source, event) {
+            var logs = {
+                translationSentencesLogs: {}
+            };
+            logs.translationSentencesLogs[source] = [event];
 
+            socket.emit('insert logs', _loggerId, logs, function() {
+                // console.log("Log inserted");
+            });
         }
     };
 })();

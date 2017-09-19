@@ -64,6 +64,18 @@ module.exports = function (socketEnsureLoggedIn, socket) {
             .catch(throwError);
     });
 
+    socket.on('insert logs', function (loggerId, logs, callback) {
+        socketEnsureLoggedIn(socket)
+            .then(function () {
+                socket.articleFactory.insertLogs(loggerId, logs)
+                    .then(callback, function (err) {
+                        console.log(socket.id, "Ignoring error:", err);
+                    });
+            }, function (err) {
+                console.log(socket.id, "Ignoring error:", err);
+            });
+    });
+
     socket.on('publish article', function (article, callback) {
         socketEnsureLoggedIn(socket)
             .then(function (user) {

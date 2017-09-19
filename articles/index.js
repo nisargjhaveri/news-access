@@ -76,4 +76,15 @@ Articles.prototype.initializeLogger = function (article) {
     return this.articles.initializeLogger(article);
 };
 
+/**
+ * insert logs in the logger
+ * @param  {string}  loggerId Id of the logger
+ * @param  {object}  logs     logs to be inserted
+ * @return {promise}          Resolves if successful
+ */
+Articles.prototype.insertLogs = function (loggerId, logs) {
+    if (!this.articles) return Promise.reject("Bad article source selected");
+    return this.articles.insertLogs(loggerId, logs);
+};
+
 module.exports = Articles;
