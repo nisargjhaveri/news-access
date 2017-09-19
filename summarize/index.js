@@ -20,9 +20,19 @@ function summarizeArticle(article, method) {
             summarize = veoozSummzrize;
     }
 
-    return summarize(article).then(mapSummarySentences, function(err) {
-        return Promise.reject(err);
-    });
+    return summarize(article)
+        .then(article, function(article) {
+            if (!("_meta" in article)) {
+                article._meta = {};
+            }
+            article._meta.summarizer = method;
+            return article;
+        }, function(err) {
+            return Promise.reject(err);
+        })
+        .then(mapSummarySentences, function(err) {
+            return Promise.reject(err);
+        });
 }
 
 function mapSummarySentences(article) {
