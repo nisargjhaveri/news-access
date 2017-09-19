@@ -21,7 +21,7 @@ function accessArticle (article, langs, options) {
 
     var summaryPromise;
 
-    if (article.summary && Array.isArray(article.summarySentences)) {
+    if (article._meta && article._meta.summarizer == options.summarizer) {
         summaryPromise = Promise.resolve(article);
     } else {
         summaryPromise = preProcessArticle(article, options);

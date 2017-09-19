@@ -21,7 +21,7 @@ function summarizeArticle(article, method) {
     }
 
     return summarize(article)
-        .then(article, function(article) {
+        .then(function(article) {
             if (!("_meta" in article)) {
                 article._meta = {};
             }
