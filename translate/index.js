@@ -1,8 +1,12 @@
 var googleTranslate = require('./googleTranslate.js');
 var microsoftTranslate = require('./microsoftTranslate.js');
 
+function getMethod(method) {
+    return method || 'google-translate';
+}
+
 function getTranslator(method) {
-    method = method || 'google-translate';
+    method = getMethod(method);
     var translator;
 
     switch (method) {
@@ -86,6 +90,11 @@ exports.translateArticle = function (article, targetLang, method) {
                                 }, propagateError);
 
     return Promise.all([titleTranslateP, bodyTranslateP, summaryTranslateP]).then(function (values) {
+        if (!("_meta" in targetArticle)) {
+            targetArticle._meta = {};
+        }
+        targetArticle._meta.translator = getMethod(method);
+
         return targetArticle;
     }, propagateError);
 };
