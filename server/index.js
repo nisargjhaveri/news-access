@@ -1,3 +1,6 @@
+require('./logger.js');
+console.log("Initializing");
+
 var path = require('path');
 var express = require('express');
 
@@ -120,7 +123,7 @@ app.get('/:articleSource?', function(req, res) {
 // Socket.io setup
 
 io.on('connection', function(socket) {
-    console.log('a user connected', socket.id);
+    console.log('A user connected', socket.id);
 
     handleSocket(auth.socketEnsureLoggedIn, socket);
 });
@@ -128,5 +131,5 @@ io.on('connection', function(socket) {
 io.use(auth.socketPassportAuth);
 
 http.listen(config.port, function() {
-    console.log('listening on *:' + config.port);
+    console.log('Listening on *:' + config.port);
 });
