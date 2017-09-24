@@ -1,6 +1,18 @@
 /* globals Sortable:false */
 /* globals articleSource: false, articleId:false, baseUrl: false */
 
+var config = {
+    logs: {
+        click: false,
+        focus: true,
+        keydown: false,
+        composition: false,
+        input: true,
+        selection: true,
+        copypaste: true,
+    }
+};
+
 var summaryTranslator = (function () {
     var translationStore = {};
     var fromLang, toLang;
@@ -107,6 +119,7 @@ var networkLogger = (function () {
             _loggerId = loggerId;
         },
         translationSentenceLog: function(source, event) {
+            console.log(event);
             var logs = {
                 translationSentencesLogs: {}
             };
@@ -187,6 +200,22 @@ var Events = (function() {
             ev.isTrusted = isTrusted;
             return ev;
         },
+        copypaste: function(type, data) {
+            if (type != 'copy' && type != 'cut' && type != 'paste') {
+                type = 'copy';
+            }
+
+            var ev = getDefaultEvent(type);
+            ev.data = data;
+            return ev;
+        },
+        selection: function(isCollapsed, startOffset, endOffset) {
+            var ev = getDefaultEvent('selection');
+            ev.isCollapsed = isCollapsed;
+            ev.startOffset = startOffset;
+            ev.endOffset = endOffset;
+            return ev;
+        }
     };
 })();
 
@@ -509,46 +538,104 @@ function prepareArticle(article) {
 
         // For translations
         var selectorTranslatable = '.summary-target .sentence, .article-body .paragraph-target .sentence, .article-title-target';
+
+        $(document)
+            .on("selectionchange", function(e) {
+                if (document.getSelection && document.getSelection().rangeCount) {
+                    if (!config.logs.selection) {
+                        return;
+                    }
+
+                    var data = document.getSelection().toString();
+                    var range = document.getSelection().getRangeAt(0);
+
+                    var sentence = $(range.commonAncestorContainer).parents('.sentence');
+
+                    if (sentence.is(selectorTranslatable)) {
+                        var linkedSentences = getLinkedSentences(this);
+                        var source = linkedSentences.sourceSentence.text();
+
+                        // FIXME: This assumes same node at startContainer and endContainer.
+
+                        networkLogger.translationSentenceLog(
+                            source,
+                            Events.selection(range.collapsed, range.startOffset, range.endOffset)
+                        );
+                    }
+                }
+            });
+
         $('.bench-container')
-            .on("click dblclick focus blur keydown input compositionstart compositionupdate compositionend", selectorTranslatable, function(e) {
+            .on("click dblclick focus blur keydown input compositionstart compositionupdate compositionend cut copy paste", selectorTranslatable, function(e) {
                 var linkedSentences = getLinkedSentences(this);
                 var source = linkedSentences.sourceSentence.text();
 
                 switch(e.type) {
                     case "click":
                     case "dblclick":
-                        networkLogger.translationSentenceLog(source, Events.click(e.type));
+                        if (config.logs.click) {
+                            networkLogger.translationSentenceLog(source, Events.click(e.type));
+                        }
                         break;
                     case "focus":
                     case "focusin":
-                        networkLogger.translationSentenceLog(source, Events.focus());
+                        if (config.logs.focus) {
+                            networkLogger.translationSentenceLog(source, Events.focus());
+                        }
                         break;
                     case "blur":
                     case "focusout":
-                        networkLogger.translationSentenceLog(source, Events.blur());
+                        if (config.logs.focus) {
+                            networkLogger.translationSentenceLog(source, Events.blur());
+                        }
                         break;
                     case "keydown":
-                        networkLogger.translationSentenceLog(source, Events.keydown(e.key, e.originalEvent.isTrusted));
+                        if (config.logs.keydown) {
+                            networkLogger.translationSentenceLog(source, Events.keydown(e.key, e.originalEvent.isTrusted));
+                        }
                         break;
                     case "input":
-                        networkLogger.translationSentenceLog(
-                            source,
-                            Events.input(
-                                $(this).text(),
-                                e.originalEvent.inputType,
-                                e.originalEvent.data,
-                                e.originalEvent.isComposing,
-                                e.originalEvent.isTrusted
-                            )
-                        );
+                        if (config.logs.input) {
+                            networkLogger.translationSentenceLog(
+                                source,
+                                Events.input(
+                                    $(this).text(),
+                                    e.originalEvent.inputType,
+                                    e.originalEvent.data,
+                                    e.originalEvent.isComposing,
+                                    e.originalEvent.isTrusted
+                                )
+                            );
+                        }
                         break;
                     case "compositionstart":
                     case "compositionupdate":
                     case "compositionend":
-                        networkLogger.translationSentenceLog(
-                            source,
-                            Events.composition(e.type, e.originalEvent.data, e.originalEvent.isTrusted)
-                        );
+                        if (config.logs.composition) {
+                            networkLogger.translationSentenceLog(
+                                source,
+                                Events.composition(e.type, e.originalEvent.data, e.originalEvent.isTrusted)
+                            );
+                        }
+                        break;
+                    case "cut":
+                    case "copy":
+                        if (config.logs.copypaste) {
+                            networkLogger.translationSentenceLog(
+                                source,
+                                Events.copypaste(e.type, document.getSelection().toString())
+                            );
+                        }
+                        break;
+                    case "paste":
+                        var clipboardData = e.clipboardData || e.originalEvent.clipboardData;
+
+                        if (config.logs.copypaste) {
+                            networkLogger.translationSentenceLog(
+                                source,
+                                Events.copypaste(e.type, clipboardData.getData('text/plain'))
+                            );
+                        }
                         break;
                 }
             })
