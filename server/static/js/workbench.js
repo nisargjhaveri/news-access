@@ -119,6 +119,7 @@ var networkLogger = (function () {
             _loggerId = loggerId;
         },
         translationSentenceLog: function(source, event) {
+            console.log(event);
             var logs = {
                 translationSentencesLogs: {}
             };
@@ -920,7 +921,7 @@ var socket;
 
 $(function () {
     globalLogs.push(Events.pageLoad());
-    socket = io({path: baseUrl + 'socket.io'});
+    socket = io({path: baseUrl + 'socket.io', transports: ['polling']});
     socket.emit('select article source', articleSource);
 
     socket.on('new error', function (err) {
