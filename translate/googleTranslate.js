@@ -13,6 +13,28 @@ function translateText (text, from, to) {
         return Promise.reject("LANG_NOT_SUPPORTED");
     }
 
+    if (text.length > 4500) { // Limit seems to be 5000, but just to be on the safe side.
+        var lines1 = text.split("\n");
+
+        if (lines1.length <= 1) {
+            return Promise.reject("SENTENCE_TOO_LARGE");
+        }
+
+        var lines2 = lines1.splice(Math.floor(lines1.length / 2));
+
+        return Promise.all([
+            translateText(lines1.join("\n"), from, to),
+            translateText(lines2.join("\n"), from, to)
+        ]).then(function (translation) {
+            return Promise.resolve({
+                'text': [translation[0].text, translation[1].text].join("\n"),
+                'sentences': translation[0].sentences.concat(translation[1].sentences)
+            });
+        }, function (err) {
+            return Promise.reject(err);
+        });
+    }
+
     return token.get(text).then(function (token) {
         var url = 'https://translate.google.com/translate_a/single';
         var data = {
