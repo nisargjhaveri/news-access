@@ -552,7 +552,7 @@ function prepareArticle(article) {
                     var sentence = $(range.commonAncestorContainer).parents('.sentence');
 
                     if (sentence.is(selectorTranslatable)) {
-                        var linkedSentences = getLinkedSentences(this);
+                        var linkedSentences = getLinkedSentences(sentence);
                         var source = linkedSentences.sourceSentence.text();
 
                         // FIXME: This assumes same node at startContainer and endContainer.
