@@ -114,25 +114,112 @@ var summaryTranslator = (function () {
 
 var networkLogger = (function () {
     var _loggerId;
+    var _pendingLogs;
+    var _pendingLogsCount;
+
+    var _lastPushTime = new Date();
+    var _lastPushCompleted = true;
+
+    function _refreshPendingLogs() {
+        _pendingLogs = {
+            translationSentencesLogs: {},
+            summarySentencesLogs: {},
+            summaryLogs: [],
+            articleLogs: []
+        };
+        _pendingLogsCount = 0;
+    }
+    _refreshPendingLogs();
+
+    function _pushLogs(callback) {
+        var logsToPush = _pendingLogs;
+        _refreshPendingLogs();
+
+        _lastPushTime = new Date();
+        _lastPushCompleted = false;
+        socket.emit('insert logs', _loggerId, logsToPush, function() {
+            _lastPushCompleted = true;
+            console.log("Logs pushed");
+            if (typeof callback == 'function') callback();
+        });
+    }
+
+    var _flushLogs = false;
+    var _flushCallback;
+
+    function _checkPushLogs(flush, callback) {
+        var currentTime = new Date();
+
+        if (_loggerId &&
+            _pendingLogsCount &&
+            _lastPushCompleted &&
+            (flush || currentTime - _lastPushTime >= 5000)
+        ) {
+            _pushLogs(function() {
+                if (flush) {
+                    if (typeof callback == 'function') callback();
+                } else if (_flushLogs) {
+                    _flushLogs = false;
+                    _checkPushLogs(true, _flushCallback);
+                }
+            });
+        } else if(flush) {
+            if (_lastPushCompleted && !_pendingLogsCount) {
+                if (typeof callback == 'function') callback();
+                return;
+            }
+
+            if (!_lastPushCompleted) {
+                _flushLogs = true;
+                _flushCallback = callback;
+            }
+
+        }
+    }
+
     return {
         initialize: function (loggerId) {
             _loggerId = loggerId;
+            _checkPushLogs();
+            setInterval(_checkPushLogs, 5000);
         },
         translationSentenceLog: function(source, event) {
             console.log(event);
-            var logs = {
-                translationSentencesLogs: {}
-            };
-            logs.translationSentencesLogs[source] = [event];
+            if (!(source in _pendingLogs.translationSentencesLogs)) {
+                _pendingLogs.translationSentencesLogs[source] = [];
+            }
 
-            socket.emit('insert logs', _loggerId, logs, function() {
-                // console.log("Log inserted");
-            });
+            _pendingLogs.translationSentencesLogs[source].push(event);
+            _pendingLogsCount++;
+            _checkPushLogs();
+        },
+        summarySentenceLog: function(key, event) {
+            console.log(event);
+            if (!(key in _pendingLogs.summarySentencesLogs)) {
+                _pendingLogs.summarySentencesLogs[key] = [];
+            }
+
+            _pendingLogs.summarySentencesLogs[key].push(event);
+            _pendingLogsCount++;
+            _checkPushLogs();
+        },
+        summaryLog: function(event) {
+            console.log(event);
+            _pendingLogs.summaryLogs.push(event);
+            _pendingLogsCount++;
+            _checkPushLogs();
+        },
+        articleLog: function(event) {
+            console.log(event);
+            _pendingLogs.articleLogs.push(event);
+            _pendingLogsCount++;
+            _checkPushLogs();
+        },
+        flushLogs: function(callback) {
+            _checkPushLogs(true, callback);
         }
     };
 })();
-
-var globalLogs = [];
 
 var Events = (function() {
     var id = 0;
@@ -144,6 +231,7 @@ var Events = (function() {
         };
     }
     return {
+        // Article-level events
         pageLoad: function() {
             var ev = getDefaultEvent('pageLoad');
             return ev;
@@ -161,6 +249,7 @@ var Events = (function() {
             return ev;
         },
 
+        // Sentence-level events
         focus: function() {
             var ev = getDefaultEvent('focus');
             return ev;
@@ -183,8 +272,8 @@ var Events = (function() {
             ev.isTrusted = isTrusted;
             return ev;
         },
-        // type can be 'compositionstart', 'compositionupdate' or 'compositionend'
         composition: function(type, data, isTrusted) {
+            // type can be 'compositionstart', 'compositionupdate' or 'compositionend'
             var ev = getDefaultEvent('composition');
             ev.subType = type;
             ev.data = data;
@@ -214,6 +303,26 @@ var Events = (function() {
             ev.isCollapsed = isCollapsed;
             ev.startOffset = startOffset;
             ev.endOffset = endOffset;
+            return ev;
+        },
+
+        // Summary-level events
+        addSentence: function(sentenceId, sentenceText, summaryOrder) {
+            var ev = getDefaultEvent('addSentence');
+            ev.sentenceId = sentenceId;
+            ev.data = sentenceText;
+            ev.summaryOrder = summaryOrder;
+            return ev;
+        },
+        removeSentence: function(sentenceId, summaryOrder) {
+            var ev = getDefaultEvent('removeSentence');
+            ev.sentenceId = sentenceId;
+            ev.summaryOrder = summaryOrder;
+            return ev;
+        },
+        reorderSummary: function(summaryOrder) {
+            var ev = getDefaultEvent('reorderSummary');
+            ev.summaryOrder = summaryOrder;
             return ev;
         }
     };
@@ -284,6 +393,11 @@ function prepareArticle(article) {
         $('.summary-target-status-char').text(totalSize);
     }
 
+    var summaryId = 0;
+    function getSummarySentenceId() {
+        return "s" + summaryId++;
+    }
+
     function showArticle(paragraphs) {
         var articleBody = $('.article-body');
 
@@ -323,9 +437,19 @@ function prepareArticle(article) {
         // Show summary in source language
         $('.summary-source').append(
             article.summarySentences.map(function (sentence) {
+                var summarySentenceId = getSummarySentenceId();
+
+                networkLogger.summaryLog(
+                    Events.addSentence(
+                        summarySentenceId,
+                        sentence.source
+                    )
+                );
+
                 return $('<span class="sentence ce-text-only">')
                     .text(sentence.source)
-                    .attr('data-sentence-id', sentence.id);
+                    .attr('data-sentence-id', sentence.id)
+                    .attr('data-summary-sentence-id', summarySentenceId);
             })
         );
         updateSourceSummaryStatus();
@@ -360,6 +484,7 @@ function prepareArticle(article) {
                 },
                 sort: true,
                 preventOnFilter: false,
+                dataIdAttr: "data-summary-sentence-id",
                 filter: function(e, target) {
                     return $(target).attr('contenteditable');
                 },
@@ -376,6 +501,33 @@ function prepareArticle(article) {
                     } else {
                         $('.summary-bin').removeClass('summary-bin-highlight');
                     }
+                },
+                onAdd: function(e) {
+                    var summarySentenceId = getSummarySentenceId();
+                    $(e.item).attr('data-summary-sentence-id', summarySentenceId);
+
+                    networkLogger.summaryLog(
+                        Events.addSentence(
+                            summarySentenceId,
+                            $(e.item).text(),
+                            $('.summary-source').data('sortable').toArray()
+                        )
+                    );
+                },
+                onRemove: function(e) {
+                    networkLogger.summaryLog(
+                        Events.removeSentence(
+                            $(e.item).attr('data-summary-sentence-id'),
+                            $('.summary-source').data('sortable').toArray()
+                        )
+                    );
+                },
+                onUpdate: function(e) {
+                    networkLogger.summaryLog(
+                        Events.reorderSummary(
+                            $('.summary-source').data('sortable').toArray()
+                        )
+                    );
                 },
                 onSort: function(e) {
                     $('.summary-source').trigger('summaryUpdated');
@@ -538,6 +690,7 @@ function prepareArticle(article) {
 
         // For translations
         var selectorTranslatable = '.summary-target .sentence, .article-body .paragraph-target .sentence, .article-title-target';
+        var selectorSourceEditable = '.summary-source .sentence';
 
         $(document)
             .on("selectionchange", function(e) {
@@ -551,53 +704,66 @@ function prepareArticle(article) {
 
                     var sentence = $(range.commonAncestorContainer).parents('.sentence');
 
+                    var key, sentenceLog;
+
                     if (sentence.is(selectorTranslatable)) {
                         var linkedSentences = getLinkedSentences(sentence);
-                        var source = linkedSentences.sourceSentence.text();
-
-                        // FIXME: This assumes same node at startContainer and endContainer.
-
-                        networkLogger.translationSentenceLog(
-                            source,
-                            Events.selection(range.collapsed, range.startOffset, range.endOffset)
-                        );
+                        key = linkedSentences.sourceSentence.text();
+                        sentenceLog = networkLogger.translationSentenceLog;
+                    } else if (sentence.is(selectorSourceEditable)) {
+                        key = sentence.data('summary-sentence-id');
+                        sentenceLog = networkLogger.summarySentenceLog;
+                    } else {
+                        return;
                     }
-                }
-            });
 
-        $('.bench-container')
-            .on("click dblclick focus blur keydown input compositionstart compositionupdate compositionend cut copy paste", selectorTranslatable, function(e) {
-                var linkedSentences = getLinkedSentences(this);
-                var source = linkedSentences.sourceSentence.text();
+                    // FIXME: This assumes same node at startContainer and endContainer.
+                    sentenceLog(
+                        key,
+                        Events.selection(range.collapsed, range.startOffset, range.endOffset)
+                    );
+                }
+            })
+            .on("click dblclick focus blur keydown input compositionstart compositionupdate compositionend cut copy paste", selectorTranslatable + ', ' + selectorSourceEditable, function(e) {
+                var $this = $(this);
+                var key, sentenceLog;
+                if ($this.is(selectorTranslatable)) {
+                    var linkedSentences = getLinkedSentences(this);
+                    key = linkedSentences.sourceSentence.text();
+                    sentenceLog = networkLogger.translationSentenceLog;
+                } else if ($this.is(selectorSourceEditable)) {
+                    key = $this.data('summary-sentence-id');
+                    sentenceLog = networkLogger.summarySentenceLog;
+                }
 
                 switch(e.type) {
                     case "click":
                     case "dblclick":
                         if (config.logs.click) {
-                            networkLogger.translationSentenceLog(source, Events.click(e.type));
+                            sentenceLog(key, Events.click(e.type));
                         }
                         break;
                     case "focus":
                     case "focusin":
                         if (config.logs.focus) {
-                            networkLogger.translationSentenceLog(source, Events.focus());
+                            sentenceLog(key, Events.focus());
                         }
                         break;
                     case "blur":
                     case "focusout":
                         if (config.logs.focus) {
-                            networkLogger.translationSentenceLog(source, Events.blur());
+                            sentenceLog(key, Events.blur());
                         }
                         break;
                     case "keydown":
                         if (config.logs.keydown) {
-                            networkLogger.translationSentenceLog(source, Events.keydown(e.key, e.originalEvent.isTrusted));
+                            sentenceLog(key, Events.keydown(e.key, e.originalEvent.isTrusted));
                         }
                         break;
                     case "input":
                         if (config.logs.input) {
-                            networkLogger.translationSentenceLog(
-                                source,
+                            sentenceLog(
+                                key,
                                 Events.input(
                                     $(this).text(),
                                     e.originalEvent.inputType,
@@ -612,8 +778,8 @@ function prepareArticle(article) {
                     case "compositionupdate":
                     case "compositionend":
                         if (config.logs.composition) {
-                            networkLogger.translationSentenceLog(
-                                source,
+                            sentenceLog(
+                                key,
                                 Events.composition(e.type, e.originalEvent.data, e.originalEvent.isTrusted)
                             );
                         }
@@ -621,8 +787,8 @@ function prepareArticle(article) {
                     case "cut":
                     case "copy":
                         if (config.logs.copypaste) {
-                            networkLogger.translationSentenceLog(
-                                source,
+                            sentenceLog(
+                                key,
                                 Events.copypaste(e.type, document.getSelection().toString())
                             );
                         }
@@ -631,14 +797,16 @@ function prepareArticle(article) {
                         var clipboardData = e.clipboardData || e.originalEvent.clipboardData;
 
                         if (config.logs.copypaste) {
-                            networkLogger.translationSentenceLog(
-                                source,
+                            sentenceLog(
+                                key,
                                 Events.copypaste(e.type, clipboardData.getData('text/plain'))
                             );
                         }
                         break;
                 }
-            })
+            });
+
+        $('.bench-container')
             .on("blur", selectorTranslatable, function(e) {
                 var $this = $(this);
 
@@ -751,7 +919,7 @@ function prepareArticle(article) {
 
         $('.publish-btn')
             .on('click', function (e) {
-                globalLogs.push(Events.publishArticle());
+                networkLogger.articleLog(Events.publishArticle());
                 $('.bench-article-container, .bench-summary-container').addClass('hidden');
                 $('.bench-container').addClass('loading');
 
@@ -804,12 +972,10 @@ function prepareArticle(article) {
 
                 // Set environment
                 editedArticle._meta.environment = getEnvironment();
-                editedArticle._meta.globalLogs = globalLogs;
 
                 console.log(editedArticle);
 
                 socket.emit('publish article', editedArticle, function () {
-                    globalLogs.push(Events.publishArticleSuccess());
                     window.location.href = 'workbench';
                 });
             });
@@ -830,7 +996,7 @@ function prepareArticle(article) {
     $('.publish-btn').removeClass('hidden');
 
     $('.bench-container').removeClass('loading');
-    globalLogs.push(Events.articleLoad());
+    networkLogger.articleLog(Events.articleLoad());
 }
 
 function showWhatsNext() {
@@ -920,7 +1086,7 @@ function panic() {
 var socket;
 
 $(function () {
-    globalLogs.push(Events.pageLoad());
+    networkLogger.articleLog(Events.pageLoad());
     socket = io({path: baseUrl + 'socket.io', transports: ['polling']});
     socket.emit('select article source', articleSource);
 

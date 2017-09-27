@@ -65,6 +65,7 @@ module.exports = function (socketEnsureLoggedIn, socket) {
     });
 
     socket.on('insert logs', function (loggerId, logs, callback) {
+        // Client should ensure that no parallel request for the same loggerId are made.
         socketEnsureLoggedIn(socket)
             .then(function () {
                 socket.articleFactory.insertLogs(loggerId, logs)

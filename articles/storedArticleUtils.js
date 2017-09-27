@@ -79,7 +79,8 @@ function initializeLogger (article) {
                     lang: article.lang,
                     translationSentencesLogs: [],
                     summarySentencesLogs: [],
-                    summaryLogs: []
+                    summaryLogs: [],
+                    articleLogs: []
                 },
                 $currentDate: {
                     _timestamp: true
@@ -131,6 +132,17 @@ function insertLogs (loggerId, logs) {
                 }
 
                 logger.translationSentencesLogs = mergeLogs(logger.translationSentencesLogs, logs.translationSentencesLogs);
+                logger.summarySentencesLogs = mergeLogs(logger.summarySentencesLogs, logs.summarySentencesLogs);
+                if (Array.isArray(logs.summaryLogs)) {
+                    logs.summaryLogs.forEach(function (event) {
+                        logger.summaryLogs.push(event);
+                    });
+                }
+                if (Array.isArray(logs.articleLogs)) {
+                    logs.articleLogs.forEach(function (event) {
+                        logger.articleLogs.push(event);
+                    });
+                }
 
                 return logger;
             }, function (err) {
