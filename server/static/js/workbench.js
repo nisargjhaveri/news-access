@@ -209,6 +209,10 @@ var networkLogger = (function () {
             _pendingLogsCount++;
             _checkPushLogs();
         },
+        setAccessibleArticleId: function(accessibleArticleId) {
+            _pendingLogs.accessibleArticleId = accessibleArticleId;
+            _pendingLogsCount++;
+        },
         articleLog: function(event) {
             console.log(event);
             _pendingLogs.articleLogs.push(event);
@@ -975,8 +979,14 @@ function prepareArticle(article) {
 
                 console.log(editedArticle);
 
-                socket.emit('publish article', editedArticle, function () {
-                    window.location.href = 'workbench';
+                socket.emit('publish article', editedArticle, function (accessibleArticleId) {
+                    console.log("Article published");
+                    networkLogger.articleLog(Events.publishArticleSuccess());
+                    networkLogger.setAccessibleArticleId(accessibleArticleId);
+                    networkLogger.flushLogs(function() {
+                        console.log("Logs finalized");
+                        window.location.href = 'workbench';
+                    });
                 });
             });
     }

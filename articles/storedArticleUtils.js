@@ -51,16 +51,7 @@ function storeEdited (article) {
             },
             { upsert: true }
         ).then(function (res) {
-            var loggerPromise = Promise.resolve();
-            if (article._meta.loggerId) {
-                loggerPromise = finalizeLogger(article._meta.loggerId, res.upsertedId._id);
-            }
-
-            return loggerPromise.then(function () {
-                Promise.resolve(article);
-            }, function () {
-                Promise.resolve(article);
-            });
+            return Promise.resolve(res.upsertedId._id);
         }, function (err) {
             return Promise.reject(err);
         });
@@ -143,6 +134,9 @@ function insertLogs (loggerId, logs) {
                         logger.articleLogs.push(event);
                     });
                 }
+                if (logs.accessibleArticleId) {
+                    logger.accessibleArticleId = logs.accessibleArticleId;
+                }
 
                 return logger;
             }, function (err) {
@@ -155,21 +149,6 @@ function insertLogs (loggerId, logs) {
             }, function (err) {
                 return Promise.reject(err);
             });
-    });
-}
-
-function finalizeLogger (loggerId, accessibleArticleId) {
-    return getDB().then(function (db) {
-        var collection = db.collection('accessible-articles-logs');
-
-        return collection.updateOne(
-            { _id: ObjectID(loggerId) },
-            {
-                $set: {
-                    accessibleArticleId: accessibleArticleId
-                }
-            }
-        );
     });
 }
 
