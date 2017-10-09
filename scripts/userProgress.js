@@ -66,7 +66,7 @@ storedArticleUtils.getDB()
     .then(function(res) {
         console.log("");
         res.forEach(function (rec) {
-            var date = new Date(rec._id.year, rec._id.month, rec._id.day);
+            var date = new Date(rec._id.year, rec._id.month - 1, rec._id.day);
             console.log(date.toDateString(), "\t", rec.count);
         });
     });
