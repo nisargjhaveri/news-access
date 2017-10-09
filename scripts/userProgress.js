@@ -1,4 +1,5 @@
 var storedArticleUtils = require("../articles/storedArticleUtils.js");
+var ObjectID = require("mongodb").ObjectID;
 
 function propagateError(err) {
     return Promise.reject(err);
@@ -20,53 +21,63 @@ var username = process.argv[2];
 storedArticleUtils.getDB()
     .then(function (db) {
         var collection = db.collection('accessible-articles');
+        var logCollection = db.collection('accessible-articles-logs');
 
-        var results = collection.aggregate([
-            {
-                $match: {
-                    "_meta.username": username
-                }
-            }, {
-                $limit: 1000
-            }, {
-                $project: {
-                    "_timestampIST": {
-                        $add: ["$_timestamp", 5.5 * 60 * 60 * 1000]
-                    },
-                    "_timestamp": 1,
-                }
-            }, {
-                $group: {
-                    "_id": {
-                        year: { $year : "$_timestampIST" },
-                        month: { $month : "$_timestampIST" },
-                        day: { $dayOfMonth : "$_timestampIST" }
-                    },
-                    "count": { $sum: 1 }
-                }
-            }, {
-                $sort: {
-                    "_id.year": -1,
-                    "_id.month": -1,
-                    "_id.day": -1
-                }
-            }
-        ]);
-
-        return results
+        return collection.find({"_meta.username": username}, {"_id": 1, "_timestamp": 1, "_meta.loggerId": 1})
+            .sort({
+                "_timestamp": -1
+            })
+            .limit(1000)
             .toArray()
             .then(function (res) {
-                db.close();
-                return res;
-            }, function (err) {
-                db.close();
-                return Promise.reject(err);
-            });
+                var promises = [];
+                res.forEach(function(doc) {
+
+                    promises.push(
+                        logCollection
+                            .find({"_id": ObjectID(doc._meta.loggerId)}, {"articleLogs": 1, "_id": 0})
+                            .toArray()
+                            .then(function (logs) {
+                                var editingTime = 0;
+                                if (logs[0] && logs[0].articleLogs) {
+                                    editingTime =  logs[0].articleLogs[logs[0].articleLogs.length - 2].timestamp - logs[0].articleLogs[1].timestamp;
+                                }
+                                var date = new Date(doc._timestamp.toDateString());
+                                return {
+                                    date,
+                                    editingTime
+                                };
+                            }, propagateError)
+                    );
+                });
+                var allPromises = Promise.all(promises);
+
+                allPromises.then(function() {
+                    db.close();
+                }, function() {
+                    db.close();
+                });
+
+                return allPromises;
+            }, propagateError);
     })
     .then(function(res) {
-        console.log("");
-        res.forEach(function (rec) {
-            var date = new Date(rec._id.year, rec._id.month - 1, rec._id.day);
-            console.log(date.toDateString(), "\t", rec.count);
+        var dateWise = {};
+
+        res.forEach(function (doc) {
+            if (!(doc.date in dateWise)) {
+                dateWise[doc.date] = {
+                    count: 0,
+                    time: 0,
+                };
+            }
+            dateWise[doc.date].count++;
+            dateWise[doc.date].time += doc.editingTime;
         });
+
+        console.log("");
+
+        for (var date in dateWise) {
+            console.log(new Date(date).toDateString(), "\t", dateWise[date].count, "\t", dateWise[date].time / 1000);
+        }
     });

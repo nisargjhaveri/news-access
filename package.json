@@ -11,5 +11,8 @@
     "url": "https://nisargjhaveri@github.com/nisargjhaveri/news-access/"
   },
   "author": "Nisarg Jhaveri <nisargjhaveri@gmail.com>",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "mongodb": "^2.2.31"
+  }
 }
