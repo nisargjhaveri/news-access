@@ -76,8 +76,16 @@ storedArticleUtils.getDB()
         });
 
         console.log("");
+        console.log("Date\t\t", "\t", "Count", "\t\t", "Time");
 
         for (var date in dateWise) {
-            console.log(new Date(date).toDateString(), "\t", dateWise[date].count, "\t", dateWise[date].time / 1000);
+            var seconds = Math.round(dateWise[date].time / 1000);
+            var hours = Math.floor(seconds / 3600);
+            seconds %= 3600;
+            var minutes = Math.floor(seconds / 60);
+            seconds %= 60;
+
+            var totalTime = [hours + "h", minutes + "m", seconds + "s"].join(" ");
+            console.log(new Date(date).toDateString(), "\t", dateWise[date].count, "\t\t", totalTime);
         }
     });
