@@ -14,6 +14,19 @@ var config = {
     }
 };
 
+function wrapLog(log) {
+    return function () {
+        var args = [].slice.call(arguments);
+        args.unshift(new Date().toISOString());
+        log.apply(null, args);
+    };
+}
+
+console.log = wrapLog(console.log);
+console.error = wrapLog(console.error);
+console.info = wrapLog(console.info);
+
+
 var summaryTranslator = (function () {
     var translationStore = {};
     var fromLang, toLang;
