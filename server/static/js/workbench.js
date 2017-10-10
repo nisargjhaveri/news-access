@@ -133,6 +133,7 @@ var networkLogger = (function () {
 
     var _lastPushTime = new Date();
     var _lastPushCompleted = true;
+    var _lastLogsToPush;
 
     function _refreshPendingLogs() {
         _pendingLogs = {
@@ -146,12 +147,12 @@ var networkLogger = (function () {
     _refreshPendingLogs();
 
     function _pushLogs(callback) {
-        var logsToPush = _pendingLogs;
+        _lastLogsToPush = _pendingLogs;
         _refreshPendingLogs();
 
         _lastPushTime = new Date();
         _lastPushCompleted = false;
-        socket.emit('insert logs', _loggerId, logsToPush, function() {
+        socket.emit('insert logs', _loggerId, _lastLogsToPush, function() {
             _lastPushCompleted = true;
             console.log("Logs pushed");
             if (typeof callback == 'function') callback();
@@ -231,6 +232,16 @@ var networkLogger = (function () {
         },
         flushLogs: function(callback) {
             _checkPushLogs(true, callback);
+        },
+        getSnapshot: function() {
+            return {
+                loggerId: _loggerId,
+                pendingLogs: _pendingLogs,
+                pendingLogsCount: _pendingLogsCount,
+                lastPushCompleted: _lastPushCompleted,
+                lastPushTime: _lastPushTime,
+                lastLogsToPush: _lastLogsToPush
+            };
         }
     };
 })();
@@ -993,6 +1004,21 @@ function prepareArticle(article) {
 
                 console.log(editedArticle);
 
+                editedArticle._timestamp = new Date();
+
+                recoverySnapshot = {
+                    socket: {
+                        id: socket.id,
+                        logs: socketLogs
+                    },
+                    accessibleArticle: editedArticle,
+                    loggerSnapshot: networkLogger.getSnapshot(),
+                };
+
+                if (!socket.connected) {
+                    attemptRecovery(recoverySnapshot);
+                }
+
                 socket.emit('publish article', editedArticle, function (accessibleArticleId) {
                     console.log("Article published");
                     networkLogger.articleLog(Events.publishArticleSuccess());
@@ -1021,6 +1047,22 @@ function prepareArticle(article) {
 
     $('.bench-container').removeClass('loading');
     networkLogger.articleLog(Events.articleLoad());
+}
+
+function attemptRecovery(snapshot) {
+    snapshot = snapshot || recoverySnapshot;
+    $('.bench-container').addClass('hidden');
+    $('.whats-next-container').addClass('hidden');
+    $('.fallback-snapshot').removeClass('hidden');
+
+    function downloadRecoverySnapshot() {
+        var snapshotBlob = new Blob([JSON.stringify(snapshot)], {type: "application/json"});
+        window.saveAs(snapshotBlob, articleId + "_" + new Date().toISOString() + ".json");
+    }
+
+    $('.download-snapshot-link').click(downloadRecoverySnapshot);
+
+    downloadRecoverySnapshot();
 }
 
 function showWhatsNext() {
@@ -1104,10 +1146,12 @@ function getSelectedSummarizer() {
 function panic() {
     $('.bench-container').addClass('hidden');
     $('.whats-next-container').addClass('hidden');
-    $('.error-container').removeClass('hidden');
+    $('.panic-error').removeClass('hidden');
 }
 
+var recoverySnapshot;
 var socket;
+var socketLogs = [];
 
 $(function () {
     networkLogger.articleLog(Events.pageLoad());
@@ -1124,32 +1168,84 @@ $(function () {
         console.log("Error", err);
     });
 
-    socket.on('connect_error', function (err) {
-        console.log("connect_error", err);
+    socket.on('connect_error', function (error) {
+        socketLogs.push({
+            event: "connect_error",
+            error: error,
+            timestamp: new Date(),
+        });
+        console.log("connect_error", error);
     });
 
-    socket.on('connect_timeout', function (err) {
-        console.log("connect_timeout", err);
+    socket.on('connect_timeout', function (timeout) {
+        socketLogs.push({
+            event: "connect_timeout",
+            timeout: timeout,
+            timestamp: new Date(),
+        });
+        console.log("connect_timeout", timeout);
     });
 
-    socket.on('error', function (err) {
-        console.log("Error", err);
+    socket.on('error', function (error) {
+        socketLogs.push({
+            event: "error",
+            error: error,
+            timestamp: new Date(),
+        });
+        console.log("Error", error);
     });
 
-    socket.on('disconnect', function (err) {
-        console.log("disconnect", err);
+    socket.on('disconnect', function (reason) {
+        socketLogs.push({
+            event: "disconnect",
+            reason: reason,
+            timestamp: new Date(),
+        });
+        console.log("disconnect", reason);
     });
 
-    socket.on('reconnect', function (err) {
-        console.log("reconnect", err);
+    socket.on('reconnect', function (attemptNumber) {
+        socketLogs.push({
+            event: "reconnect",
+            attemptNumber: attemptNumber,
+            timestamp: new Date(),
+        });
+        console.log("reconnect", attemptNumber);
     });
 
-    socket.on('reconnect_attempt', function (err) {
-        console.log("reconnect_attempt", err);
+    socket.on('reconnect_attempt', function (attemptNumber) {
+        socketLogs.push({
+            event: "reconnect_attempt",
+            attemptNumber: attemptNumber,
+            timestamp: new Date(),
+        });
+        console.log("reconnect_attempt", attemptNumber);
     });
 
-    socket.on('reconnecting', function (err) {
-        console.log("reconnecting", err);
+    socket.on('reconnecting', function (attemptNumber) {
+        socketLogs.push({
+            event: "reconnecting",
+            attemptNumber: attemptNumber,
+            timestamp: new Date(),
+        });
+        console.log("reconnecting", attemptNumber);
+    });
+
+    socket.on('reconnect_error', function (error) {
+        socketLogs.push({
+            event: "reconnect_error",
+            error: error,
+            timestamp: new Date(),
+        });
+        console.log("reconnect_error", error);
+    });
+
+    socket.on('reconnect_failed', function () {
+        socketLogs.push({
+            event: "reconnect_failed",
+            timestamp: new Date(),
+        });
+        console.log("reconnect_failed");
     });
 
     setupOptions();

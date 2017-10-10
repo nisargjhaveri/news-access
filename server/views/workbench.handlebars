@@ -11,6 +11,7 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.0/moment.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/Sortable/1.5.1/Sortable.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
         <script src="socket.io/socket.io.js"></script>
         <script>
             var baseUrl = "{{baseUrl}}";
@@ -97,6 +98,21 @@
                         </div>
                     </article>
                 </div>
+            </div>
+        </div>
+        <div class="error-container fallback-snapshot hidden">
+            Looks like something is wrong!
+            <div class="error-suggestion">
+                Don't worry though, your data is safe. :)
+            </div>
+            <div class="error-suggestion">
+                A file has been automatically downloaded. If not, <a href="javascript:void(0)" class="download-snapshot-link">click here to download again.</a>
+                <br>
+                Please send the downloaded file to
+                <a href="mailto:nisarg.jhaveri@research.iiit.ac.in" class="error-mailto-link">nisarg.jhaveri@research.iiit.ac.in</a>
+                <br>
+                <br>
+                After that you can safely move on to the next article.
             </div>
         </div>
         {{> panic-error}}

@@ -132,7 +132,7 @@ function panic(err) {
     $('.select-translator').removeAttr('disabled');
 
     $('.article-container').removeClass('loading');
-    $('.error-container').removeClass('hidden');
+    $('.panic-error').removeClass('hidden');
 }
 
 var socket;

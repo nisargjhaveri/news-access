@@ -44,7 +44,7 @@ function changeSource(source) {
 
 function panic() {
     $('.article-list').removeClass('loading');
-    $('.error-container').removeClass('hidden');
+    $('.panic-error').removeClass('hidden');
 }
 
 var socket;

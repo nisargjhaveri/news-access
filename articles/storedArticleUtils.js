@@ -40,6 +40,7 @@ function storeEdited (article) {
         var collection = db.collection('accessible-articles');
 
         delete article._id;
+        delete article._timestamp;
 
         return collection.updateOne(
             { $and: [{ _id: { $gt: 0 }}, { _id: { $lt: 0 }}] },
