@@ -185,7 +185,6 @@ var networkLogger = (function () {
             setInterval(_checkPushLogs, 5000);
         },
         translationSentenceLog: function(source, event) {
-            console.log(event);
             if (!(source in _pendingLogs.translationSentencesLogs)) {
                 _pendingLogs.translationSentencesLogs[source] = [];
             }
@@ -195,7 +194,6 @@ var networkLogger = (function () {
             _checkPushLogs();
         },
         summarySentenceLog: function(key, event) {
-            console.log(event);
             if (!(key in _pendingLogs.summarySentencesLogs)) {
                 _pendingLogs.summarySentencesLogs[key] = [];
             }
@@ -205,7 +203,6 @@ var networkLogger = (function () {
             _checkPushLogs();
         },
         summaryLog: function(event) {
-            console.log(event);
             _pendingLogs.summaryLogs.push(event);
             _pendingLogsCount++;
             _checkPushLogs();
@@ -215,7 +212,6 @@ var networkLogger = (function () {
             _pendingLogsCount++;
         },
         articleLog: function(event) {
-            console.log(event);
             _pendingLogs.articleLogs.push(event);
             _pendingLogsCount++;
             _checkPushLogs();
@@ -1102,12 +1098,45 @@ var socket;
 
 $(function () {
     networkLogger.articleLog(Events.pageLoad());
-    socket = io({path: baseUrl + 'socket.io', transports: ['polling']});
-    socket.emit('select article source', articleSource);
+    socket = io({
+        path: baseUrl + 'socket.io',
+        transports: ['polling'],
+        query: {
+            articleSource: articleSource
+        }
+    });
 
     socket.on('new error', function (err) {
         panic();
         console.log("Error", err);
+    });
+
+    socket.on('connect_error', function (err) {
+        console.log("connect_error", err);
+    });
+
+    socket.on('connect_timeout', function (err) {
+        console.log("connect_timeout", err);
+    });
+
+    socket.on('error', function (err) {
+        console.log("Error", err);
+    });
+
+    socket.on('disconnect', function (err) {
+        console.log("disconnect", err);
+    });
+
+    socket.on('reconnect', function (err) {
+        console.log("reconnect", err);
+    });
+
+    socket.on('reconnect_attempt', function (err) {
+        console.log("reconnect_attempt", err);
+    });
+
+    socket.on('reconnecting', function (err) {
+        console.log("reconnecting", err);
     });
 
     setupOptions();

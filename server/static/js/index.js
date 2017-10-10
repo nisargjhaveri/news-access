@@ -50,14 +50,17 @@ function panic() {
 var socket;
 
 function loadArticleList() {
-    socket = io({path: baseUrl + 'socket.io'});
+    socket = io({
+        path: baseUrl + 'socket.io',
+        query: {
+            articleSource: articleSource
+        }
+    });
 
     socket.on('new error', function (err) {
         panic();
         console.log("Error", err);
     });
-
-    socket.emit('select article source', articleSource);
 
     console.log("Requesting article list");
     socket.emit('get article list', {limit: 10}, function (articles) {

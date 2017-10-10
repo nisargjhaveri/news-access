@@ -138,8 +138,12 @@ function panic(err) {
 var socket;
 
 $(function () {
-    socket = io({path: baseUrl + 'socket.io'});
-    socket.emit('select article source', articleSource);
+    socket = io({
+        path: baseUrl + 'socket.io',
+        query: {
+            articleSource: articleSource
+        }
+    });
 
     socket.on('new error', function (err) {
         panic(err);

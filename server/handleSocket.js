@@ -15,15 +15,21 @@ module.exports = function (socketEnsureLoggedIn, socket) {
         socket.emit('new error', err);
     }
 
-    socket.on('select article source', function (source) {
-        socket.articleFactory = new Articles(socket.id, source);
-    });
+    function ensureArticleFactory(source) {
+        if (!socket.articleFactory) {
+            socket.articleFactory = new Articles(socket.id, source);
+        }
+    }
 
     socket.on('get article list', function (options, callback) {
+        ensureArticleFactory(socket.handshake.query.articleSource);
+
         socket.articleFactory.fetchList(options).then(callback, throwError);
     });
 
     socket.on('access article', function (articleId, langs, options, callback) {
+        ensureArticleFactory(socket.handshake.query.articleSource);
+
         var authPromise;
         if (options.requireAuth) {
             authPromise = socketEnsureLoggedIn(socket);
@@ -65,6 +71,8 @@ module.exports = function (socketEnsureLoggedIn, socket) {
     });
 
     socket.on('insert logs', function (loggerId, logs, callback) {
+        ensureArticleFactory(socket.handshake.query.articleSource);
+
         // Client should ensure that no parallel request for the same loggerId are made.
         socketEnsureLoggedIn(socket)
             .then(function () {
@@ -78,6 +86,8 @@ module.exports = function (socketEnsureLoggedIn, socket) {
     });
 
     socket.on('publish article', function (article, callback) {
+        ensureArticleFactory(socket.handshake.query.articleSource);
+
         socketEnsureLoggedIn(socket)
             .then(function (user) {
                 if (!article._meta) {
