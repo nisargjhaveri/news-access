@@ -1015,19 +1015,21 @@ function prepareArticle(article) {
                     loggerSnapshot: networkLogger.getSnapshot(),
                 };
 
-                if (!socket.connected) {
+                if (socket.connected) {
+                    var publishTimeout = setTimeout(attemptRecovery, 20 * 1000, recoverySnapshot);
+                    socket.emit('publish article', editedArticle, function (accessibleArticleId) {
+                        clearTimeout(publishTimeout);
+                        console.log("Article published");
+                        networkLogger.articleLog(Events.publishArticleSuccess());
+                        networkLogger.setAccessibleArticleId(accessibleArticleId);
+                        networkLogger.flushLogs(function() {
+                            console.log("Logs finalized");
+                            window.location.href = 'workbench';
+                        });
+                    });
+                } else {
                     attemptRecovery(recoverySnapshot);
                 }
-
-                socket.emit('publish article', editedArticle, function (accessibleArticleId) {
-                    console.log("Article published");
-                    networkLogger.articleLog(Events.publishArticleSuccess());
-                    networkLogger.setAccessibleArticleId(accessibleArticleId);
-                    networkLogger.flushLogs(function() {
-                        console.log("Logs finalized");
-                        window.location.href = 'workbench';
-                    });
-                });
             });
     }
 
