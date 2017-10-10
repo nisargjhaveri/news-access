@@ -9,6 +9,7 @@ var config = {
         composition: false,
         input: true,
         selection: true,
+        cursorPosition: false,
         copypaste: true,
     }
 };
@@ -699,12 +700,16 @@ function prepareArticle(article) {
         $(document)
             .on("selectionchange", function(e) {
                 if (document.getSelection && document.getSelection().rangeCount) {
-                    if (!config.logs.selection) {
-                        return;
-                    }
-
                     var data = document.getSelection().toString();
                     var range = document.getSelection().getRangeAt(0);
+
+                    if (range.collapsed) {
+                        if (!config.logs.cursorPosition) {
+                            return;
+                        }
+                    } else if (!config.logs.selection) {
+                        return;
+                    }
 
                     var sentence = $(range.commonAncestorContainer).parents('.sentence');
 
