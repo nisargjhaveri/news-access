@@ -23,42 +23,24 @@ storedArticleUtils.getDB()
         var collection = db.collection('accessible-articles');
         var logCollection = db.collection('accessible-articles-logs');
 
-        return collection.find({"_meta.username": username}, {"_id": 1, "_timestamp": 1, "_meta.loggerId": 1})
+        return collection.find({"_meta.username": username}, {"_id": 1, "_timestamp": 1, "_meta.environment.navigationStart": 1})
             .sort({
                 "_timestamp": -1
             })
             .limit(1000)
             .toArray()
             .then(function (res) {
-                var promises = [];
-                res.forEach(function(doc) {
+                db.close();
 
-                    promises.push(
-                        logCollection
-                            .find({"_id": ObjectID(doc._meta.loggerId)}, {"articleLogs": 1, "_id": 0})
-                            .toArray()
-                            .then(function (logs) {
-                                var editingTime = 0;
-                                if (logs[0] && logs[0].articleLogs) {
-                                    editingTime =  logs[0].articleLogs[logs[0].articleLogs.length - 2].timestamp - logs[0].articleLogs[1].timestamp;
-                                }
-                                var date = new Date(doc._timestamp.toDateString());
-                                return {
-                                    date,
-                                    editingTime
-                                };
-                            }, propagateError)
-                    );
+                return res.map(function(doc) {
+                    var date = new Date(doc._timestamp.toDateString());
+                    var editingTime = doc._timestamp - new Date(doc._meta.environment.navigationStart);
+
+                    return {
+                        date,
+                        editingTime
+                    };
                 });
-                var allPromises = Promise.all(promises);
-
-                allPromises.then(function() {
-                    db.close();
-                }, function() {
-                    db.close();
-                });
-
-                return allPromises;
             }, propagateError);
     })
     .then(function(res) {
