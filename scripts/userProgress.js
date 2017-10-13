@@ -23,24 +23,39 @@ storedArticleUtils.getDB()
         var collection = db.collection('accessible-articles');
         var logCollection = db.collection('accessible-articles-logs');
 
-        return collection.find({"_meta.username": username}, {"_id": 1, "_timestamp": 1, "_meta.environment.navigationStart": 1})
+        return collection.find({"_meta.username": username}, {"_id": 1, "_timestamp": 1, "_meta.loggerId": 1})
             .sort({
                 "_timestamp": -1
             })
             .limit(1000)
             .toArray()
             .then(function (res) {
-                db.close();
+                var promises = [];
+                res.forEach(function(doc) {
 
-                return res.map(function(doc) {
-                    var date = new Date(doc._timestamp.toDateString());
-                    var editingTime = doc._timestamp - new Date(doc._meta.environment.navigationStart);
-
-                    return {
-                        date,
-                        editingTime
-                    };
+                    promises.push(
+                        logCollection
+                            .find({"_id": ObjectID(doc._meta.loggerId)}, {"_timestamp": 1, "_id": 0})
+                            .toArray()
+                            .then(function (logs) {
+                                var editingTime =  doc._timestamp - logs[0]._timestamp;
+                                var date = new Date(doc._timestamp.toDateString());
+                                return {
+                                    date,
+                                    editingTime
+                                };
+                            }, propagateError)
+                    );
                 });
+                var allPromises = Promise.all(promises);
+
+                allPromises.then(function() {
+                    db.close();
+                }, function() {
+                    db.close();
+                });
+
+                return allPromises;
             }, propagateError);
     })
     .then(function(res) {
