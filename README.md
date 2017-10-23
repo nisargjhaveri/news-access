@@ -12,4 +12,6 @@
 - Lin and Bilmes implementation setup (optional)
 
 ## Run
-- Once you're done with the setup, you can run the system as `node server/`.
+Once you're done with the setup, you can run the system with the following command. 
+
+```$ node server/```
