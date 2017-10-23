@@ -2,6 +2,7 @@ var storedArticleUtils = require("../articles/storedArticleUtils.js");
 var ObjectID = require("mongodb").ObjectID;
 
 if (process.argv.length < 4) {
+    console.warn("Manually check the recovery file and applicability before running this script");
     console.error("Please provide relative path to the recovery file and username");
     process.exit(1);
 }
