@@ -5,10 +5,8 @@ function propagateError(err) {
     return Promise.reject(err);
 }
 
-function getErrorLogger(logId) {
-    return function (err) {
-        console.log(logId, "Error:", err);
-    };
+function logError(err) {
+    console.log("Error:", err);
 }
 
 if (process.argv.length < 3) {
@@ -57,7 +55,7 @@ storedArticleUtils.getDB()
 
                 return allPromises;
             }, propagateError);
-    })
+    }, propagateError)
     .then(function(res) {
         var dateWise = {};
 
@@ -85,4 +83,5 @@ storedArticleUtils.getDB()
             var totalTime = [hours + "h", minutes + "m", seconds + "s"].join(" ");
             console.log(new Date(date).toDateString(), "\t", dateWise[date].count, "\t\t", totalTime);
         }
-    });
+    }, propagateError)
+    .catch(logError);

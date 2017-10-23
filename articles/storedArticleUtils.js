@@ -139,10 +139,6 @@ function insertLogs (loggerId, logs) {
                     logger.accessibleArticleId = logs.accessibleArticleId;
                 }
 
-                return logger;
-            }, function (err) {
-                return Promise.reject(err);
-            }).then(function (logger) {
                 return collection.replaceOne(
                     { _id: ObjectID(loggerId) },
                     logger
