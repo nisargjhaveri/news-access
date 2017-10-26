@@ -99,6 +99,10 @@ StoredArticles.prototype.fetchList = function (options) {
         if (options.lang) {
             results = collection.aggregate([
                 {
+                    $sort: {
+                        publishedTime: -1
+                    }
+                }, {
                     $lookup: {
                         from: 'accessible-articles',
                         localField: 'id',
@@ -118,11 +122,12 @@ StoredArticles.prototype.fetchList = function (options) {
                 }
             ]);
         } else {
-            results = collection.find({});
+            results = collection.find({}).sort({
+                publishedTime: -1
+            });
         }
 
         return results
-            .sort({"publishedTime": -1})
             .limit(options.limit || 10)
             .toArray();
     });
