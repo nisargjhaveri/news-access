@@ -18,13 +18,28 @@ function getDB () {
                     console.log("Connected to mongodb");
                     var dbConnection = db;
 
+                    // Setup logging
                     dbConnection.on("close", function(err) {
                         console.log("Mongodb connection closed. Reason:", err);
                     }).on("error", function(err) {
                         console.log("Mongodb error:", err);
                     });
 
-                    resolve(dbConnection);
+                    // Setup indexes
+                    var indexPromises = [];
+
+                    indexPromises.push(
+                        dbConnection.collection('preprocessed-articles').createIndex({
+                            "publishedTime" : -1
+                        })
+                    );
+
+                    Promise.all(indexPromises)
+                        .then(function() {
+                            resolve(dbConnection);
+                        }, function(err) {
+                            reject(err);
+                        });
                 }, function(err) {
                     reject(err);
                 });
