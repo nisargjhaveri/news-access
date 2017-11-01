@@ -21,6 +21,33 @@ function logError(err) {
     console.log("Error:", err);
 }
 
+function getMinEventId(logsToPush) {
+    // Find event id of the first event in logsToPush
+    var newLogEventId = Infinity;
+
+    Object.keys(logsToPush.translationSentencesLogs).forEach(function (sentenceId) {
+        logsToPush.translationSentencesLogs[sentenceId].forEach(function (event) {
+            newLogEventId = Math.min(newLogEventId, event.id);
+        });
+    });
+
+    Object.keys(logsToPush.summarySentencesLogs).forEach(function (sentenceId) {
+        logsToPush.translationSentencesLogs[sentenceId].forEach(function (event) {
+            newLogEventId = Math.min(newLogEventId, event.id);
+        });
+    });
+
+    logsToPush.summaryLogs.forEach(function (event) {
+        newLogEventId = Math.min(newLogEventId, event.id);
+    });
+
+    logsToPush.articleLogs.forEach(function (event) {
+        newLogEventId = Math.min(newLogEventId, event.id);
+    });
+
+    return newLogEventId;
+}
+
 storedArticleUtils.getDB()
     .then(function (db) {
         var collection = db.collection('accessible-articles');
@@ -80,42 +107,34 @@ storedArticleUtils.getDB()
                         lastLogEventId = Math.max(lastLogEventId, event.id);
                     });
 
-                    // Find event id of the first event in lastLogsToPush
-                    var newLogEventId = Infinity;
-                    var lastLogsToPush = recoverySnapshot.loggerSnapshot.lastLogsToPush;
-
-                    Object.keys(lastLogsToPush.translationSentencesLogs).forEach(function (sentenceId) {
-                        lastLogsToPush.translationSentencesLogs[sentenceId].forEach(function (event) {
-                            newLogEventId = Math.min(newLogEventId, event.id);
-                        });
-                    });
-
-                    Object.keys(lastLogsToPush.summarySentencesLogs).forEach(function (sentenceId) {
-                        lastLogsToPush.translationSentencesLogs[sentenceId].forEach(function (event) {
-                            newLogEventId = Math.min(newLogEventId, event.id);
-                        });
-                    });
-
-                    lastLogsToPush.summaryLogs.forEach(function (event) {
-                        newLogEventId = Math.min(newLogEventId, event.id);
-                    });
-
-                    lastLogsToPush.articleLogs.forEach(function (event) {
-                        newLogEventId = Math.min(newLogEventId, event.id);
-                    });
+                    var lastLogPushedPromise = Promise.resolve();
+                    var newLogEventId;
 
                     // Insert lastLogsToPush if it is not already pushed
+                    newLogEventId = getMinEventId(recoverySnapshot.loggerSnapshot.lastLogsToPush);
                     if (newLogEventId < Infinity && newLogEventId > lastLogEventId) {
-                        console.log("Inserting lastLogsToPush");
-                        return storedArticleUtils.insertLogs(recoverySnapshot.loggerSnapshot.loggerId, lastLogsToPush);
+                        lastLogPushedPromise = lastLogPushedPromise.then(function() {
+                            console.log("Inserting lastLogsToPush");
+                            return storedArticleUtils.insertLogs(
+                                recoverySnapshot.loggerSnapshot.loggerId,
+                                recoverySnapshot.loggerSnapshot.lastLogsToPush
+                            );
+                        });
                     }
+
+                    newLogEventId = getMinEventId(recoverySnapshot.loggerSnapshot.pendingLogs);
+                    if (newLogEventId < Infinity && newLogEventId > lastLogEventId) {
+                        lastLogPushedPromise = lastLogPushedPromise.then(function() {
+                            console.log("Inserting pending logs");
+                            return storedArticleUtils.insertLogs(
+                                recoverySnapshot.loggerSnapshot.loggerId,
+                                recoverySnapshot.loggerSnapshot.pendingLogs
+                            );
+                        });
+                    }
+
+                    return lastLogPushedPromise;
                 }, propagateError);
-        }, propagateError)
-        .then(function () {
-            if (recoverySnapshot.loggerSnapshot.pendingLogsCount) {
-                console.log("Inserting pending logs");
-                return storedArticleUtils.insertLogs(recoverySnapshot.loggerSnapshot.loggerId, recoverySnapshot.loggerSnapshot.pendingLogs);
-            }
         }, propagateError)
         .then(function () {
             if (accessibleArticleId) {
