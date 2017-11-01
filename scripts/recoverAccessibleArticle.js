@@ -119,7 +119,7 @@ storedArticleUtils.getDB()
                                 recoverySnapshot.loggerSnapshot.loggerId,
                                 recoverySnapshot.loggerSnapshot.lastLogsToPush
                             );
-                        });
+                        }, propagateError);
                     }
 
                     newLogEventId = getMinEventId(recoverySnapshot.loggerSnapshot.pendingLogs);
@@ -130,7 +130,7 @@ storedArticleUtils.getDB()
                                 recoverySnapshot.loggerSnapshot.loggerId,
                                 recoverySnapshot.loggerSnapshot.pendingLogs
                             );
-                        });
+                        }, propagateError);
                     }
 
                     return lastLogPushedPromise;
