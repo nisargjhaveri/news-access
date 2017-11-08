@@ -154,6 +154,3 @@ storedArticleUtils.getDB()
         });
 
     }, logError);
-
-
-storedArticleUtils.insertLogs();
