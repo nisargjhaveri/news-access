@@ -37,9 +37,9 @@ function printSentences(doc) {
     function handleSentence(sentence) {
         if (sentence.source in sentenceMap) return;
 
-        srcFile.write(sentence.source + "\n");
-        mtFile.write(sentence.target + "\n");
-        peFile.write((sentence.editedTarget || sentence.target) + "\n");
+        srcFile.write(sentence.source.replace(/\n/g, "\\n") + "\n");
+        mtFile.write(sentence.target.replace(/\n/g, "\\n") + "\n");
+        peFile.write((sentence.editedTarget || sentence.target).replace(/\n/g, "\\n") + "\n");
 
         sentenceMap[sentence.source] = 1;
     }
