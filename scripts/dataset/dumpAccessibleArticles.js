@@ -1,14 +1,6 @@
 var storedArticleUtils = require("../../articles/storedArticleUtils.js");
 var ObjectID = require("mongodb").ObjectID;
 
-function propagateError(err) {
-    return Promise.reject(err);
-}
-
-function logError(err) {
-    console.error("Error:", err);
-}
-
 if (process.argv.length < 4) {
     console.error("Usage: js prepareDataset.js USERNAME LANG");
     console.error("For advance usage edit the script! :P");
@@ -18,15 +10,21 @@ if (process.argv.length < 4) {
 var username = process.argv[2];
 var lang = process.argv[3];
 
+/**
+ * Filter for finding accessible articles.
+ * Change here if possible
+ */
+const filter = {
+    "_meta.username": username,
+    "lang": lang
+};
+
 storedArticleUtils.getDB(false)
     .then(function (db) {
         var collection = db.collection('accessible-articles');
         var logCollection = db.collection('accessible-articles-logs');
 
-        const cursor = collection.find({
-            "_meta.username": username,
-            "lang": lang
-        });
+        const cursor = collection.find(filter);
 
         function handleDoc(doc) {
             if (!doc || !doc._meta.loggerId) {
@@ -58,3 +56,12 @@ storedArticleUtils.getDB(false)
 
         cursor.hasNext().then(hasNextHandler, logError);
     }, propagateError);
+
+
+function propagateError(err) {
+    return Promise.reject(err);
+}
+
+function logError(err) {
+    console.error("Error:", err);
+}
