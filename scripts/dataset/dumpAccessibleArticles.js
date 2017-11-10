@@ -16,7 +16,20 @@ var lang = process.argv[3];
  */
 const filter = {
     "_meta.username": username,
-    "lang": lang
+    "lang": lang,
+/*
+    $and:[
+        {
+            "_timestamp": {
+                $gt: new Date("2017-10-11 GMT+0530")
+            }
+        }, {
+            "_timestamp": {
+                $lt: new Date("2017-11-11 GMT+0530")
+            }
+        }
+    ]
+*/
 };
 
 storedArticleUtils.getDB(false)
