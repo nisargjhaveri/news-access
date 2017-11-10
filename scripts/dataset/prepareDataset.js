@@ -15,9 +15,9 @@ var lineReader = require('readline').createInterface({
     input: fs.createReadStream(filename)
 });
 
-const srcFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src"));
-const mtFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt"));
-const peFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe"));
+const srcFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src"), {flags: 'a'});
+const mtFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt"), {flags: 'a'});
+const peFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe"), {flags: 'a'});
 
 lineReader
     .on('line', function (line) {
