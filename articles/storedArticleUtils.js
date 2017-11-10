@@ -4,7 +4,13 @@ var ObjectID = require("mongodb").ObjectID;
 var config = require("./config.json");
 
 var dbPromise = null;
-function getDB () {
+function getDB (logger) {
+    if (typeof logger == "undefined") {
+        logger = console.log.bind();    // Log to console
+    } else if (typeof logger != "function") {
+        logger = function() {}; // Ignore log
+    } // Else, use logger directly
+
     if (!dbPromise) {
         dbPromise = new Promise(function(resolve, reject) {
             var mongoServerUri = 'mongodb://' +
@@ -15,14 +21,14 @@ function getDB () {
             MongoClient
                 .connect(mongoServerUri)
                 .then(function(db) {
-                    console.log("Connected to mongodb");
+                    logger("Connected to mongodb");
                     var dbConnection = db;
 
                     // Setup logging
                     dbConnection.on("close", function(err) {
-                        console.log("Mongodb connection closed. Reason:", err);
+                        logger("Mongodb connection closed. Reason:", err);
                     }).on("error", function(err) {
-                        console.log("Mongodb error:", err);
+                        logger("Mongodb error:", err);
                     });
 
                     // Setup indexes
