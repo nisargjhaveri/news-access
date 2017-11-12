@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const tokenizer = new (require('node-icu-tokenizer'))();
 
 if (process.argv.length < 5) {
     console.error("Usage: js prepareDataset.js DUMP_FILENAME OUT_DIR OUT_PREFIX");
@@ -19,6 +20,10 @@ const srcFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src"), {fla
 const mtFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt"), {flags: 'a'});
 const peFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe"), {flags: 'a'});
 
+const srcTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src.tok"), {flags: 'a'});
+const mtTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt.tok"), {flags: 'a'});
+const peTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe.tok"), {flags: 'a'});
+
 lineReader
     .on('line', function (line) {
         var doc = JSON.parse(line);
@@ -28,11 +33,23 @@ lineReader
         srcFile.end();
         mtFile.end();
         peFile.end();
+
+        srcTokFile.end();
+        mtTokFile.end();
+        peTokFile.end();
     });
 
 function printSentences(doc) {
     var sentenceMap = {};
     var sentenceLogs = {};
+
+    function sourceTokenizer(text) {
+        return tokenizer.tokenize(text).map((t) => t.token).join(' ');
+    }
+
+    function targetTokenizer(text) {
+        return tokenizer.tokenize(text, {locale: doc.lang}).map((t) => t.token).join(' ');
+    }
 
     function handleSentence(sentence) {
         if (sentence.source in sentenceMap) return;
@@ -40,6 +57,19 @@ function printSentences(doc) {
         srcFile.write(sentence.source.replace(/\n/g, "\\n") + "\n");
         mtFile.write(sentence.target.replace(/\n/g, "\\n") + "\n");
         peFile.write((sentence.editedTarget || sentence.target).replace(/\n/g, "\\n") + "\n");
+
+        srcTokFile.write(
+            sourceTokenizer(sentence.source)
+                .replace(/\n/g, "\\n") + "\n"
+        );
+        mtTokFile.write(
+            targetTokenizer(sentence.target)
+                .replace(/\n/g, "\\n") + "\n"
+        );
+        peTokFile.write(
+            targetTokenizer(sentence.editedTarget || sentence.target)
+                .replace(/\n/g, "\\n") + "\n"
+        );
 
         sentenceMap[sentence.source] = 1;
     }

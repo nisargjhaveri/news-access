@@ -8,10 +8,11 @@
 ## External dependencies
 - mongodb
 - python2, with NLTK properly setup
+- libicu-dev/libicu-devel
 - Modified G-Flow, with `run.sh` script (optional)
 - Lin and Bilmes implementation setup (optional)
 
 ## Run
-Once you're done with the setup, you can run the system with the following command. 
+Once you're done with the setup, you can run the system with the following command.
 
 ```$ node server/```

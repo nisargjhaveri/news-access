@@ -13,6 +13,7 @@
   "author": "Nisarg Jhaveri <nisargjhaveri@gmail.com>",
   "license": "UNLICENSED",
   "dependencies": {
-    "mongodb": "^2.2.31"
+    "mongodb": "^2.2.31",
+    "node-icu-tokenizer": "^1.0.4"
   }
 }
