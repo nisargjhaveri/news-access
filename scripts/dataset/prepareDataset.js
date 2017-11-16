@@ -16,13 +16,17 @@ var lineReader = require('readline').createInterface({
     input: fs.createReadStream(filename)
 });
 
-const srcFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src"), {flags: 'a'});
-const mtFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt"), {flags: 'a'});
-const peFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe"), {flags: 'a'});
+var fileOptions = {
+    // flags: 'a'
+};
 
-const srcTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src.tok"), {flags: 'a'});
-const mtTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt.tok"), {flags: 'a'});
-const peTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe.tok"), {flags: 'a'});
+const srcFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src"), fileOptions);
+const mtFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt"), fileOptions);
+const peFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe"), fileOptions);
+
+const srcTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src.tok"), fileOptions);
+const mtTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt.tok"), fileOptions);
+const peTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe.tok"), fileOptions);
 
 lineReader
     .on('line', function (line) {
@@ -51,24 +55,27 @@ function printSentences(doc) {
         return tokenizer.tokenize(text, {locale: doc.lang}).map((t) => t.token).join(' ');
     }
 
+    function cleanText(text) {
+        return text
+            .replace(/\u200b/g, " ")
+            .replace(/\s+/g, " ");
+    }
+
     function handleSentence(sentence) {
         if (sentence.source in sentenceMap) return;
 
-        srcFile.write(sentence.source.replace(/\n/g, "\\n") + "\n");
-        mtFile.write(sentence.target.replace(/\n/g, "\\n") + "\n");
-        peFile.write((sentence.editedTarget || sentence.target).replace(/\n/g, "\\n") + "\n");
+        srcFile.write(cleanText(sentence.source) + "\n");
+        mtFile.write(cleanText(sentence.target) + "\n");
+        peFile.write(cleanText(sentence.editedTarget || sentence.target) + "\n");
 
         srcTokFile.write(
-            sourceTokenizer(sentence.source)
-                .replace(/\n/g, "\\n") + "\n"
+            cleanText(sourceTokenizer(sentence.source)) + "\n"
         );
         mtTokFile.write(
-            targetTokenizer(sentence.target)
-                .replace(/\n/g, "\\n") + "\n"
+            cleanText(targetTokenizer(sentence.target)) + "\n"
         );
         peTokFile.write(
-            targetTokenizer(sentence.editedTarget || sentence.target)
-                .replace(/\n/g, "\\n") + "\n"
+            cleanText(targetTokenizer(sentence.editedTarget || sentence.target)) + "\n"
         );
 
         sentenceMap[sentence.source] = 1;
