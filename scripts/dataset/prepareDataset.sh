@@ -19,5 +19,5 @@ js "$DIRNAME/prepareDataset.js" "$DUMP_FILE" "$OUT_DIR" "$OUT_PREFIX"
 echo "==> Computing HTER scores <=="
 java -jar "$TERCOM_JAR" -h "$OUT_DIR/$OUT_PREFIX.mt.tok" -r "$OUT_DIR/$OUT_PREFIX.pe.tok" -o ter -n "$OUT_DIR/$OUT_PREFIX.hter" > /dev/null
 
-tail -n +3 "$OUT_DIR/$OUT_PREFIX.hter.ter" | awk '{print $4 "\t(" $1 ")"}' | rev | cut --complement -c2-3 | rev > "$OUT_DIR/$OUT_PREFIX.hter"
-rm "$OUT_DIR/$OUT_PREFIX.hter.ter"
+paste <(echo hter; tail -n +3 "$OUT_DIR/$OUT_PREFIX.hter.ter" | awk '{print $4}') <(cat $OUT_DIR/$OUT_PREFIX.time) > "$OUT_DIR/$OUT_PREFIX.params"
+rm "$OUT_DIR/$OUT_PREFIX.hter.ter" "$OUT_DIR/$OUT_PREFIX.time"

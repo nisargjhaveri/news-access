@@ -35,6 +35,16 @@ const peTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe.tok"),
 
 const peTimeFile = fs.createWriteStream(path.join(outDir, outPrefix + ".time"), fileOptions);
 
+srcFile.writeLine("source_sentence");
+mtFile.writeLine("mt_translated_sentence");
+peFile.writeLine("postedited_mt_translated_sentence");
+
+srcTokFile.writeLine("source_sentence_tokenized");
+mtTokFile.writeLine("mt_translated_sentence_tokenized");
+peTokFile.writeLine("postedited_mt_translated_sentence_tokenized");
+
+peTimeFile.writeLine(["time_ms", "focus_count", "input_count", "cut_count", "copy_count", "paste_count"].join("\t"));
+
 lineReader
     .on('line', function (line) {
         var doc = JSON.parse(line);
