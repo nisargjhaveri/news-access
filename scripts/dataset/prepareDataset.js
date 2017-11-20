@@ -4,6 +4,7 @@ const tokenizer = new (require('node-icu-tokenizer'))();
 
 if (process.argv.length < 5) {
     console.error("Usage: js prepareDataset.js DUMP_FILENAME OUT_DIR OUT_PREFIX");
+    console.error("You probably want to use prepareDataset.sh");
     console.error("For advance usage edit the script! :P");
     process.exit(1);
 }
@@ -16,6 +17,10 @@ var lineReader = require('readline').createInterface({
     input: fs.createReadStream(filename)
 });
 
+fs.WriteStream.prototype.writeLine = function (chunk, encoding, callback) {
+    this.write(chunk + "\n", encoding, callback);
+};
+
 var fileOptions = {
     // flags: 'a'
 };
@@ -27,6 +32,8 @@ const peFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe"), fileOp
 const srcTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src.tok"), fileOptions);
 const mtTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt.tok"), fileOptions);
 const peTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe.tok"), fileOptions);
+
+const peTimeFile = fs.createWriteStream(path.join(outDir, outPrefix + ".time"), fileOptions);
 
 lineReader
     .on('line', function (line) {
@@ -41,7 +48,18 @@ lineReader
         srcTokFile.end();
         mtTokFile.end();
         peTokFile.end();
+
+        peTimeFile.end();
     });
+
+var docIdCounts = {};
+function getDocId(doc) {
+    if (!(doc.id in docIdCounts)) {
+        docIdCounts[doc.id] = 1;
+    }
+
+    return [doc.id, docIdCounts[doc.id]++].join('_');
+}
 
 function printSentences(doc) {
     var sentenceMap = {};
@@ -61,22 +79,64 @@ function printSentences(doc) {
             .replace(/\s+/g, " ");
     }
 
+    function getExtraParams(sentence) {
+        var lastFocused = -1;
+        var totalFocusTime = 0;
+
+        var countFocus = 0;
+        var countInput = 0;
+        var countCut = 0;
+        var countCopy = 0;
+        var countPaste = 0;
+
+        if (sentence.source in sentenceLogs) {
+            sentenceLogs[sentence.source].forEach(function (event) {
+                if (event.type == 'focus' && lastFocused == -1) {
+                    lastFocused = event.timestamp;
+                    countFocus++;
+                } else if (event.type == 'blur' && lastFocused >= 0) {
+                    totalFocusTime += event.timestamp - lastFocused;
+                    lastFocused = -1;
+                } else if (event.type == 'focus' || event.type == 'blur') {
+                    console.error("Error!", lastFocused, event.type);
+                } else if (event.type == 'input') {
+                    countInput++;
+                } else if (event.type == 'cut') {
+                    countCut++;
+                } else if (event.type == 'copy') {
+                    countCopy++;
+                } else if (event.type == 'paste') {
+                    countPaste++;
+                }
+            });
+        }
+
+        if (lastFocused >= 0) {
+            console.error("Didn't blur!", doc.id);
+        } else if (totalFocusTime == 0 && sentence.editedTarget && sentence.editedTarget != sentence.target) {
+            console.error("Edited in no time!");
+        }
+
+        return [totalFocusTime, countFocus, countInput, countCut, countCopy, countPaste];
+    }
+
+    var sentenceCount = 1;
+    var docId = getDocId(doc);
+
     function handleSentence(sentence) {
         if (sentence.source in sentenceMap) return;
 
-        srcFile.write(cleanText(sentence.source) + "\n");
-        mtFile.write(cleanText(sentence.target) + "\n");
-        peFile.write(cleanText(sentence.editedTarget || sentence.target) + "\n");
+        var sentenceId = "\t" + "(" + docId + "_" + sentenceCount++ + ")";
 
-        srcTokFile.write(
-            cleanText(sourceTokenizer(sentence.source)) + "\n"
-        );
-        mtTokFile.write(
-            cleanText(targetTokenizer(sentence.target)) + "\n"
-        );
-        peTokFile.write(
-            cleanText(targetTokenizer(sentence.editedTarget || sentence.target)) + "\n"
-        );
+        srcFile.writeLine(cleanText(sentence.source) + sentenceId);
+        mtFile.writeLine(cleanText(sentence.target) + sentenceId);
+        peFile.writeLine(cleanText(sentence.editedTarget || sentence.target) + sentenceId);
+
+        srcTokFile.writeLine(cleanText(sourceTokenizer(sentence.source)) + sentenceId);
+        mtTokFile.writeLine(cleanText(targetTokenizer(sentence.target)) + sentenceId);
+        peTokFile.writeLine(cleanText(targetTokenizer(sentence.editedTarget || sentence.target)) + sentenceId);
+
+        peTimeFile.writeLine(getExtraParams(sentence).join("\t") + sentenceId);
 
         sentenceMap[sentence.source] = 1;
     }
