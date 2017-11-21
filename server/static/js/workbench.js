@@ -11,7 +11,9 @@ var config = {
         selection: true,
         cursorPosition: false,
         copypaste: true,
-    }
+    },
+    translator: 'dummy-translate',
+    summarizer: 'veooz'
 };
 
 function wrapLog(log) {
@@ -1138,11 +1140,11 @@ function loadArticle() {
 }
 
 function getSelectedTranslator() {
-    return 'google-translate';
+    return config.translator;
 }
 
 function getSelectedSummarizer() {
-    return 'veooz';
+    return config.summarizer;
 }
 
 function panic() {

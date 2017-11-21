@@ -1,3 +1,4 @@
+var dummyTranslate = require('./dummyTranslate.js');
 var googleTranslate = require('./googleTranslate.js');
 var microsoftTranslate = require('./microsoftTranslate.js');
 
@@ -10,6 +11,9 @@ function getTranslator(method) {
     var translator;
 
     switch (method) {
+        case 'dummy-translate':
+            translator = dummyTranslate;
+            break;
         case 'microsoft-translate':
             translator = microsoftTranslate;
             break;
