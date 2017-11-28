@@ -34,6 +34,8 @@ const peTokFile = fs.createWriteStream(path.join(outDir, "sentences.pe.tok"), fi
 
 const peTimeFile = fs.createWriteStream(path.join(outDir, "sentences.time"), fileOptions);
 
+const articleFile = fs.createWriteStream(path.join(outDir, "articles.params"), fileOptions);
+
 srcFile.writeLine(["source_sentence", "(sentence_id)"].join("\t"));
 mtFile.writeLine(["mt_translated_sentence", "(sentence_id)"].join("\t"));
 peFile.writeLine(["postedited_mt_translated_sentence", "(sentence_id)"].join("\t"));
@@ -43,6 +45,8 @@ mtTokFile.writeLine(["mt_translated_sentence_tokenized", "(sentence_id)"].join("
 peTokFile.writeLine(["postedited_mt_translated_sentence_tokenized", "(sentence_id)"].join("\t"));
 
 peTimeFile.writeLine(["time_ms", "focus_count", "input_count", "cut_count", "copy_count", "paste_count", "(sentence_id)"].join("\t"));
+
+articleFile.writeLine(["total_time", "sentence_count", "edited_sentence_count", "time/sentence", "time/edited_sentence", "summary_edited", "(article_id)"].join("\t"));
 
 lineReader
     .on('line', function (line) {
@@ -59,6 +63,8 @@ lineReader
         peTokFile.end();
 
         peTimeFile.end();
+
+        articleFile.end();
     });
 
 var docIdCounts = {};
@@ -82,12 +88,7 @@ function printSentences(doc) {
         return tokenizer.tokenize(text, {locale: doc.lang}).map((t) => t.token).join(' ');
     }
 
-    function cleanText(text) {
-        return text
-            .replace(/\u200b/g, " ")
-            .replace(/\s+/g, " ");
-    }
-
+    // Get parameters for sentence
     function getExtraParams(sentence) {
         var lastFocused = -1;
         var totalFocusTime = 0;
@@ -132,10 +133,11 @@ function printSentences(doc) {
     var sentenceCount = 1;
     var docId = getDocId(doc);
 
-    function handleSentence(sentence) {
+    // Collect and write to files about sentence
+    function handleSentence(sentence, isTitle) {
         if (sentence.source in sentenceMap) return;
 
-        var sentenceId = "\t" + "(" + docId + "_" + sentenceCount++ + ")";
+        var sentenceId = "\t" + "(" + docId + "_" + (isTitle === true ? 'title' : sentenceCount++) + ")";
 
         srcFile.writeLine(cleanText(sentence.source) + sentenceId);
         mtFile.writeLine(cleanText(sentence.target) + sentenceId);
@@ -154,13 +156,55 @@ function printSentences(doc) {
         sentenceLogs[sentenceLog.key] = sentenceLog.logs;
     });
 
+    // Print title
+    handleSentence(doc.titleSentence, true);
+
+    // Print body sentences
     doc.bodySentences.forEach(function(para) {
         para.forEach(handleSentence);
     });
 
+    // Print summary sentences
     doc.summarySentences.forEach(handleSentence);
 
+    // Print article parameters
+    var totalTime = new Date(doc._timestamp) - new Date(doc._meta.logger._timestamp);
+    var summaryEdited = (doc._meta.logger.summarySentencesLogs.length || (doc._meta.logger.summaryLogs.length != doc.summarySentences.length));
+
+    var bodySentenceCount = 0;
+    var editedSentencesCount = 0;
+    doc.bodySentences.forEach(function(para) {
+        bodySentenceCount += para.length;
+
+        para.forEach(function (sentence) {
+            if (sentence.editedTarget && sentence.editedTarget != sentence.target) {
+                editedSentencesCount++;
+            }
+        });
+    });
+
+    var averageTimePerSentence = totalTime / bodySentenceCount;
+    var averageTimePerEditedSentence = totalTime / editedSentencesCount;
+
+    articleFile.writeLine(
+        [
+            totalTime,
+            bodySentenceCount,
+            editedSentencesCount,
+            averageTimePerSentence,
+            averageTimePerEditedSentence,
+            summaryEdited,
+            "(" + docId + ")"
+        ].join("\t")
+    );
+
     return doc;
+}
+
+function cleanText(text) {
+    return text
+        .replace(/\u200b/g, " ")
+        .replace(/\s+/g, " ");
 }
 
 function propagateError(err) {
