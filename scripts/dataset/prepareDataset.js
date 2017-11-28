@@ -2,8 +2,8 @@ const path = require('path');
 const fs = require('fs');
 const tokenizer = new (require('node-icu-tokenizer'))();
 
-if (process.argv.length < 5) {
-    console.error("Usage: js prepareDataset.js DUMP_FILENAME OUT_DIR OUT_PREFIX");
+if (process.argv.length < 4) {
+    console.error("Usage: js prepareDataset.js DUMP_FILENAME OUT_DIR");
     console.error("You probably want to use prepareDataset.sh");
     console.error("For advance usage edit the script! :P");
     process.exit(1);
@@ -11,7 +11,6 @@ if (process.argv.length < 5) {
 
 var filename = process.argv[2];
 var outDir = process.argv[3];
-var outPrefix = process.argv[4];
 
 var lineReader = require('readline').createInterface({
     input: fs.createReadStream(filename)
@@ -25,25 +24,25 @@ var fileOptions = {
     // flags: 'a'
 };
 
-const srcFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src"), fileOptions);
-const mtFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt"), fileOptions);
-const peFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe"), fileOptions);
+const srcFile = fs.createWriteStream(path.join(outDir, "sentences.src"), fileOptions);
+const mtFile = fs.createWriteStream(path.join(outDir, "sentences.mt"), fileOptions);
+const peFile = fs.createWriteStream(path.join(outDir, "sentences.pe"), fileOptions);
 
-const srcTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".src.tok"), fileOptions);
-const mtTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".mt.tok"), fileOptions);
-const peTokFile = fs.createWriteStream(path.join(outDir, outPrefix + ".pe.tok"), fileOptions);
+const srcTokFile = fs.createWriteStream(path.join(outDir, "sentences.src.tok"), fileOptions);
+const mtTokFile = fs.createWriteStream(path.join(outDir, "sentences.mt.tok"), fileOptions);
+const peTokFile = fs.createWriteStream(path.join(outDir, "sentences.pe.tok"), fileOptions);
 
-const peTimeFile = fs.createWriteStream(path.join(outDir, outPrefix + ".time"), fileOptions);
+const peTimeFile = fs.createWriteStream(path.join(outDir, "sentences.time"), fileOptions);
 
-srcFile.writeLine("source_sentence");
-mtFile.writeLine("mt_translated_sentence");
-peFile.writeLine("postedited_mt_translated_sentence");
+srcFile.writeLine(["source_sentence", "(sentence_id)"].join("\t"));
+mtFile.writeLine(["mt_translated_sentence", "(sentence_id)"].join("\t"));
+peFile.writeLine(["postedited_mt_translated_sentence", "(sentence_id)"].join("\t"));
 
-srcTokFile.writeLine("source_sentence_tokenized");
-mtTokFile.writeLine("mt_translated_sentence_tokenized");
-peTokFile.writeLine("postedited_mt_translated_sentence_tokenized");
+srcTokFile.writeLine(["source_sentence_tokenized", "(sentence_id)"].join("\t"));
+mtTokFile.writeLine(["mt_translated_sentence_tokenized", "(sentence_id)"].join("\t"));
+peTokFile.writeLine(["postedited_mt_translated_sentence_tokenized", "(sentence_id)"].join("\t"));
 
-peTimeFile.writeLine(["time_ms", "focus_count", "input_count", "cut_count", "copy_count", "paste_count"].join("\t"));
+peTimeFile.writeLine(["time_ms", "focus_count", "input_count", "cut_count", "copy_count", "paste_count", "(sentence_id)"].join("\t"));
 
 lineReader
     .on('line', function (line) {
