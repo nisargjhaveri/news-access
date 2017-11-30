@@ -36,13 +36,13 @@ const peTimeFile = fs.createWriteStream(path.join(outDir, "sentences.time"), fil
 
 const articleFile = fs.createWriteStream(path.join(outDir, "articles.params"), fileOptions);
 
-srcFile.writeLine(["source_sentence", "(sentence_id)"].join("\t"));
-mtFile.writeLine(["mt_translated_sentence", "(sentence_id)"].join("\t"));
-peFile.writeLine(["postedited_mt_translated_sentence", "(sentence_id)"].join("\t"));
+// srcFile.writeLine(["source_sentence", "(sentence_id)"].join("\t"));
+// mtFile.writeLine(["mt_translated_sentence", "(sentence_id)"].join("\t"));
+// peFile.writeLine(["postedited_mt_translated_sentence", "(sentence_id)"].join("\t"));
 
-srcTokFile.writeLine(["source_sentence_tokenized", "(sentence_id)"].join("\t"));
-mtTokFile.writeLine(["mt_translated_sentence_tokenized", "(sentence_id)"].join("\t"));
-peTokFile.writeLine(["postedited_mt_translated_sentence_tokenized", "(sentence_id)"].join("\t"));
+// srcTokFile.writeLine(["source_sentence_tokenized", "(sentence_id)"].join("\t"));
+// mtTokFile.writeLine(["mt_translated_sentence_tokenized", "(sentence_id)"].join("\t"));
+// peTokFile.writeLine(["postedited_mt_translated_sentence_tokenized", "(sentence_id)"].join("\t"));
 
 peTimeFile.writeLine(["time_ms", "focus_count", "input_count", "cut_count", "copy_count", "paste_count", "(sentence_id)"].join("\t"));
 
