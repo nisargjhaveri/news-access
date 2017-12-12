@@ -44,7 +44,7 @@ const articleFile = fs.createWriteStream(path.join(outDir, "articles.params"), f
 // mtTokFile.writeLine(["mt_translated_sentence_tokenized", "(sentence_id)"].join("\t"));
 // peTokFile.writeLine(["postedited_mt_translated_sentence_tokenized", "(sentence_id)"].join("\t"));
 
-peTimeFile.writeLine(["time_ms", "focus_count", "input_count", "cut_count", "copy_count", "paste_count", "(sentence_id)"].join("\t"));
+peTimeFile.writeLine(["time_ms", "focus_count", "input_count", "cut_count", "copy_count", "paste_count", "token_count", "(sentence_id)"].join("\t"));
 
 articleFile.writeLine(["total_time", "sentence_count", "edited_sentence_count", "time/sentence", "time/edited_sentence", "summary_edited", "(article_id)"].join("\t"));
 
@@ -127,7 +127,9 @@ function printSentences(doc) {
             console.error("Edited in no time!");
         }
 
-        return [totalFocusTime, countFocus, countInput, countCut, countCopy, countPaste];
+        var tokenCount = targetTokenizer(sentence.source).split(' ').length;
+
+        return [totalFocusTime, countFocus, countInput, countCut, countCopy, countPaste, tokenCount];
     }
 
     var sentenceCount = 1;
