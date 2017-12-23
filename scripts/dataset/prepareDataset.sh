@@ -20,5 +20,21 @@ js "$DIRNAME/prepareDataset.js" "$DUMP_FILE" "$OUT_DIR"
 echo "==> Computing HTER scores <=="
 java -jar "$TERCOM_JAR" -h "$OUT_DIR/sentences.mt.tok" -r "$OUT_DIR/sentences.pe.tok" -o ter -n "$OUT_DIR/sentences.hter" > /dev/null
 
-paste <(echo hter; tail -n +3 "$OUT_DIR/sentences.hter.ter" | awk '{print $4}') <(cat "$OUT_DIR/sentences.time") > "$OUT_DIR/sentences.params"
-rm "$OUT_DIR/sentences.hter.ter" "$OUT_DIR/sentences.time"
+echo "==> Computing BLEU scores <=="
+python > "$OUT_DIR/sentences.bleu" <<END
+from nltk.translate import bleu_score
+
+with open("$OUT_DIR/sentences.mt.tok") as hyp_file:
+    with open("$OUT_DIR/sentences.pe.tok") as ref_file:
+        for ref, hyp in zip([_.split() for _ in list(ref_file)], [_.split() for _ in list(hyp_file)]):
+            print bleu_score.sentence_bleu([ref], hyp, smoothing_function=bleu_score.SmoothingFunction().method1)
+END
+
+echo "==> Finalizing <=="
+paste \
+    <(echo hter; tail -n +3 "$OUT_DIR/sentences.hter.ter" | awk '{print $4}') \
+    <(echo bleu; cat "$OUT_DIR/sentences.bleu") \
+    <(cat "$OUT_DIR/sentences.time") \
+    > "$OUT_DIR/sentences.params"
+
+rm "$OUT_DIR/sentences.hter.ter" "$OUT_DIR/sentences.bleu" "$OUT_DIR/sentences.time"
