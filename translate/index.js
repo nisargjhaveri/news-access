@@ -53,6 +53,9 @@ exports.translateArticle = function (article, targetLang, method) {
                             }, propagateError);
 
     function translateSentences(sentences) {
+        // Do nothing if no sentence is present in the list
+        if (!sentences.length) return Promise.resolve(sentences);
+
         // Adds .target to sentences as side effect
         var sentencesText = sentences.map(function (sentence) {
             return sentence.source;

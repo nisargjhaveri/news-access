@@ -97,6 +97,7 @@ StoredArticles.prototype.fetchList = function (options) {
         var results;
 
         if (options.lang) {
+            // Show articles not already made accessible in this language
             results = collection.aggregate([
                 {
                     $sort: {

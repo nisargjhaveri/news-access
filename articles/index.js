@@ -1,5 +1,6 @@
 var liveArticles = require("./liveArticles.js");
-var storedArticle = require("./storedArticles.js");
+var storedArticles = require("./storedArticles.js");
+var localArticles = require("./localArticles.js");
 
 function Articles(id, source) {
     this.id = id || 'noid';
@@ -7,12 +8,17 @@ function Articles(id, source) {
 
     switch (this.source) {
         case 'pti':
-            this.articles = new storedArticle(this.id);
+            this.articles = new storedArticles(this.id);
             break;
         // case 'timesofindia':
         case 'indianexpress':
         case 'thehindu':
             this.articles = new liveArticles(this.id, this.source);
+            break;
+        case 'tac2011':
+        case 'duc2004':
+            this.articles = new localArticles(this.id, this.source);
+            break;
     }
 }
 

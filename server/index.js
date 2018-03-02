@@ -108,7 +108,7 @@ app.get('/article/:articleSource/:articleId', function(req, res) {
 
 // Keep this route last
 app.get('/:articleSource?', function(req, res) {
-    var availableSources = ["pti", "thehindu", "indianexpress"];
+    var availableSources = ["pti", "thehindu", "indianexpress", "tac2011", "duc2004"];
     if (req.params.articleSource && availableSources.indexOf(req.params.articleSource) == -1) {
         return res.sendStatus(404);
     }
