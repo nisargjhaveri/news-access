@@ -12,7 +12,7 @@ var config = {
         cursorPosition: false,
         copypaste: true,
     },
-    translator: 'dummy-translate',
+    translator: 'google-translate',
     summarizer: 'veooz'
 };
 
@@ -1026,7 +1026,7 @@ function prepareArticle(article) {
                         networkLogger.flushLogs(function() {
                             clearTimeout(publishTimeout);
                             console.log("Logs finalized");
-                            window.location.href = 'workbench';
+                            window.location.href = 'workbench/' + articleSource;
                         });
                     });
                 } else {
