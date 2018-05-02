@@ -17,6 +17,7 @@ function Articles(id, source) {
             break;
         case 'tac2011':
         case 'duc2004':
+        case 'duc2004-hi':
             this.articles = new localArticles(this.id, this.source);
             break;
     }

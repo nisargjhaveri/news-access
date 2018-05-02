@@ -13,7 +13,7 @@ var config = {
         copypaste: true,
     },
     translator: 'google-translate',
-    summarizer: 'veooz'
+    summarizer: 'veooz',
 };
 
 function wrapLog(log) {
@@ -1042,9 +1042,15 @@ function prepareArticle(article) {
     summaryTranslator.cacheTranslations(article.summarySentences);
     summaryTranslator.cacheTranslations([].concat.apply([], article.bodySentences));
 
+    //$('.bench-article-container').addClass('flex-column');
+    //$('.article-title').addClass('hidden');
+
     showArticle(article.bodySentences);
     enableDragDrop();
     makeArticleInteractive();
+
+    //$('.article-body').append($('<div class="flex-row">').append($('.publish-btn').addClass('flex-item').css({margin: '0 10%'})));
+    //$('.bench-summary-container').addClass('hidden')
 
     $('.summary-status-container').removeClass('hidden');
     $('.publish-btn').removeClass('hidden');

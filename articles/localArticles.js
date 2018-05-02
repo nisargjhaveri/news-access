@@ -23,15 +23,17 @@ function LocalArticles(logId, source) {
     var sourceDirs = {
         'tac2011': 'TAC2011-MultiLing',
         'duc2004': 'duc2004',
+        'duc2004-hi': 'duc2004-hi',
     };
 
     var sourceNames = {
         'tac2011': 'TAC2011 MultiLing',
         'duc2004': 'DUC 2004',
+        'duc2004-hi': 'DUC 2004',
     };
 
-    this.sourceDir = path.join(config.localSourceDir || ".", sourceDirs[source]);
-    this.sourceName = sourceNames[source];
+    this.sourceDir = path.join(config.localSourceDir || ".", sourceDirs[source] || source);
+    this.sourceName = sourceNames[source] || source;
 }
 
 function makeArticle(source, filename, lang, body) {
