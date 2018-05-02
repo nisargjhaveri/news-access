@@ -3,7 +3,8 @@ html,body {
 }
 
 body {
-    font-family: "Lohit Gujarati", "Lohit Bengali", "Lohit Kannada", "Lohit Malayalam", "Lohit Punjabi", "Lohit Tamil", "Lohit Telugu", "Lohit Devanagari", sans-serif;
+    /*font-family: "Lohit Gujarati", "Lohit Bengali", "Lohit Kannada", "Lohit Malayalam", "Lohit Punjabi", "Lohit Tamil", "Lohit Telugu", "Lohit Devanagari", sans-serif;*/
+    font-family: "Lohit Gujarati", "Lohit Bengali", "Lohit Kannada", "Lohit Malayalam", "Lohit Punjabi", "Lohit Tamil", "Lohit Devanagari", sans-serif;
     margin: 0;
     padding: 0;
 }
